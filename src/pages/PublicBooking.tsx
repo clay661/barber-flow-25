@@ -24,6 +24,8 @@ import { cn } from '@/lib/utils';
 import { format } from 'date-fns';
 import { ptBR } from 'date-fns/locale';
 
+import nexioLogo from "@/assets/nexio-logo.png";
+
 export default function PublicBooking() {
   const { publicLink } = useParams<{ publicLink: string }>();
   const { toast } = useToast();
@@ -211,15 +213,20 @@ export default function PublicBooking() {
           )}
           
           <div className="flex flex-col items-center mb-6">
-            {salonSettings.logo_url && (
-              <div className="mb-4">
+            <div className="mb-4 flex items-center gap-3">
+              <img
+                src={nexioLogo}
+                alt="Nexio"
+                className="w-12 h-12 object-contain"
+              />
+              {salonSettings.logo_url && (
                 <img
                   src={salonSettings.logo_url}
                   alt="Logo"
                   className="w-20 h-20 rounded-full shadow-lg border-4 border-white/20"
                 />
-              </div>
-            )}
+              )}
+            </div>
             <h1 className="text-4xl md:text-5xl font-bold bg-gradient-to-r from-accent to-accent/70 bg-clip-text text-transparent">
               {salonSettings.name}
             </h1>

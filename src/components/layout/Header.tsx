@@ -14,6 +14,8 @@ import { useIsMobile } from "@/hooks/use-mobile";
 import { useAuth } from "@/hooks/useAuth";
 import { useNavigate } from "react-router-dom";
 
+import nexioLogo from "@/assets/nexio-logo.png";
+
 export function Header() {
   const isMobile = useIsMobile();
   const { state } = useSidebar();
@@ -30,16 +32,22 @@ export function Header() {
       <div className="flex items-center justify-between">
         <div className="flex items-center space-x-2 md:space-x-4">
           <SidebarTrigger className="hover-glow" />
-          {!isMobile && (
-            <h2 className="text-lg md:text-xl font-semibold text-card-foreground">
-              Sistema de Gestão - Nexio
-            </h2>
-          )}
-          {isMobile && (
-            <h2 className="text-lg font-semibold text-card-foreground">
-              Nexio
-            </h2>
-          )}
+          <div className="flex items-center gap-2">
+            <img 
+              src={nexioLogo} 
+              alt="Nexio" 
+              className="w-6 h-6 md:w-8 md:h-8 object-contain"
+            />
+            {!isMobile ? (
+              <h2 className="text-lg md:text-xl font-semibold text-card-foreground">
+                Sistema de Gestão - Nexio
+              </h2>
+            ) : (
+              <h2 className="text-lg font-semibold text-card-foreground">
+                Nexio
+              </h2>
+            )}
+          </div>
         </div>
 
         <div className="flex items-center space-x-2 md:space-x-4">

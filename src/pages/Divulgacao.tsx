@@ -213,17 +213,6 @@ const Divulgacao = () => {
               />
             </div>
 
-            <div className="space-y-2">
-              <Label htmlFor="public_link">Link Público de Agendamento</Label>
-              <Input
-                id="public_link"
-                value={formData.public_link}
-                onChange={(e) => handleInputChange('public_link', e.target.value)}
-                placeholder="link-personalizado"
-                disabled={!isAdmin}
-              />
-            </div>
-
             {isAdmin && (
               <Button onClick={handleSave} disabled={isSaving} className="w-full">
                 <Save className="h-4 w-4 mr-2" />

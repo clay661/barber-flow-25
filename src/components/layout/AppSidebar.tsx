@@ -21,7 +21,7 @@ import {
   useSidebar,
 } from "@/components/ui/sidebar";
 import { useIsMobile } from "@/hooks/use-mobile";
-import barbershopLogo from "@/assets/barbershop-logo.jpg";
+import nexioLogo from "@/assets/nexio-logo.png";
 
 const menuItems = [
   { title: "Dashboard", url: "/", icon: LayoutDashboard },
@@ -72,9 +72,9 @@ export function AppSidebar() {
         <div className="p-4 border-b border-sidebar-border">
           <div className="flex items-center gap-3">
             <img 
-              src={barbershopLogo} 
+              src={nexioLogo} 
               alt="Nexio" 
-              className="w-8 h-8 rounded-md flex-shrink-0"
+              className="w-8 h-8 object-contain flex-shrink-0"
             />
             {(state !== 'collapsed' || isMobile) && (
               <div className="min-w-0">
