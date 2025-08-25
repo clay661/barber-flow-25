@@ -51,15 +51,20 @@ export default function Configuracoes() {
   const logoInputRef = useRef<HTMLInputElement>(null);
   const bannerInputRef = useRef<HTMLInputElement>(null);
 
+  // Debug logging
+  console.log('Configuracoes - Settings:', settings);
+  console.log('Configuracoes - Loading:', loading);
+
   // Carregar dados quando settings estiver disponível
   useEffect(() => {
     if (settings) {
+      console.log('Configuracoes - Updating formData with settings:', settings);
       setFormData({
         name: settings.name || '',
         description: settings.description || '',
-        address: '', // Adicionar campo na tabela se necessário
-        phone: '', // Adicionar campo na tabela se necessário  
-        schedulingInterval: 30, // Adicionar campo na tabela se necessário
+        address: '', 
+        phone: '',
+        schedulingInterval: 30,
       });
     }
   }, [settings]);
@@ -75,8 +80,10 @@ export default function Configuracoes() {
   };
 
   const handleImageUpload = async (file: File, type: 'logo' | 'banner') => {
+    console.log('Configuracoes - Uploading image:', type, file.name);
     try {
       const result = await uploadImage(file, type);
+      console.log('Configuracoes - Upload result:', result);
       if (result.success) {
         toast({
           title: 'Sucesso',
@@ -86,6 +93,7 @@ export default function Configuracoes() {
         throw new Error('Erro no upload');
       }
     } catch (error) {
+      console.error('Configuracoes - Upload error:', error);
       toast({
         title: 'Erro',
         description: `Erro ao fazer upload do ${type === 'logo' ? 'logo' : 'banner'}.`,
@@ -110,9 +118,11 @@ export default function Configuracoes() {
   };
 
   const handleSaveSettings = async () => {
+    console.log('Configuracoes - Saving settings:', formData);
     setIsSaving(true);
     try {
       const result = await updateSettings(formData);
+      console.log('Configuracoes - Save result:', result);
       if (result.success) {
         toast({
           title: 'Sucesso',
@@ -122,6 +132,7 @@ export default function Configuracoes() {
         throw new Error('Erro ao salvar');
       }
     } catch (error) {
+      console.error('Configuracoes - Save error:', error);
       toast({
         title: 'Erro',
         description: 'Erro ao salvar as configurações.',
@@ -133,7 +144,7 @@ export default function Configuracoes() {
   };
 
   const handleSaveWorkingHours = () => {
-    // Por enquanto, apenas simular o salvamento
+    console.log('Configuracoes - Saving working hours:', workingHours);
     toast({
       title: 'Sucesso',
       description: 'Horários salvos com sucesso!',
@@ -141,12 +152,18 @@ export default function Configuracoes() {
   };
 
   if (loading) {
+    console.log('Configuracoes - Still loading...');
     return (
       <div className="flex items-center justify-center h-64">
         <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary"></div>
       </div>
     );
   }
+
+  const logoUrl = settings?.logo_url;
+  const bannerUrl = settings?.banner_url;
+  
+  console.log('Configuracoes - Rendering with logoUrl:', logoUrl, 'bannerUrl:', bannerUrl);
 
   return (
     <div className="space-y-4 md:space-y-6">
@@ -173,10 +190,10 @@ export default function Configuracoes() {
             <div className="space-y-3">
               <Label className="text-sm font-medium">Logo da Barbearia</Label>
               <div className="flex flex-col items-center gap-4 p-4 border-2 border-dashed border-muted-foreground/25 rounded-lg">
-                {settings?.logo_url ? (
+                {logoUrl ? (
                   <div className="relative">
                     <img 
-                      src={settings.logo_url} 
+                      src={logoUrl} 
                       alt="Logo" 
                       className="w-24 h-24 object-cover rounded-lg border"
                     />
@@ -200,7 +217,7 @@ export default function Configuracoes() {
                     onClick={() => logoInputRef.current?.click()}
                   >
                     <Upload className="h-4 w-4 mr-2" />
-                    {settings?.logo_url ? 'Alterar Logo' : 'Carregar Logo'}
+                    {logoUrl ? 'Alterar Logo' : 'Carregar Logo'}
                   </Button>
                   <p className="text-xs text-muted-foreground mt-2">
                     PNG, JPG até 5MB
@@ -213,10 +230,10 @@ export default function Configuracoes() {
             <div className="space-y-3">
               <Label className="text-sm font-medium">Banner Principal</Label>
               <div className="flex flex-col items-center gap-4 p-4 border-2 border-dashed border-muted-foreground/25 rounded-lg">
-                {settings?.banner_url ? (
+                {bannerUrl ? (
                   <div className="relative">
                     <img 
-                      src={settings.banner_url} 
+                      src={bannerUrl} 
                       alt="Banner" 
                       className="w-full max-w-sm h-32 object-cover rounded-lg border"
                     />
@@ -240,7 +257,7 @@ export default function Configuracoes() {
                     onClick={() => bannerInputRef.current?.click()}
                   >
                     <Upload className="h-4 w-4 mr-2" />
-                    {settings?.banner_url ? 'Alterar Banner' : 'Carregar Banner'}
+                    {bannerUrl ? 'Alterar Banner' : 'Carregar Banner'}
                   </Button>
                   <p className="text-xs text-muted-foreground mt-2">
                     PNG, JPG até 5MB
