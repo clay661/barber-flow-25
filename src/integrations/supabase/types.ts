@@ -68,6 +68,48 @@ export type Database = {
           },
         ]
       }
+      affiliates: {
+        Row: {
+          commission_rate: number | null
+          created_at: string | null
+          email: string
+          id: string
+          name: string
+          referral_code: string
+          status: string | null
+          total_clicks: number | null
+          total_commission: number | null
+          total_conversions: number | null
+          updated_at: string | null
+        }
+        Insert: {
+          commission_rate?: number | null
+          created_at?: string | null
+          email: string
+          id?: string
+          name: string
+          referral_code: string
+          status?: string | null
+          total_clicks?: number | null
+          total_commission?: number | null
+          total_conversions?: number | null
+          updated_at?: string | null
+        }
+        Update: {
+          commission_rate?: number | null
+          created_at?: string | null
+          email?: string
+          id?: string
+          name?: string
+          referral_code?: string
+          status?: string | null
+          total_clicks?: number | null
+          total_commission?: number | null
+          total_conversions?: number | null
+          updated_at?: string | null
+        }
+        Relationships: []
+      }
       appointments: {
         Row: {
           client_id: string | null
@@ -153,6 +195,48 @@ export type Database = {
           status?: string | null
           telefone?: string | null
           total_visits?: number | null
+        }
+        Relationships: []
+      }
+      discount_coupons: {
+        Row: {
+          code: string
+          created_at: string | null
+          end_date: string | null
+          id: string
+          start_date: string | null
+          status: string | null
+          type: string
+          updated_at: string | null
+          usage_limit: number | null
+          used_count: number | null
+          value: number
+        }
+        Insert: {
+          code: string
+          created_at?: string | null
+          end_date?: string | null
+          id?: string
+          start_date?: string | null
+          status?: string | null
+          type: string
+          updated_at?: string | null
+          usage_limit?: number | null
+          used_count?: number | null
+          value: number
+        }
+        Update: {
+          code?: string
+          created_at?: string | null
+          end_date?: string | null
+          id?: string
+          start_date?: string | null
+          status?: string | null
+          type?: string
+          updated_at?: string | null
+          usage_limit?: number | null
+          used_count?: number | null
+          value?: number
         }
         Relationships: []
       }
@@ -424,6 +508,30 @@ export type Database = {
           scheduling_interval?: number | null
           updated_at?: string
           working_hours?: Json | null
+        }
+        Relationships: []
+      }
+      security_settings: {
+        Row: {
+          created_at: string | null
+          id: string
+          last_password_change: string | null
+          two_factor_enabled: boolean | null
+          updated_at: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          id?: string
+          last_password_change?: string | null
+          two_factor_enabled?: boolean | null
+          updated_at?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          id?: string
+          last_password_change?: string | null
+          two_factor_enabled?: boolean | null
+          updated_at?: string | null
         }
         Relationships: []
       }
