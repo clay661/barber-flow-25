@@ -19,10 +19,14 @@ const SuperAuthContext = createContext<SuperAuthContextType | undefined>(undefin
 export function useSuperAuth() {
   const context = useContext(SuperAuthContext);
   if (context === undefined) {
-    // Adicionar mais informações de debug
-    console.error('useSuperAuth called outside SuperAuthProvider. Current location:', window.location.pathname);
-    console.error('SuperAuthContext:', SuperAuthContext);
-    throw new Error('useSuperAuth must be used within a SuperAuthProvider');
+    // Em vez de lançar erro, retornar valores padrão para evitar crashes
+    console.warn('useSuperAuth called outside SuperAuthProvider, returning default values');
+    return {
+      superAdmin: null,
+      loading: false,
+      login: async () => ({ success: false, error: 'Super Auth not available' }),
+      logout: async () => {}
+    };
   }
   return context;
 }

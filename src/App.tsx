@@ -32,120 +32,82 @@ import SuperAdminConfiguracoes from "./pages/super-admin/SuperAdminConfiguracoes
 
 const queryClient = new QueryClient();
 
-// Componente wrapper para as rotas regulares
-function RegularRoutes() {
-  return (
-    <AuthProvider>
-      <Routes>
-        <Route path="/" element={
-          <ProtectedRoute>
-            <AppLayout />
-          </ProtectedRoute>
-        }>
-          <Route index element={<Dashboard />} />
-          <Route path="clientes" element={<Clientes />} />
-          <Route path="funcionarios" element={
-            <ProtectedRoute adminOnly>
-              <Funcionarios />
-            </ProtectedRoute>
-          } />
-          <Route path="agendamentos" element={<Agendamentos />} />
-          <Route path="servicos" element={<Servicos />} />
-          <Route path="financas" element={
-            <ProtectedRoute adminOnly>
-              <Financas />
-            </ProtectedRoute>
-          } />
-          <Route path="financas-subadmin" element={
-            <ProtectedRoute subAdminOnly>
-              <FinancasSubAdmin />
-            </ProtectedRoute>
-          } />
-          <Route path="divulgacao" element={
-            <ProtectedRoute adminOnly>
-              <Divulgacao />
-            </ProtectedRoute>
-          } />
-          <Route path="configuracoes" element={
-            <ProtectedRoute adminOnly>
-              <Configuracoes />
-            </ProtectedRoute>
-          } />
-          <Route path="perfil" element={<ConfiguracoesPerfil />} />
-          <Route path="notificacoes" element={
-            <ProtectedRoute adminOnly>
-              <NotificationSettings />
-            </ProtectedRoute>
-          } />
-        </Route>
-      </Routes>
-    </AuthProvider>
-  );
-}
-
-// Componente wrapper para as rotas do super admin
-function SuperAdminRoutes() {
-  return (
-    <SuperAuthProvider>
-      <Routes>
-        <Route path="/super-admin" element={
-          <ProtectedSuperRoute>
-            <SuperAdminLayout />
-          </ProtectedSuperRoute>
-        }>
-          <Route index element={<SuperAdminDashboard />} />
-          <Route path="empresas" element={<SuperAdminEmpresas />} />
-          <Route path="assinaturas" element={<SuperAdminAssinaturas />} />
-          <Route path="planos" element={<SuperAdminPlanos />} />
-          <Route path="financeiro" element={<SuperAdminFinanceiro />} />
-          <Route path="configuracoes" element={<SuperAdminConfiguracoes />} />
-          <Route path="seguranca" element={<div className="p-6"><h1 className="text-2xl font-bold">Segurança</h1><p className="text-muted-foreground">Logs de acessos e alertas de fraude em desenvolvimento...</p></div>} />
-        </Route>
-      </Routes>
-    </SuperAuthProvider>
-  );
-}
-
-// Componente wrapper para rotas públicas
-function PublicRoutes() {
-  return (
-    <SuperAuthProvider>
-      <AuthProvider>
-        <Routes>
-          <Route path="/login" element={<Login />} />
-          <Route path="/agendamento/:publicLink" element={<PublicBooking />} />
-        </Routes>
-      </AuthProvider>
-    </SuperAuthProvider>
-  );
-}
-
 const App = () => (
   <QueryClientProvider client={queryClient}>
     <TooltipProvider>
       <Toaster />
       <Sonner />
       <BrowserRouter>
-        <Routes>
-          {/* Rotas públicas */}
-          <Route path="/login" element={
-            <SuperAuthProvider>
-              <AuthProvider>
-                <Login />
-              </AuthProvider>
-            </SuperAuthProvider>
-          } />
-          <Route path="/agendamento/:publicLink" element={<PublicBooking />} />
-          
-          {/* Rotas do Super Admin */}
-          <Route path="/super-admin/*" element={<SuperAdminRoutes />} />
-          
-          {/* Rotas regulares */}
-          <Route path="/*" element={<RegularRoutes />} />
-          
-          {/* Catch-all route */}
-          <Route path="*" element={<NotFound />} />
-        </Routes>
+        <SuperAuthProvider>
+          <AuthProvider>
+            <Routes>
+              {/* Login público */}
+              <Route path="/login" element={<Login />} />
+              <Route path="/agendamento/:publicLink" element={<PublicBooking />} />
+              
+              {/* Super Admin routes */}
+              <Route path="/super-admin" element={
+                <ProtectedSuperRoute>
+                  <SuperAdminLayout />
+                </ProtectedSuperRoute>
+              }>
+                <Route index element={<SuperAdminDashboard />} />
+                <Route path="empresas" element={<SuperAdminEmpresas />} />
+                <Route path="assinaturas" element={<SuperAdminAssinaturas />} />
+                <Route path="planos" element={<SuperAdminPlanos />} />
+                <Route path="financeiro" element={<SuperAdminFinanceiro />} />
+                <Route path="configuracoes" element={<SuperAdminConfiguracoes />} />
+                <Route path="seguranca" element={<div className="p-6"><h1 className="text-2xl font-bold">Segurança</h1><p className="text-muted-foreground">Logs de acessos e alertas de fraude em desenvolvimento...</p></div>} />
+              </Route>
+              
+              {/* Regular user routes */}
+              <Route path="/" element={
+                <ProtectedRoute>
+                  <AppLayout />
+                </ProtectedRoute>
+              }>
+                <Route index element={<Dashboard />} />
+                <Route path="clientes" element={<Clientes />} />
+                <Route path="funcionarios" element={
+                  <ProtectedRoute adminOnly>
+                    <Funcionarios />
+                  </ProtectedRoute>
+                } />
+                <Route path="agendamentos" element={<Agendamentos />} />
+                <Route path="servicos" element={<Servicos />} />
+                <Route path="financas" element={
+                  <ProtectedRoute adminOnly>
+                    <Financas />
+                  </ProtectedRoute>
+                } />
+                <Route path="financas-subadmin" element={
+                  <ProtectedRoute subAdminOnly>
+                    <FinancasSubAdmin />
+                  </ProtectedRoute>
+                } />
+                <Route path="divulgacao" element={
+                  <ProtectedRoute adminOnly>
+                    <Divulgacao />
+                  </ProtectedRoute>
+                } />
+                <Route path="configuracoes" element={
+                  <ProtectedRoute adminOnly>
+                    <Configuracoes />
+                  </ProtectedRoute>
+                } />
+                <Route path="perfil" element={<ConfiguracoesPerfil />} />
+                <Route path="notificacoes" element={
+                  <ProtectedRoute adminOnly>
+                    <NotificationSettings />
+                  </ProtectedRoute>
+                } />
+              </Route>
+              
+              {/* Catch-all route */}
+              <Route path="*" element={<NotFound />} />
+            </Routes>
+          </AuthProvider>
+        </SuperAuthProvider>
       </BrowserRouter>
     </TooltipProvider>
   </QueryClientProvider>
