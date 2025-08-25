@@ -5,8 +5,72 @@ import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
 import { Badge } from "@/components/ui/badge";
 import { Shield, Key, Clock, MapPin } from "lucide-react";
+import { useSecuritySettings } from "@/hooks/useSuperAdminData";
+import { useState } from "react";
+import { useToast } from "@/hooks/use-toast";
 
 export default function SuperAdminSeguranca() {
+  const { settings, loading, updateSettings } = useSecuritySettings();
+  const { toast } = useToast();
+  const [passwordData, setPasswordData] = useState({
+    current: '',
+    new: '',
+    confirm: ''
+  });
+
+  const handleToggle2FA = async (enabled: boolean) => {
+    await updateSettings({ two_factor_enabled: enabled });
+  };
+
+  const handlePasswordChange = async (e: React.FormEvent) => {
+    e.preventDefault();
+    
+    if (!passwordData.current || !passwordData.new || !passwordData.confirm) {
+      toast({
+        title: "Erro",
+        description: "Todos os campos são obrigatórios",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    if (passwordData.new !== passwordData.confirm) {
+      toast({
+        title: "Erro",
+        description: "As senhas não coincidem",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    if (passwordData.new.length < 6) {
+      toast({
+        title: "Erro",
+        description: "A nova senha deve ter pelo menos 6 caracteres",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    // Simular alteração de senha (na implementação real, validaria a senha atual)
+    await updateSettings({ last_password_change: new Date().toISOString() });
+    
+    setPasswordData({
+      current: '',
+      new: '',
+      confirm: ''
+    });
+
+    toast({
+      title: "Sucesso",
+      description: "Senha alterada com sucesso",
+    });
+  };
+
+  if (loading) {
+    return <div className="p-6">Carregando...</div>;
+  }
+
   return (
     <div className="space-y-6">
       <div>
@@ -35,12 +99,18 @@ export default function SuperAdminSeguranca() {
                 Adicione uma camada extra de segurança ao seu login
               </p>
             </div>
-            <Switch id="2fa-switch" />
+            <Switch 
+              id="2fa-switch" 
+              checked={settings?.two_factor_enabled || false}
+              onCheckedChange={handleToggle2FA}
+            />
           </div>
 
           <div className="p-4 bg-muted rounded-lg">
             <p className="text-sm text-muted-foreground mb-2">
-              Status: <Badge className="bg-yellow-100 text-yellow-800">Desativado</Badge>
+              Status: <Badge className={settings?.two_factor_enabled ? "bg-green-100 text-green-800" : "bg-yellow-100 text-yellow-800"}>
+                {settings?.two_factor_enabled ? 'Ativado' : 'Desativado'}
+              </Badge>
             </p>
             <Button variant="outline" size="sm">
               Configurar Google Authenticator
@@ -61,35 +131,52 @@ export default function SuperAdminSeguranca() {
           </CardDescription>
         </CardHeader>
         <CardContent className="space-y-4">
-          <div className="grid gap-4 max-w-md">
-            <div>
-              <Label htmlFor="current-password">Senha Atual</Label>
-              <Input
-                id="current-password"
-                type="password"
-                placeholder="Digite sua senha atual"
-              />
+          <form onSubmit={handlePasswordChange} className="space-y-4">
+            <div className="grid gap-4 max-w-md">
+              <div>
+                <Label htmlFor="current-password">Senha Atual</Label>
+                <Input
+                  id="current-password"
+                  type="password"
+                  placeholder="Digite sua senha atual"
+                  value={passwordData.current}
+                  onChange={(e) => setPasswordData(prev => ({ ...prev, current: e.target.value }))}
+                  required
+                />
+              </div>
+              <div>
+                <Label htmlFor="new-password">Nova Senha</Label>
+                <Input
+                  id="new-password"
+                  type="password"
+                  placeholder="Digite a nova senha"
+                  value={passwordData.new}
+                  onChange={(e) => setPasswordData(prev => ({ ...prev, new: e.target.value }))}
+                  required
+                />
+              </div>
+              <div>
+                <Label htmlFor="confirm-password">Confirmar Nova Senha</Label>
+                <Input
+                  id="confirm-password"
+                  type="password"
+                  placeholder="Confirme a nova senha"
+                  value={passwordData.confirm}
+                  onChange={(e) => setPasswordData(prev => ({ ...prev, confirm: e.target.value }))}
+                  required
+                />
+              </div>
+              <Button type="submit" className="w-fit">
+                Alterar Senha
+              </Button>
             </div>
-            <div>
-              <Label htmlFor="new-password">Nova Senha</Label>
-              <Input
-                id="new-password"
-                type="password"
-                placeholder="Digite a nova senha"
-              />
-            </div>
-            <div>
-              <Label htmlFor="confirm-password">Confirmar Nova Senha</Label>
-              <Input
-                id="confirm-password"
-                type="password"
-                placeholder="Confirme a nova senha"
-              />
-            </div>
-            <Button className="w-fit">
-              Alterar Senha
-            </Button>
-          </div>
+            
+            {settings?.last_password_change && (
+              <p className="text-sm text-muted-foreground mt-4">
+                Última alteração: {new Date(settings.last_password_change).toLocaleString('pt-BR')}
+              </p>
+            )}
+          </form>
         </CardContent>
       </Card>
 

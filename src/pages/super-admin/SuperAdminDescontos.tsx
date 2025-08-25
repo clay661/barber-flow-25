@@ -5,8 +5,101 @@ import { Label } from "@/components/ui/label";
 import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from "@/components/ui/select";
 import { Badge } from "@/components/ui/badge";
 import { Plus, Copy, Edit, Trash2, Percent, DollarSign } from "lucide-react";
+import { useDiscountCoupons } from "@/hooks/useSuperAdminData";
+import { useState } from "react";
+import { useToast } from "@/hooks/use-toast";
 
 export default function SuperAdminDescontos() {
+  const { coupons, loading, createCoupon, updateCoupon, deleteCoupon } = useDiscountCoupons();
+  const { toast } = useToast();
+  const [formData, setFormData] = useState({
+    code: '',
+    type: 'percentage' as 'percentage' | 'fixed',
+    value: '',
+    usage_limit: '',
+    start_date: '',
+    end_date: ''
+  });
+
+  const handleSubmit = async (e: React.FormEvent) => {
+    e.preventDefault();
+    
+    if (!formData.code || !formData.value) {
+      toast({
+        title: "Erro",
+        description: "Código e valor são obrigatórios",
+        variant: "destructive",
+      });
+      return;
+    }
+
+    try {
+      await createCoupon({
+        code: formData.code.toUpperCase(),
+        type: formData.type,
+        value: parseFloat(formData.value),
+        usage_limit: formData.usage_limit ? parseInt(formData.usage_limit) : null,
+        start_date: formData.start_date || null,
+        end_date: formData.end_date || null,
+        status: 'active'
+      });
+      
+      setFormData({
+        code: '',
+        type: 'percentage',
+        value: '',
+        usage_limit: '',
+        start_date: '',
+        end_date: ''
+      });
+    } catch (error) {
+      // Error já tratado no hook
+    }
+  };
+
+  const handleCopy = (code: string) => {
+    navigator.clipboard.writeText(code);
+    toast({
+      title: "Copiado!",
+      description: "Código do cupom copiado para a área de transferência",
+    });
+  };
+
+  const handleDelete = async (id: string, code: string) => {
+    if (confirm(`Tem certeza que deseja excluir o cupom ${code}?`)) {
+      await deleteCoupon(id);
+    }
+  };
+
+  const getStatusBadge = (status: string) => {
+    switch (status) {
+      case 'active':
+        return <Badge className="bg-green-100 text-green-800">Ativo</Badge>;
+      case 'paused':
+        return <Badge className="bg-yellow-100 text-yellow-800">Pausado</Badge>;
+      case 'expired':
+        return <Badge className="bg-red-100 text-red-800">Expirado</Badge>;
+      default:
+        return <Badge variant="outline">{status}</Badge>;
+    }
+  };
+
+  const formatDate = (dateString: string | null) => {
+    if (!dateString) return '-';
+    return new Date(dateString).toLocaleDateString('pt-BR');
+  };
+
+  const formatCurrency = (value: number) => {
+    return new Intl.NumberFormat('pt-BR', {
+      style: 'currency',
+      currency: 'BRL'
+    }).format(value);
+  };
+
+  if (loading) {
+    return <div className="p-6">Carregando...</div>;
+  }
+
   return (
     <div className="space-y-6">
       <div className="flex justify-between items-center">
@@ -31,66 +124,80 @@ export default function SuperAdminDescontos() {
           </CardDescription>
         </CardHeader>
         <CardContent className="space-y-4">
-          <div className="grid gap-4 md:grid-cols-2">
-            <div>
-              <Label htmlFor="coupon-code">Código do Cupom</Label>
-              <Input
-                id="coupon-code"
-                placeholder="Ex: DESCONTO20"
-                className="uppercase"
-              />
+          <form onSubmit={handleSubmit} className="space-y-4">
+            <div className="grid gap-4 md:grid-cols-2">
+              <div>
+                <Label htmlFor="coupon-code">Código do Cupom</Label>
+                <Input
+                  id="coupon-code"
+                  placeholder="Ex: DESCONTO20"
+                  className="uppercase"
+                  value={formData.code}
+                  onChange={(e) => setFormData(prev => ({ ...prev, code: e.target.value }))}
+                  required
+                />
+              </div>
+              <div>
+                <Label htmlFor="coupon-type">Tipo de Desconto</Label>
+                <Select value={formData.type} onValueChange={(value: 'percentage' | 'fixed') => setFormData(prev => ({ ...prev, type: value }))}>
+                  <SelectTrigger>
+                    <SelectValue placeholder="Selecione o tipo" />
+                  </SelectTrigger>
+                  <SelectContent>
+                    <SelectItem value="percentage">Percentual (%)</SelectItem>
+                    <SelectItem value="fixed">Valor Fixo (R$)</SelectItem>
+                  </SelectContent>
+                </Select>
+              </div>
             </div>
-            <div>
-              <Label htmlFor="coupon-type">Tipo de Desconto</Label>
-              <Select>
-                <SelectTrigger>
-                  <SelectValue placeholder="Selecione o tipo" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="percentage">Percentual (%)</SelectItem>
-                  <SelectItem value="fixed">Valor Fixo (R$)</SelectItem>
-                </SelectContent>
-              </Select>
-            </div>
-          </div>
 
-          <div className="grid gap-4 md:grid-cols-2">
-            <div>
-              <Label htmlFor="discount-value">Valor do Desconto</Label>
-              <Input
-                id="discount-value"
-                type="number"
-                placeholder="20"
-              />
+            <div className="grid gap-4 md:grid-cols-2">
+              <div>
+                <Label htmlFor="discount-value">Valor do Desconto</Label>
+                <Input
+                  id="discount-value"
+                  type="number"
+                  placeholder="20"
+                  value={formData.value}
+                  onChange={(e) => setFormData(prev => ({ ...prev, value: e.target.value }))}
+                  required
+                />
+              </div>
+              <div>
+                <Label htmlFor="usage-limit">Limite de Uso</Label>
+                <Input
+                  id="usage-limit"
+                  type="number"
+                  placeholder="100"
+                  value={formData.usage_limit}
+                  onChange={(e) => setFormData(prev => ({ ...prev, usage_limit: e.target.value }))}
+                />
+              </div>
             </div>
-            <div>
-              <Label htmlFor="usage-limit">Limite de Uso</Label>
-              <Input
-                id="usage-limit"
-                type="number"
-                placeholder="100"
-              />
-            </div>
-          </div>
 
-          <div className="grid gap-4 md:grid-cols-2">
-            <div>
-              <Label htmlFor="start-date">Data de Início</Label>
-              <Input
-                id="start-date"
-                type="date"
-              />
+            <div className="grid gap-4 md:grid-cols-2">
+              <div>
+                <Label htmlFor="start-date">Data de Início</Label>
+                <Input
+                  id="start-date"
+                  type="date"
+                  value={formData.start_date}
+                  onChange={(e) => setFormData(prev => ({ ...prev, start_date: e.target.value }))}
+                />
+              </div>
+              <div>
+                <Label htmlFor="end-date">Data de Expiração</Label>
+                <Input
+                  id="end-date"
+                  type="date"
+                  value={formData.end_date}
+                  onChange={(e) => setFormData(prev => ({ ...prev, end_date: e.target.value }))}
+                />
+              </div>
             </div>
-            <div>
-              <Label htmlFor="end-date">Data de Expiração</Label>
-              <Input
-                id="end-date"
-                type="date"
-              />
-            </div>
-          </div>
 
-          <Button>Criar Cupom</Button>
+            <Button type="submit">Criar Cupom</Button>
+          </form>
         </CardContent>
       </Card>
 
@@ -102,9 +209,11 @@ export default function SuperAdminDescontos() {
             <Percent className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold text-green-600">8</div>
+            <div className="text-2xl font-bold text-green-600">
+              {coupons.filter(c => c.status === 'active').length}
+            </div>
             <p className="text-xs text-muted-foreground">
-              12 cupons expirados
+              {coupons.filter(c => c.status === 'expired').length} cupons expirados
             </p>
           </CardContent>
         </Card>
@@ -115,9 +224,11 @@ export default function SuperAdminDescontos() {
             <Copy className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">247</div>
+            <div className="text-2xl font-bold">
+              {coupons.reduce((acc, c) => acc + c.used_count, 0)}
+            </div>
             <p className="text-xs text-muted-foreground">
-              +18% em relação ao mês passado
+              Total de usos dos cupons
             </p>
           </CardContent>
         </Card>
@@ -128,7 +239,9 @@ export default function SuperAdminDescontos() {
             <DollarSign className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold text-red-600">R$ 3.420,00</div>
+            <div className="text-2xl font-bold text-red-600">
+              {formatCurrency(coupons.reduce((acc, c) => acc + (c.used_count * c.value), 0))}
+            </div>
             <p className="text-xs text-muted-foreground">
               Valor total descontado
             </p>
@@ -146,125 +259,64 @@ export default function SuperAdminDescontos() {
         </CardHeader>
         <CardContent>
           <div className="space-y-4">
-            <div className="flex items-center justify-between p-4 border rounded-lg">
-              <div className="flex-1">
-                <div className="flex items-center gap-3 mb-2">
-                  <h3 className="font-semibold text-lg">DESCONTO20</h3>
-                  <Badge className="bg-green-100 text-green-800">Ativo</Badge>
-                  <Badge variant="outline">20% OFF</Badge>
+            {coupons.map((coupon) => (
+              <div key={coupon.id} className="flex items-center justify-between p-4 border rounded-lg">
+                <div className="flex-1">
+                  <div className="flex items-center gap-3 mb-2">
+                    <h3 className="font-semibold text-lg">{coupon.code}</h3>
+                    {getStatusBadge(coupon.status)}
+                    <Badge variant="outline">
+                      {coupon.type === 'percentage' ? `${coupon.value}% OFF` : `${formatCurrency(coupon.value)} OFF`}
+                    </Badge>
+                  </div>
+                  <div className="grid grid-cols-4 gap-4 text-sm text-muted-foreground">
+                    <span>Usado: {coupon.used_count}/{coupon.usage_limit || '∞'}</span>
+                    <span>Criado: {formatDate(coupon.created_at)}</span>
+                    <span>
+                      {coupon.end_date ? 
+                        (new Date(coupon.end_date) < new Date() ? 'Expirou' : 'Expira'): 'Sem data'}: {formatDate(coupon.end_date)}
+                    </span>
+                    <span>Economia: {formatCurrency(coupon.used_count * coupon.value)}</span>
+                  </div>
                 </div>
-                <div className="grid grid-cols-4 gap-4 text-sm text-muted-foreground">
-                  <span>Usado: 45/100</span>
-                  <span>Criado: 15/01/2025</span>
-                  <span>Expira: 31/01/2025</span>
-                  <span>Economia: R$ 890,00</span>
-                </div>
-              </div>
-              <div className="flex items-center gap-2">
-                <Button variant="outline" size="sm">
-                  <Copy className="h-4 w-4 mr-1" />
-                  Copiar
-                </Button>
-                <Button variant="outline" size="sm">
-                  <Edit className="h-4 w-4 mr-1" />
-                  Editar
-                </Button>
-                <Button variant="outline" size="sm" className="text-red-600 hover:text-red-700">
-                  <Trash2 className="h-4 w-4 mr-1" />
-                  Excluir
-                </Button>
-              </div>
-            </div>
-
-            <div className="flex items-center justify-between p-4 border rounded-lg">
-              <div className="flex-1">
-                <div className="flex items-center gap-3 mb-2">
-                  <h3 className="font-semibold text-lg">PRIMEIRA30</h3>
-                  <Badge className="bg-green-100 text-green-800">Ativo</Badge>
-                  <Badge variant="outline">30% OFF</Badge>
-                </div>
-                <div className="grid grid-cols-4 gap-4 text-sm text-muted-foreground">
-                  <span>Usado: 23/50</span>
-                  <span>Criado: 10/01/2025</span>
-                  <span>Expira: 28/02/2025</span>
-                  <span>Economia: R$ 1.240,00</span>
-                </div>
-              </div>
-              <div className="flex items-center gap-2">
-                <Button variant="outline" size="sm">
-                  <Copy className="h-4 w-4 mr-1" />
-                  Copiar
-                </Button>
-                <Button variant="outline" size="sm">
-                  <Edit className="h-4 w-4 mr-1" />
-                  Editar
-                </Button>
-                <Button variant="outline" size="sm" className="text-red-600 hover:text-red-700">
-                  <Trash2 className="h-4 w-4 mr-1" />
-                  Excluir
-                </Button>
-              </div>
-            </div>
-
-            <div className="flex items-center justify-between p-4 border rounded-lg">
-              <div className="flex-1">
-                <div className="flex items-center gap-3 mb-2">
-                  <h3 className="font-semibold text-lg">NATAL50</h3>
-                  <Badge className="bg-red-100 text-red-800">Expirado</Badge>
-                  <Badge variant="outline">R$ 50,00 OFF</Badge>
-                </div>
-                <div className="grid grid-cols-4 gap-4 text-sm text-muted-foreground">
-                  <span>Usado: 200/200</span>
-                  <span>Criado: 01/12/2024</span>
-                  <span>Expirou: 31/12/2024</span>
-                  <span>Economia: R$ 10.000,00</span>
+                <div className="flex items-center gap-2">
+                  <Button 
+                    variant="outline" 
+                    size="sm"
+                    onClick={() => handleCopy(coupon.code)}
+                  >
+                    <Copy className="h-4 w-4 mr-1" />
+                    Copiar
+                  </Button>
+                  <Button 
+                    variant="outline" 
+                    size="sm"
+                    onClick={() => updateCoupon(coupon.id, { 
+                      status: coupon.status === 'active' ? 'paused' : 'active' 
+                    })}
+                    disabled={coupon.status === 'expired'}
+                  >
+                    <Edit className="h-4 w-4 mr-1" />
+                    {coupon.status === 'active' ? 'Pausar' : 'Ativar'}
+                  </Button>
+                  <Button 
+                    variant="outline" 
+                    size="sm" 
+                    className="text-red-600 hover:text-red-700"
+                    onClick={() => handleDelete(coupon.id, coupon.code)}
+                  >
+                    <Trash2 className="h-4 w-4 mr-1" />
+                    Excluir
+                  </Button>
                 </div>
               </div>
-              <div className="flex items-center gap-2">
-                <Button variant="outline" size="sm">
-                  <Copy className="h-4 w-4 mr-1" />
-                  Copiar
-                </Button>
-                <Button variant="outline" size="sm" disabled>
-                  <Edit className="h-4 w-4 mr-1" />
-                  Editar
-                </Button>
-                <Button variant="outline" size="sm" className="text-red-600 hover:text-red-700">
-                  <Trash2 className="h-4 w-4 mr-1" />
-                  Excluir
-                </Button>
+            ))}
+            
+            {coupons.length === 0 && (
+              <div className="text-center py-8 text-muted-foreground">
+                Nenhum cupom cadastrado ainda.
               </div>
-            </div>
-
-            <div className="flex items-center justify-between p-4 border rounded-lg">
-              <div className="flex-1">
-                <div className="flex items-center gap-3 mb-2">
-                  <h3 className="font-semibold text-lg">FRETE15</h3>
-                  <Badge className="bg-yellow-100 text-yellow-800">Pausado</Badge>
-                  <Badge variant="outline">15% OFF</Badge>
-                </div>
-                <div className="grid grid-cols-4 gap-4 text-sm text-muted-foreground">
-                  <span>Usado: 12/∞</span>
-                  <span>Criado: 20/01/2025</span>
-                  <span>Expira: 30/06/2025</span>
-                  <span>Economia: R$ 180,00</span>
-                </div>
-              </div>
-              <div className="flex items-center gap-2">
-                <Button variant="outline" size="sm">
-                  <Copy className="h-4 w-4 mr-1" />
-                  Copiar
-                </Button>
-                <Button variant="outline" size="sm">
-                  <Edit className="h-4 w-4 mr-1" />
-                  Editar
-                </Button>
-                <Button variant="outline" size="sm" className="text-red-600 hover:text-red-700">
-                  <Trash2 className="h-4 w-4 mr-1" />
-                  Excluir
-                </Button>
-              </div>
-            </div>
+            )}
           </div>
         </CardContent>
       </Card>
