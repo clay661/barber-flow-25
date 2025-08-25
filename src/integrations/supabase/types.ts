@@ -242,6 +242,8 @@ export type Database = {
           banner_url: string | null
           created_at: string
           description: string | null
+          document_number: string | null
+          document_type: string | null
           email_notifications_enabled: boolean | null
           id: string
           logo_url: string | null
@@ -258,6 +260,8 @@ export type Database = {
           banner_url?: string | null
           created_at?: string
           description?: string | null
+          document_number?: string | null
+          document_type?: string | null
           email_notifications_enabled?: boolean | null
           id?: string
           logo_url?: string | null
@@ -274,6 +278,8 @@ export type Database = {
           banner_url?: string | null
           created_at?: string
           description?: string | null
+          document_number?: string | null
+          document_type?: string | null
           email_notifications_enabled?: boolean | null
           id?: string
           logo_url?: string | null

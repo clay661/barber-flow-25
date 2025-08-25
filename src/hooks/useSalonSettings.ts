@@ -14,6 +14,8 @@ export interface SalonSettings {
   scheduling_interval: number | null;
   notifications_enabled: boolean | null;
   email_notifications_enabled: boolean | null;
+  document_type: 'cpf' | 'cnpj' | null;
+  document_number: string | null;
   created_at: string;
   updated_at: string;
 }
@@ -56,12 +58,12 @@ export function useSalonSettings() {
             .single();
           
           if (createError) throw createError;
-          setSettings(newSettings);
+          setSettings(newSettings as SalonSettings);
         } else {
           throw error;
         }
       } else {
-        setSettings(data);
+        setSettings(data as SalonSettings);
       }
     } catch (error) {
       console.error('Error fetching salon settings:', error);
@@ -80,7 +82,7 @@ export function useSalonSettings() {
         .single();
 
       if (error) throw error;
-      setSettings(data);
+      setSettings(data as SalonSettings);
       return { success: true };
     } catch (error) {
       console.error('Error updating salon settings:', error);
