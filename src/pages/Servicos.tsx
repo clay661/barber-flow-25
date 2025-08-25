@@ -94,7 +94,7 @@ export default function Servicos() {
         <div>
           <h1 className="text-2xl md:text-3xl font-bold text-foreground">Serviços</h1>
           <p className="text-muted-foreground">
-            Gerencie os serviços oferecidos pela barbearia
+            Gerencie os serviços oferecidos pela empresa
           </p>
         </div>
         <Button 

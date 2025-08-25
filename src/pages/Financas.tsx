@@ -65,7 +65,7 @@ export default function Financas() {
         <div>
           <h1 className="text-2xl md:text-3xl font-bold text-foreground">Finanças</h1>
           <p className="text-muted-foreground">
-            Acompanhe a performance financeira da barbearia
+            Acompanhe a performance financeira da empresa
           </p>
         </div>
         <div className="flex gap-2 w-full sm:w-auto">

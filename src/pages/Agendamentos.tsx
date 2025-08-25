@@ -125,7 +125,7 @@ export default function Agendamentos() {
         <div>
           <h1 className="text-2xl md:text-3xl font-bold text-foreground">Agendamentos</h1>
           <p className="text-muted-foreground">
-            Gerencie os agendamentos da barbearia
+            Gerencie os agendamentos da empresa
           </p>
         </div>
         <Button 

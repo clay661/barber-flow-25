@@ -33,6 +33,9 @@ const dayNames = {
   sunday: "Domingo",
 };
 
+// Ordem correta dos dias da semana
+const daysOrder = ['monday', 'tuesday', 'wednesday', 'thursday', 'friday', 'saturday', 'sunday'];
+
 export default function Configuracoes() {
   const { settings, loading, updateSettings } = useSalonSettings();
   const [workingHours, setWorkingHours] = useState(defaultWorkingHours);
@@ -46,7 +49,6 @@ export default function Configuracoes() {
     email_notifications_enabled: true,
   });
   const [isSaving, setIsSaving] = useState(false);
-  const [isSavingHours, setIsSavingHours] = useState(false);
   const { toast } = useToast();
 
   // Carregar dados quando settings estiver disponível
@@ -79,20 +81,26 @@ export default function Configuracoes() {
     }));
   };
 
-  const handleSaveSettings = async () => {
+  const handleSaveAll = async () => {
     setIsSaving(true);
     try {
-      const result = await updateSettings(formData);
+      // Salvar todas as configurações de uma vez
+      const allSettings = {
+        ...formData,
+        working_hours: workingHours
+      };
+      
+      const result = await updateSettings(allSettings);
       if (result.success) {
         toast({
           title: 'Sucesso',
-          description: 'Configurações salvas com sucesso!',
+          description: 'Todas as configurações foram salvas com sucesso!',
         });
       } else {
         throw new Error('Erro ao salvar');
       }
     } catch (error) {
-      console.error('Configuracoes - Save error:', error);
+      console.error('Configuracoes - Save all error:', error);
       toast({
         title: 'Erro',
         description: 'Erro ao salvar as configurações.',
@@ -100,30 +108,6 @@ export default function Configuracoes() {
       });
     } finally {
       setIsSaving(false);
-    }
-  };
-
-  const handleSaveWorkingHours = async () => {
-    setIsSavingHours(true);
-    try {
-      const result = await updateSettings({ working_hours: workingHours });
-      if (result.success) {
-        toast({
-          title: 'Sucesso',
-          description: 'Horários salvos com sucesso!',
-        });
-      } else {
-        throw new Error('Erro ao salvar horários');
-      }
-    } catch (error) {
-      console.error('Configuracoes - Save hours error:', error);
-      toast({
-        title: 'Erro',
-        description: 'Erro ao salvar os horários.',
-        variant: 'destructive',
-      });
-    } finally {
-      setIsSavingHours(false);
     }
   };
 
@@ -157,7 +141,7 @@ export default function Configuracoes() {
           </CardHeader>
           <CardContent className="space-y-4">
             <div>
-              <Label htmlFor="barbershop-name">Nome da Barbearia</Label>
+              <Label htmlFor="barbershop-name">Nome da Empresa</Label>
               <Input 
                 id="barbershop-name" 
                 value={formData.name}
@@ -235,15 +219,6 @@ export default function Configuracoes() {
                 Configurar SMS/WhatsApp/E-mail
               </Button>
             </div>
-            
-            <Button 
-              className="w-full mt-4 hover-gold"
-              onClick={handleSaveSettings}
-              disabled={isSaving}
-            >
-              <Save className="h-4 w-4 mr-2" />
-              {isSaving ? 'Salvando...' : 'Salvar Configurações'}
-            </Button>
           </CardContent>
         </Card>
 
@@ -257,53 +232,61 @@ export default function Configuracoes() {
           </CardHeader>
           <CardContent>
             <div className="space-y-4">
-              {Object.entries(workingHours).map(([day, hours]) => (
-                <div key={day} className="space-y-2">
-                  <div className="flex items-center justify-between">
-                    <Label className="text-sm font-medium">
-                      {dayNames[day as keyof typeof dayNames]}
-                    </Label>
-                    <Switch
-                      checked={hours.active}
-                      onCheckedChange={(checked) => updateWorkingHours(day, 'active', checked)}
-                    />
-                  </div>
-                  {hours.active && (
-                    <div className="grid grid-cols-2 gap-2 pl-4">
-                      <div>
-                        <Label className="text-xs text-muted-foreground">Abertura</Label>
-                        <Input
-                          type="time"
-                          value={hours.start}
-                          onChange={(e) => updateWorkingHours(day, 'start', e.target.value)}
-                          className="text-sm"
-                        />
-                      </div>
-                      <div>
-                        <Label className="text-xs text-muted-foreground">Fechamento</Label>
-                        <Input
-                          type="time"
-                          value={hours.end}
-                          onChange={(e) => updateWorkingHours(day, 'end', e.target.value)}
-                          className="text-sm"
-                        />
-                      </div>
+              {daysOrder.map((day) => {
+                const hours = workingHours[day as keyof typeof workingHours];
+                return (
+                  <div key={day} className="space-y-2">
+                    <div className="flex items-center justify-between">
+                      <Label className="text-sm font-medium">
+                        {dayNames[day as keyof typeof dayNames]}
+                      </Label>
+                      <Switch
+                        checked={hours.active}
+                        onCheckedChange={(checked) => updateWorkingHours(day, 'active', checked)}
+                      />
                     </div>
-                  )}
-                  <Separator />
-                </div>
-              ))}
-              <Button 
-                className="w-full mt-4 hover-gold"
-                onClick={handleSaveWorkingHours}
-                disabled={isSavingHours}
-              >
-                <Save className="h-4 w-4 mr-2" />
-                {isSavingHours ? 'Salvando...' : 'Salvar Horários'}
-              </Button>
+                    {hours.active && (
+                      <div className="grid grid-cols-2 gap-2 pl-4">
+                        <div>
+                          <Label className="text-xs text-muted-foreground">Abertura</Label>
+                          <Input
+                            type="time"
+                            value={hours.start}
+                            onChange={(e) => updateWorkingHours(day, 'start', e.target.value)}
+                            className="text-sm"
+                          />
+                        </div>
+                        <div>
+                          <Label className="text-xs text-muted-foreground">Fechamento</Label>
+                          <Input
+                            type="time"
+                            value={hours.end}
+                            onChange={(e) => updateWorkingHours(day, 'end', e.target.value)}
+                            className="text-sm"
+                          />
+                        </div>
+                      </div>
+                    )}
+                    <Separator />
+                  </div>
+                );
+              })}
             </div>
           </CardContent>
         </Card>
+      </div>
+      
+      {/* Botão único para salvar todas as configurações */}
+      <div className="flex justify-center">
+        <Button 
+          className="w-full max-w-md hover-gold"
+          onClick={handleSaveAll}
+          disabled={isSaving}
+          size="lg"
+        >
+          <Save className="h-4 w-4 mr-2" />
+          {isSaving ? 'Salvando...' : 'Salvar Todas as Configurações'}
+        </Button>
       </div>
     </div>
   );

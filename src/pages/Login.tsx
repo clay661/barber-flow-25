@@ -115,7 +115,7 @@ export default function Login() {
               Nexio
             </CardTitle>
             <CardDescription className="text-muted-foreground">
-              {isRegisterMode ? "Cadastro do Administrador" : "Sistema de Gestão para Barbearias"}
+              {isRegisterMode ? "Cadastro do Administrador" : "Sistema de Gestão Empresarial"}
             </CardDescription>
           </div>
         </CardHeader>

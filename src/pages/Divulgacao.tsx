@@ -196,7 +196,7 @@ const Divulgacao = () => {
                 id="name"
                 value={formData.name}
                 onChange={(e) => handleInputChange('name', e.target.value)}
-                placeholder="Digite o nome do salão/barbearia"
+                placeholder="Digite o nome da empresa"
                 disabled={!isAdmin}
               />
             </div>
