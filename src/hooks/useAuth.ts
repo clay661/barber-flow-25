@@ -8,6 +8,8 @@ export interface Employee {
   pro_email: string;
   telefone?: string;
   status: string;
+  commission_type?: string;
+  commission_value?: number;
 }
 
 export interface AuthContextType {

@@ -21,23 +21,56 @@ import {
   useSidebar,
 } from "@/components/ui/sidebar";
 import { useIsMobile } from "@/hooks/use-mobile";
+import { useAuth } from "@/hooks/useAuth";
 import nexioLogo from "@/assets/nexio-logo.png";
 
-const menuItems = [
-  { title: "Dashboard", url: "/", icon: LayoutDashboard },
-  { title: "Clientes", url: "/clientes", icon: Users },
-  { title: "Funcionários", url: "/funcionarios", icon: UserCheck },
-  { title: "Agendamentos", url: "/agendamentos", icon: Calendar },
-  { title: "Serviços", url: "/servicos", icon: Scissors },
-  { title: "Finanças", url: "/financas", icon: DollarSign },
-  { title: "Divulgação", url: "/divulgacao", icon: Share2 },
-  { title: "Configurações", url: "/configuracoes", icon: Settings },
-];
+const getMenuItemsByRole = (role: string) => {
+  const baseItems = [
+    { title: "Dashboard", url: "/", icon: LayoutDashboard },
+  ];
+
+  if (role === 'ADMIN' || role === 'SUBADMIN') {
+    return [
+      ...baseItems,
+      { title: "Clientes", url: "/clientes", icon: Users },
+      { title: "Funcionários", url: "/funcionarios", icon: UserCheck },
+      { title: "Agendamentos", url: "/agendamentos", icon: Calendar },
+      { title: "Serviços", url: "/servicos", icon: Scissors },
+      { title: "Finanças", url: "/financas", icon: DollarSign },
+      { title: "Divulgação", url: "/divulgacao", icon: Share2 },
+      { title: "Configurações", url: "/configuracoes", icon: Settings },
+    ];
+  }
+
+  if (role === 'FUNCIONARIO') {
+    return [
+      ...baseItems,
+      { title: "Meus Clientes", url: "/clientes", icon: Users },
+      { title: "Meus Agendamentos", url: "/agendamentos", icon: Calendar },
+      { title: "Configurações", url: "/perfil", icon: Settings },
+    ];
+  }
+
+  if (role === 'RECEPCIONISTA') {
+    return [
+      ...baseItems,
+      { title: "Clientes", url: "/clientes", icon: Users },
+      { title: "Agendamentos", url: "/agendamentos", icon: Calendar },
+      { title: "Serviços", url: "/servicos", icon: Scissors },
+      { title: "Configurações", url: "/perfil", icon: Settings },
+    ];
+  }
+
+  return baseItems;
+};
 
 export function AppSidebar() {
   const location = useLocation();
   const isMobile = useIsMobile();
   const { state, open, setOpen } = useSidebar();
+  const { employee } = useAuth();
+  
+  const menuItems = getMenuItemsByRole(employee?.role || 'FUNCIONARIO');
 
   const isActive = (path: string) => {
     if (path === "/") return location.pathname === "/";
