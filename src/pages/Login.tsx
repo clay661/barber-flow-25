@@ -1,11 +1,12 @@
 import React, { useState, useEffect } from 'react';
-import { Navigate } from 'react-router-dom';
+import { Navigate, useNavigate } from 'react-router-dom';
 import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { useToast } from '@/hooks/use-toast';
 import { useAuth } from '@/hooks/useAuth';
+import { useSuperAuth } from '@/hooks/useSuperAuth';
 import { Eye, EyeOff, Scissors } from 'lucide-react';
 import barbershopLogo from "@/assets/barbershop-logo.jpg";
 
@@ -18,7 +19,9 @@ export default function Login() {
   const [isRegisterMode, setIsRegisterMode] = useState(false);
   const [adminExists, setAdminExists] = useState(true);
   const { login, register, checkAdminExists, employee, loading } = useAuth();
+  const { login: superLogin, superAdmin, loading: superLoading } = useSuperAuth();
   const { toast } = useToast();
+  const navigate = useNavigate();
 
   // Check if admin exists on component mount
   useEffect(() => {
@@ -27,14 +30,19 @@ export default function Login() {
       setAdminExists(exists);
     };
     
-    if (!loading) {
+    if (!loading && !superLoading) {
       checkAdmin();
     }
-  }, [loading, checkAdminExists]);
+  }, [loading, superLoading, checkAdminExists]);
 
   // Redirect if already logged in
-  if (!loading && employee) {
-    return <Navigate to="/" replace />;
+  if (!loading && !superLoading) {
+    if (employee) {
+      return <Navigate to="/" replace />;
+    }
+    if (superAdmin) {
+      return <Navigate to="/super-admin" replace />;
+    }
   }
 
   const handleSubmit = async (e: React.FormEvent) => {
@@ -44,9 +52,23 @@ export default function Login() {
     try {
       // Verificar se é super admin primeiro
       if (email === 'luizasbs70@gmail.com' && password === '10luiz10') {
-        // Redirecionar para o painel super admin
-        window.location.href = '/super-admin';
-        return;
+        console.log('Attempting super admin login');
+        const result = await superLogin(email, password);
+        if (result.success) {
+          toast({
+            title: "Login realizado com sucesso",
+            description: "Bem-vindo ao painel Super Admin!",
+          });
+          navigate('/super-admin');
+          return;
+        } else {
+          toast({
+            variant: "destructive",
+            title: "Erro no login",
+            description: "Erro ao acessar painel Super Admin",
+          });
+          return;
+        }
       }
 
       if (isRegisterMode) {
@@ -78,6 +100,7 @@ export default function Login() {
             title: "Login realizado com sucesso",
             description: "Bem-vindo ao sistema!",
           });
+          navigate('/');
         } else {
           toast({
             variant: "destructive",
@@ -97,7 +120,7 @@ export default function Login() {
     }
   };
 
-  if (loading) {
+  if (loading || superLoading) {
     return (
       <div className="min-h-screen flex items-center justify-center">
         <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>

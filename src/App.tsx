@@ -35,84 +35,76 @@ const App = () => (
       <Toaster />
       <Sonner />
       <BrowserRouter>
-        <Routes>
-          {/* Public routes */}
-          <Route path="/login" element={<Login />} />
-          <Route path="/agendamento/:publicLink" element={<PublicBooking />} />
-          
-          {/* Super Admin routes - isolated with its own provider */}
-          <Route path="/super-admin/*" element={
-            <SuperAuthProvider>
-              <Routes>
-                <Route path="/" element={
-                  <ProtectedSuperRoute>
-                    <SuperAdminLayout />
-                  </ProtectedSuperRoute>
-                }>
-                  <Route index element={<SuperAdminDashboard />} />
-                  <Route path="empresas" element={<SuperAdminEmpresas />} />
-                  <Route path="assinaturas" element={<SuperAdminAssinaturas />} />
-                  <Route path="planos" element={<div>Planos e Cobrança</div>} />
-                  <Route path="financeiro" element={<div>Financeiro</div>} />
-                  <Route path="configuracoes" element={<div>Configurações do SaaS</div>} />
-                  <Route path="seguranca" element={<div>Segurança</div>} />
-                </Route>
-              </Routes>
-            </SuperAuthProvider>
-          } />
-          
-          {/* Regular app routes - isolated with its own provider */}
-          <Route path="/*" element={
-            <AuthProvider>
-              <Routes>
-                <Route path="/" element={
-                  <ProtectedRoute>
-                    <AppLayout />
+        <SuperAuthProvider>
+          <AuthProvider>
+            <Routes>
+              {/* Public routes */}
+              <Route path="/login" element={<Login />} />
+              <Route path="/agendamento/:publicLink" element={<PublicBooking />} />
+              
+              {/* Super Admin routes */}
+              <Route path="/super-admin" element={
+                <ProtectedSuperRoute>
+                  <SuperAdminLayout />
+                </ProtectedSuperRoute>
+              }>
+                <Route index element={<SuperAdminDashboard />} />
+                <Route path="empresas" element={<SuperAdminEmpresas />} />
+                <Route path="assinaturas" element={<SuperAdminAssinaturas />} />
+                <Route path="planos" element={<div>Planos e Cobrança</div>} />
+                <Route path="financeiro" element={<div>Financeiro</div>} />
+                <Route path="configuracoes" element={<div>Configurações do SaaS</div>} />
+                <Route path="seguranca" element={<div>Segurança</div>} />
+              </Route>
+              
+              {/* Protected routes */}
+              <Route path="/" element={
+                <ProtectedRoute>
+                  <AppLayout />
+                </ProtectedRoute>
+              }>
+                <Route index element={<Dashboard />} />
+                <Route path="clientes" element={<Clientes />} />
+                <Route path="funcionarios" element={
+                  <ProtectedRoute adminOnly>
+                    <Funcionarios />
                   </ProtectedRoute>
-                }>
-                  <Route index element={<Dashboard />} />
-                  <Route path="clientes" element={<Clientes />} />
-                  <Route path="funcionarios" element={
-                    <ProtectedRoute adminOnly>
-                      <Funcionarios />
-                    </ProtectedRoute>
-                  } />
-                  <Route path="agendamentos" element={<Agendamentos />} />
-                  <Route path="servicos" element={<Servicos />} />
-                  <Route path="financas" element={
-                    <ProtectedRoute adminOnly>
-                      <Financas />
-                    </ProtectedRoute>
-                  } />
-                  <Route path="financas-subadmin" element={
-                    <ProtectedRoute subAdminOnly>
-                      <FinancasSubAdmin />
-                    </ProtectedRoute>
-                  } />
-                  <Route path="divulgacao" element={
-                    <ProtectedRoute adminOnly>
-                      <Divulgacao />
-                    </ProtectedRoute>
-                  } />
-                  <Route path="configuracoes" element={
-                    <ProtectedRoute adminOnly>
-                      <Configuracoes />
-                    </ProtectedRoute>
-                  } />
-                  <Route path="perfil" element={<ConfiguracoesPerfil />} />
-                  <Route path="notificacoes" element={
-                    <ProtectedRoute adminOnly>
-                      <NotificationSettings />
-                    </ProtectedRoute>
-                  } />
-                </Route>
-                
-                {/* Catch-all route */}
-                <Route path="*" element={<NotFound />} />
-              </Routes>
-            </AuthProvider>
-          } />
-        </Routes>
+                } />
+                <Route path="agendamentos" element={<Agendamentos />} />
+                <Route path="servicos" element={<Servicos />} />
+                <Route path="financas" element={
+                  <ProtectedRoute adminOnly>
+                    <Financas />
+                  </ProtectedRoute>
+                } />
+                <Route path="financas-subadmin" element={
+                  <ProtectedRoute subAdminOnly>
+                    <FinancasSubAdmin />
+                  </ProtectedRoute>
+                } />
+                <Route path="divulgacao" element={
+                  <ProtectedRoute adminOnly>
+                    <Divulgacao />
+                  </ProtectedRoute>
+                } />
+                <Route path="configuracoes" element={
+                  <ProtectedRoute adminOnly>
+                    <Configuracoes />
+                  </ProtectedRoute>
+                } />
+                <Route path="perfil" element={<ConfiguracoesPerfil />} />
+                <Route path="notificacoes" element={
+                  <ProtectedRoute adminOnly>
+                    <NotificationSettings />
+                  </ProtectedRoute>
+                } />
+              </Route>
+              
+              {/* Catch-all route */}
+              <Route path="*" element={<NotFound />} />
+            </Routes>
+          </AuthProvider>
+        </SuperAuthProvider>
       </BrowserRouter>
     </TooltipProvider>
   </QueryClientProvider>

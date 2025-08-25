@@ -30,6 +30,7 @@ export function useSuperAuthState() {
 
   const login = async (email: string, password: string) => {
     try {
+      console.log('SuperAuth: Attempting login for:', email);
       // Verificar credenciais contra tabela super_admins
       const { data: adminData, error } = await supabase
         .from('super_admins')
@@ -39,9 +40,11 @@ export function useSuperAuthState() {
         .single();
 
       if (error || !adminData) {
+        console.log('SuperAuth: Login failed:', error);
         return { success: false, error: 'Credenciais inválidas' };
       }
 
+      console.log('SuperAuth: Login successful');
       setSuperAdmin(adminData);
       // Armazenar no localStorage para persistência
       localStorage.setItem('super_admin_id', adminData.id);
@@ -54,6 +57,7 @@ export function useSuperAuthState() {
   };
 
   const logout = async () => {
+    console.log('SuperAuth: Logging out');
     setSuperAdmin(null);
     localStorage.removeItem('super_admin_id');
   };
@@ -61,7 +65,17 @@ export function useSuperAuthState() {
   const checkAuthState = async () => {
     console.log('SuperAuth: Checking auth state...');
     const adminId = localStorage.getItem('super_admin_id');
+    const employeeId = localStorage.getItem('employee_id');
+    
     console.log('SuperAuth: Admin ID from localStorage:', adminId);
+    console.log('SuperAuth: Employee ID from localStorage:', employeeId);
+    
+    // Se há um employee_id, significa que é um usuário regular, não super admin
+    if (employeeId && !adminId) {
+      console.log('SuperAuth: Regular employee detected, skipping super admin check');
+      setLoading(false);
+      return;
+    }
     
     if (adminId) {
       try {

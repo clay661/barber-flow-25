@@ -126,7 +126,17 @@ export function useAuthState() {
   const checkAuthState = async () => {
     console.log('Regular Auth: Checking auth state...');
     const employeeId = localStorage.getItem('employee_id');
+    const adminId = localStorage.getItem('super_admin_id');
+    
     console.log('Regular Auth: Employee ID from localStorage:', employeeId);
+    console.log('Regular Auth: Super Admin ID from localStorage:', adminId);
+    
+    // Se há um super_admin_id, significa que é um super admin, não usuário regular
+    if (adminId && !employeeId) {
+      console.log('Regular Auth: Super admin detected, skipping regular auth check');
+      setLoading(false);
+      return;
+    }
     
     if (employeeId) {
       try {
