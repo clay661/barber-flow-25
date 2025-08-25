@@ -80,14 +80,13 @@ export function ClientForm({ clientData, onDataChange }: ClientFormProps) {
           </div>
 
           <div className="space-y-2">
-            <Label htmlFor="email">Email *</Label>
+            <Label htmlFor="email">Email</Label>
             <Input
               id="email"
               type="email"
-              placeholder="seu@email.com"
+              placeholder="seu@email.com (opcional)"
               value={clientData.email}
               onChange={(e) => handleChange('email', e.target.value)}
-              required
             />
           </div>
 

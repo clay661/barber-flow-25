@@ -291,8 +291,18 @@ export default function Configuracoes() {
                 <Input id="advance-booking" type="number" placeholder="30" />
               </div>
               <div className="flex items-center justify-between">
-                <Label htmlFor="notifications">Notificações por WhatsApp</Label>
+                <Label htmlFor="notifications">Notificações Automáticas</Label>
                 <Switch id="notifications" />
+              </div>
+              <div className="mt-4">
+                <Button 
+                  variant="outline" 
+                  className="w-full"
+                  onClick={() => window.location.href = '/notificacoes'}
+                >
+                  <Settings className="h-4 w-4 mr-2" />
+                  Configurar SMS/WhatsApp
+                </Button>
               </div>
             </div>
           </div>

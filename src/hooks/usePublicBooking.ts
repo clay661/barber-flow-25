@@ -176,7 +176,7 @@ export function usePublicBooking(publicLink: string) {
           .insert({
             name: bookingData.clientName,
             telefone: bookingData.clientPhone,
-            email: bookingData.clientEmail,
+            email: bookingData.clientEmail || null,
             status: 'ativo'
           })
           .select('id')
@@ -191,14 +191,14 @@ export function usePublicBooking(publicLink: string) {
       const totalPrice = selectedServices.reduce((acc, service) => acc + Number(service.price), 0);
 
       // Create appointments for each service
-      const appointments = [];
+      const appointmentPromises = [];
       let currentTime = new Date(`${bookingData.selectedDate}T${bookingData.selectedTime}:00`);
 
       for (const serviceId of bookingData.selectedServices) {
         const service = services.find(s => s.id === serviceId);
         if (!service) continue;
 
-        appointments.push({
+        const appointmentData = {
           client_id: clientId,
           employee_id: bookingData.selectedEmployee,
           service_id: serviceId,
@@ -206,17 +206,52 @@ export function usePublicBooking(publicLink: string) {
           status: 'PENDENTE',
           total_price: service.price,
           notes: `Agendamento via site público`
-        });
+        };
+
+        appointmentPromises.push(
+          supabase
+            .from('appointments')
+            .insert(appointmentData)
+            .select('id')
+            .single()
+        );
 
         // Update time for next service
         currentTime = new Date(currentTime.getTime() + service.duration_minutes * 60000);
       }
 
-      const { error: appointmentError } = await supabase
-        .from('appointments')
-        .insert(appointments);
+      const appointmentResults = await Promise.all(appointmentPromises);
+      
+      // Check for errors
+      for (const result of appointmentResults) {
+        if (result.error) throw result.error;
+      }
 
-      if (appointmentError) throw appointmentError;
+      // Enviar notificação de confirmação
+      if (appointmentResults.length > 0 && appointmentResults[0].data) {
+        try {
+          const employeeName = employees.find(e => e.id === bookingData.selectedEmployee)?.name || 'Profissional';
+          const salonName = salonSettings?.name || 'Salão';
+          const serviceNames = selectedServices.map(s => s.name).join(', ');
+          const appointmentDate = new Date(`${bookingData.selectedDate}T${bookingData.selectedTime}:00`);
+          const formattedDate = appointmentDate.toLocaleDateString('pt-BR');
+          const formattedTime = appointmentDate.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' });
+
+          const message = `Olá ${bookingData.clientName}, seu agendamento em ${salonName} foi confirmado para ${formattedDate} às ${formattedTime}. Serviços: ${serviceNames}. Profissional: ${employeeName}.`;
+
+          // Enviar notificação usando o primeiro agendamento criado como referência
+          await supabase.functions.invoke('send-notification', {
+            body: {
+              clientPhone: bookingData.clientPhone,
+              message: message,
+              appointmentId: appointmentResults[0].data.id
+            }
+          });
+        } catch (notificationError) {
+          console.error('Error sending notification:', notificationError);
+          // Não falhar o agendamento se a notificação falhar
+        }
+      }
 
       return { success: true };
 

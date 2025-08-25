@@ -135,6 +135,83 @@ export type Database = {
         }
         Relationships: []
       }
+      notification_history: {
+        Row: {
+          appointment_id: string | null
+          client_phone: string
+          created_at: string
+          id: string
+          message: string
+          provider: string
+          provider_response: Json | null
+          sent_at: string
+          status: string
+        }
+        Insert: {
+          appointment_id?: string | null
+          client_phone: string
+          created_at?: string
+          id?: string
+          message: string
+          provider: string
+          provider_response?: Json | null
+          sent_at?: string
+          status: string
+        }
+        Update: {
+          appointment_id?: string | null
+          client_phone?: string
+          created_at?: string
+          id?: string
+          message?: string
+          provider?: string
+          provider_response?: Json | null
+          sent_at?: string
+          status?: string
+        }
+        Relationships: [
+          {
+            foreignKeyName: "notification_history_appointment_id_fkey"
+            columns: ["appointment_id"]
+            isOneToOne: false
+            referencedRelation: "appointments"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      notification_settings: {
+        Row: {
+          api_key_sid: string
+          auth_token: string
+          created_at: string
+          id: string
+          is_active: boolean | null
+          phone_number: string
+          provider: string
+          updated_at: string
+        }
+        Insert: {
+          api_key_sid: string
+          auth_token: string
+          created_at?: string
+          id?: string
+          is_active?: boolean | null
+          phone_number: string
+          provider: string
+          updated_at?: string
+        }
+        Update: {
+          api_key_sid?: string
+          auth_token?: string
+          created_at?: string
+          id?: string
+          is_active?: boolean | null
+          phone_number?: string
+          provider?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       salon_settings: {
         Row: {
           banner_url: string | null

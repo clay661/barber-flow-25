@@ -13,6 +13,7 @@ import Agendamentos from "./pages/Agendamentos";
 import Servicos from "./pages/Servicos";
 import Financas from "./pages/Financas";
 import Configuracoes from "./pages/Configuracoes";
+import NotificationSettings from "./pages/NotificationSettings";
 import Login from "./pages/Login";
 import PublicBooking from "./pages/PublicBooking";
 import NotFound from "./pages/NotFound";
@@ -46,6 +47,11 @@ const App = () => (
               <Route path="configuracoes" element={
                 <ProtectedRoute adminOnly>
                   <Configuracoes />
+                </ProtectedRoute>
+              } />
+              <Route path="notificacoes" element={
+                <ProtectedRoute adminOnly>
+                  <NotificationSettings />
                 </ProtectedRoute>
               } />
             </Route>

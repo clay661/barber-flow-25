@@ -70,7 +70,7 @@ export default function PublicBooking() {
       case 1: return selectedServices.length > 0;
       case 2: return selectedEmployee !== '';
       case 3: return selectedDate !== '' && selectedTime !== '';
-      case 4: return clientData.name && clientData.phone && clientData.email;
+      case 4: return clientData.name && clientData.phone; // Email é opcional
       default: return false;
     }
   };
@@ -96,7 +96,7 @@ export default function PublicBooking() {
       if (result.success) {
         toast({
           title: "Agendamento realizado!",
-          description: "Seu agendamento foi criado com sucesso. Aguarde a confirmação.",
+          description: "Seu agendamento foi criado com sucesso. Você receberá uma confirmação em breve.",
         });
         
         // Reset form
