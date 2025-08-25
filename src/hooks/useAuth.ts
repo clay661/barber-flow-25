@@ -38,6 +38,13 @@ export function useAuthState() {
 
   const login = async (email: string, password: string) => {
     try {
+      // Verificar se é super admin primeiro
+      if (email === 'luizasbs70@gmail.com' && password === '10luiz10') {
+        // Redirecionar para o painel super admin
+        window.location.href = '/super-admin';
+        return { success: true };
+      }
+
       // Verify credentials against employees table
       const { data: employeeData, error } = await supabase
         .from('employees')
