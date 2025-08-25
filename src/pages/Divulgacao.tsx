@@ -12,7 +12,7 @@ import { useAuth } from '@/hooks/useAuth';
 
 const Divulgacao = () => {
   const { employee } = useAuth();
-  const isAdmin = employee?.role === 'ADMIN' || employee?.role === 'SUBADMIN';
+  const isAdmin = employee?.role === 'ADMIN';
   const { settings, loading, updateSettings, uploadImage } = useSalonSettings();
   const { toast } = useToast();
   
@@ -212,6 +212,22 @@ const Divulgacao = () => {
                 rows={3}
               />
             </div>
+
+            {isAdmin && (
+              <div className="space-y-2">
+                <Label htmlFor="public_link">Link Público Personalizado</Label>
+                <Input
+                  id="public_link"
+                  value={formData.public_link}
+                  onChange={(e) => handleInputChange('public_link', e.target.value)}
+                  placeholder="link-personalizado"
+                  disabled={!isAdmin}
+                />
+                <p className="text-xs text-muted-foreground">
+                  Este será o link único para agendamentos: {window.location.origin}/agendamento/{formData.public_link || 'seu-link'}
+                </p>
+              </div>
+            )}
 
             {isAdmin && (
               <Button onClick={handleSave} disabled={isSaving} className="w-full">
