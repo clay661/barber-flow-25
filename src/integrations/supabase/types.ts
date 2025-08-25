@@ -232,34 +232,49 @@ export type Database = {
       }
       salon_settings: {
         Row: {
+          address: string | null
           banner_url: string | null
           created_at: string
           description: string | null
           id: string
           logo_url: string | null
           name: string
+          notifications_enabled: boolean | null
+          phone: string | null
           public_link: string
+          scheduling_interval: number | null
           updated_at: string
+          working_hours: Json | null
         }
         Insert: {
+          address?: string | null
           banner_url?: string | null
           created_at?: string
           description?: string | null
           id?: string
           logo_url?: string | null
           name?: string
+          notifications_enabled?: boolean | null
+          phone?: string | null
           public_link?: string
+          scheduling_interval?: number | null
           updated_at?: string
+          working_hours?: Json | null
         }
         Update: {
+          address?: string | null
           banner_url?: string | null
           created_at?: string
           description?: string | null
           id?: string
           logo_url?: string | null
           name?: string
+          notifications_enabled?: boolean | null
+          phone?: string | null
           public_link?: string
+          scheduling_interval?: number | null
           updated_at?: string
+          working_hours?: Json | null
         }
         Relationships: []
       }

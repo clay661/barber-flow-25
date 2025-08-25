@@ -8,6 +8,11 @@ export interface SalonSettings {
   logo_url: string | null;
   banner_url: string | null;
   public_link: string;
+  working_hours: any;
+  address: string | null;
+  phone: string | null;
+  scheduling_interval: number | null;
+  notifications_enabled: boolean | null;
   created_at: string;
   updated_at: string;
 }
@@ -23,8 +28,39 @@ export function useSalonSettings() {
         .select('*')
         .single();
 
-      if (error) throw error;
-      setSettings(data);
+      if (error) {
+        // Se não existir settings, criar um registro inicial
+        if (error.code === 'PGRST116') {
+          const { data: newSettings, error: createError } = await supabase
+            .from('salon_settings')
+            .insert({
+              name: 'Meu Salão',
+              description: '',
+              address: '',
+              phone: '',
+              scheduling_interval: 30,
+              notifications_enabled: true,
+              working_hours: {
+                monday: { start: "08:00", end: "18:00", active: true },
+                tuesday: { start: "08:00", end: "18:00", active: true },
+                wednesday: { start: "08:00", end: "18:00", active: true },
+                thursday: { start: "08:00", end: "18:00", active: true },
+                friday: { start: "08:00", end: "18:00", active: true },
+                saturday: { start: "08:00", end: "16:00", active: true },
+                sunday: { start: "10:00", end: "14:00", active: false },
+              }
+            })
+            .select()
+            .single();
+          
+          if (createError) throw createError;
+          setSettings(newSettings);
+        } else {
+          throw error;
+        }
+      } else {
+        setSettings(data);
+      }
     } catch (error) {
       console.error('Error fetching salon settings:', error);
     } finally {

@@ -1,22 +1,19 @@
-import { useState, useRef, useEffect } from "react";
+import { useState, useEffect } from "react";
 import { Button } from "@/components/ui/button";
 import { Input } from "@/components/ui/input";
 import { Card, CardContent, CardHeader, CardTitle } from "@/components/ui/card";
 import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
 import { 
-  Upload, 
   Settings,
   Save,
-  Clock,
-  Image,
-  X
+  Clock
 } from "lucide-react";
 import { Separator } from "@/components/ui/separator";
 import { useToast } from "@/hooks/use-toast";
 import { useSalonSettings } from "@/hooks/useSalonSettings";
 
-const mockWorkingHours = {
+const defaultWorkingHours = {
   monday: { start: "08:00", end: "18:00", active: true },
   tuesday: { start: "08:00", end: "18:00", active: true },
   wednesday: { start: "08:00", end: "18:00", active: true },
@@ -37,35 +34,36 @@ const dayNames = {
 };
 
 export default function Configuracoes() {
-  const { settings, loading, updateSettings, uploadImage } = useSalonSettings();
-  const [workingHours, setWorkingHours] = useState(mockWorkingHours);
+  const { settings, loading, updateSettings } = useSalonSettings();
+  const [workingHours, setWorkingHours] = useState(defaultWorkingHours);
   const [formData, setFormData] = useState({
     name: '',
     description: '',
     address: '',
     phone: '',
-    schedulingInterval: 30,
+    scheduling_interval: 30,
+    notifications_enabled: true,
   });
   const [isSaving, setIsSaving] = useState(false);
+  const [isSavingHours, setIsSavingHours] = useState(false);
   const { toast } = useToast();
-  const logoInputRef = useRef<HTMLInputElement>(null);
-  const bannerInputRef = useRef<HTMLInputElement>(null);
-
-  // Debug logging
-  console.log('Configuracoes - Settings:', settings);
-  console.log('Configuracoes - Loading:', loading);
 
   // Carregar dados quando settings estiver disponível
   useEffect(() => {
     if (settings) {
-      console.log('Configuracoes - Updating formData with settings:', settings);
       setFormData({
         name: settings.name || '',
         description: settings.description || '',
-        address: '', 
-        phone: '',
-        schedulingInterval: 30,
+        address: settings.address || '',
+        phone: settings.phone || '',
+        scheduling_interval: settings.scheduling_interval || 30,
+        notifications_enabled: settings.notifications_enabled ?? true,
       });
+      
+      // Carregar horários de funcionamento
+      if (settings.working_hours) {
+        setWorkingHours(settings.working_hours);
+      }
     }
   }, [settings]);
 
@@ -79,50 +77,10 @@ export default function Configuracoes() {
     }));
   };
 
-  const handleImageUpload = async (file: File, type: 'logo' | 'banner') => {
-    console.log('Configuracoes - Uploading image:', type, file.name);
-    try {
-      const result = await uploadImage(file, type);
-      console.log('Configuracoes - Upload result:', result);
-      if (result.success) {
-        toast({
-          title: 'Sucesso',
-          description: `${type === 'logo' ? 'Logo' : 'Banner'} atualizado com sucesso!`,
-        });
-      } else {
-        throw new Error('Erro no upload');
-      }
-    } catch (error) {
-      console.error('Configuracoes - Upload error:', error);
-      toast({
-        title: 'Erro',
-        description: `Erro ao fazer upload do ${type === 'logo' ? 'logo' : 'banner'}.`,
-        variant: 'destructive',
-      });
-    }
-  };
-
-  const handleFileChange = (event: React.ChangeEvent<HTMLInputElement>, type: 'logo' | 'banner') => {
-    const file = event.target.files?.[0];
-    if (file) {
-      if (file.type.startsWith('image/')) {
-        handleImageUpload(file, type);
-      } else {
-        toast({
-          title: 'Arquivo inválido',
-          description: 'Por favor, selecione apenas arquivos de imagem.',
-          variant: 'destructive',
-        });
-      }
-    }
-  };
-
   const handleSaveSettings = async () => {
-    console.log('Configuracoes - Saving settings:', formData);
     setIsSaving(true);
     try {
       const result = await updateSettings(formData);
-      console.log('Configuracoes - Save result:', result);
       if (result.success) {
         toast({
           title: 'Sucesso',
@@ -143,16 +101,31 @@ export default function Configuracoes() {
     }
   };
 
-  const handleSaveWorkingHours = () => {
-    console.log('Configuracoes - Saving working hours:', workingHours);
-    toast({
-      title: 'Sucesso',
-      description: 'Horários salvos com sucesso!',
-    });
+  const handleSaveWorkingHours = async () => {
+    setIsSavingHours(true);
+    try {
+      const result = await updateSettings({ working_hours: workingHours });
+      if (result.success) {
+        toast({
+          title: 'Sucesso',
+          description: 'Horários salvos com sucesso!',
+        });
+      } else {
+        throw new Error('Erro ao salvar horários');
+      }
+    } catch (error) {
+      console.error('Configuracoes - Save hours error:', error);
+      toast({
+        title: 'Erro',
+        description: 'Erro ao salvar os horários.',
+        variant: 'destructive',
+      });
+    } finally {
+      setIsSavingHours(false);
+    }
   };
 
   if (loading) {
-    console.log('Configuracoes - Still loading...');
     return (
       <div className="flex items-center justify-center h-64">
         <div className="animate-spin rounded-full h-12 w-12 border-b-2 border-primary"></div>
@@ -160,111 +133,106 @@ export default function Configuracoes() {
     );
   }
 
-  const logoUrl = settings?.logo_url;
-  const bannerUrl = settings?.banner_url;
-  
-  console.log('Configuracoes - Rendering with logoUrl:', logoUrl, 'bannerUrl:', bannerUrl);
-
   return (
     <div className="space-y-4 md:space-y-6">
       <div className="flex items-center justify-between">
         <div>
           <h1 className="text-2xl md:text-3xl font-bold text-foreground">Configurações</h1>
           <p className="text-muted-foreground">
-            Gerencie configurações gerais, horários e imagens do sistema
+            Gerencie configurações gerais e horários de funcionamento
           </p>
         </div>
       </div>
 
       <div className="grid grid-cols-1 lg:grid-cols-2 gap-4 md:gap-6">
-        {/* Upload de Imagens */}
+        {/* Configurações Gerais */}
         <Card>
           <CardHeader>
             <CardTitle className="flex items-center gap-2">
-              <Image className="h-5 w-5 text-accent" />
-              Imagens do Sistema
+              <Settings className="h-5 w-5 text-accent" />
+              Configurações Gerais
             </CardTitle>
           </CardHeader>
-          <CardContent className="space-y-6">
-            {/* Logo */}
-            <div className="space-y-3">
-              <Label className="text-sm font-medium">Logo da Barbearia</Label>
-              <div className="flex flex-col items-center gap-4 p-4 border-2 border-dashed border-muted-foreground/25 rounded-lg">
-                {logoUrl ? (
-                  <div className="relative">
-                    <img 
-                      src={logoUrl} 
-                      alt="Logo" 
-                      className="w-24 h-24 object-cover rounded-lg border"
-                    />
-                  </div>
-                ) : (
-                  <div className="w-24 h-24 bg-muted rounded-lg flex items-center justify-center">
-                    <Image className="h-8 w-8 text-muted-foreground" />
-                  </div>
-                )}
-                <div className="text-center">
-                  <input
-                    ref={logoInputRef}
-                    type="file"
-                    accept="image/*"
-                    onChange={(e) => handleFileChange(e, 'logo')}
-                    className="hidden"
-                  />
-                  <Button 
-                    variant="outline" 
-                    className="hover-glow"
-                    onClick={() => logoInputRef.current?.click()}
-                  >
-                    <Upload className="h-4 w-4 mr-2" />
-                    {logoUrl ? 'Alterar Logo' : 'Carregar Logo'}
-                  </Button>
-                  <p className="text-xs text-muted-foreground mt-2">
-                    PNG, JPG até 5MB
-                  </p>
-                </div>
-              </div>
+          <CardContent className="space-y-4">
+            <div>
+              <Label htmlFor="barbershop-name">Nome da Barbearia</Label>
+              <Input 
+                id="barbershop-name" 
+                value={formData.name}
+                onChange={(e) => setFormData({...formData, name: e.target.value})}
+                placeholder="Nexio Premium" 
+              />
             </div>
-
-            {/* Banner */}
-            <div className="space-y-3">
-              <Label className="text-sm font-medium">Banner Principal</Label>
-              <div className="flex flex-col items-center gap-4 p-4 border-2 border-dashed border-muted-foreground/25 rounded-lg">
-                {bannerUrl ? (
-                  <div className="relative">
-                    <img 
-                      src={bannerUrl} 
-                      alt="Banner" 
-                      className="w-full max-w-sm h-32 object-cover rounded-lg border"
-                    />
-                  </div>
-                ) : (
-                  <div className="w-full max-w-sm h-32 bg-muted rounded-lg flex items-center justify-center">
-                    <Image className="h-8 w-8 text-muted-foreground" />
-                  </div>
-                )}
-                <div className="text-center">
-                  <input
-                    ref={bannerInputRef}
-                    type="file"
-                    accept="image/*"
-                    onChange={(e) => handleFileChange(e, 'banner')}
-                    className="hidden"
-                  />
-                  <Button 
-                    variant="outline" 
-                    className="hover-glow"
-                    onClick={() => bannerInputRef.current?.click()}
-                  >
-                    <Upload className="h-4 w-4 mr-2" />
-                    {bannerUrl ? 'Alterar Banner' : 'Carregar Banner'}
-                  </Button>
-                  <p className="text-xs text-muted-foreground mt-2">
-                    PNG, JPG até 5MB
-                  </p>
-                </div>
-              </div>
+            
+            <div>
+              <Label htmlFor="description">Descrição</Label>
+              <Input 
+                id="description" 
+                value={formData.description}
+                onChange={(e) => setFormData({...formData, description: e.target.value})}
+                placeholder="Breve descrição do estabelecimento" 
+              />
             </div>
+            
+            <div>
+              <Label htmlFor="address">Endereço</Label>
+              <Input 
+                id="address" 
+                value={formData.address}
+                onChange={(e) => setFormData({...formData, address: e.target.value})}
+                placeholder="Rua das Flores, 123" 
+              />
+            </div>
+            
+            <div>
+              <Label htmlFor="phone">Telefone</Label>
+              <Input 
+                id="phone" 
+                value={formData.phone}
+                onChange={(e) => setFormData({...formData, phone: e.target.value})}
+                placeholder="(11) 99999-9999" 
+              />
+            </div>
+            
+            <div>
+              <Label htmlFor="interval">Intervalo entre Agendamentos (min)</Label>
+              <Input 
+                id="interval" 
+                type="number" 
+                value={formData.scheduling_interval}
+                onChange={(e) => setFormData({...formData, scheduling_interval: parseInt(e.target.value) || 30})}
+                placeholder="15" 
+              />
+            </div>
+            
+            <div className="flex items-center justify-between">
+              <Label htmlFor="notifications">Notificações Automáticas</Label>
+              <Switch 
+                id="notifications" 
+                checked={formData.notifications_enabled}
+                onCheckedChange={(checked) => setFormData({...formData, notifications_enabled: checked})}
+              />
+            </div>
+            
+            <div className="mt-4">
+              <Button 
+                variant="outline" 
+                className="w-full"
+                onClick={() => window.location.href = '/notificacoes'}
+              >
+                <Settings className="h-4 w-4 mr-2" />
+                Configurar SMS/WhatsApp/E-mail
+              </Button>
+            </div>
+            
+            <Button 
+              className="w-full mt-4 hover-gold"
+              onClick={handleSaveSettings}
+              disabled={isSaving}
+            >
+              <Save className="h-4 w-4 mr-2" />
+              {isSaving ? 'Salvando...' : 'Salvar Configurações'}
+            </Button>
           </CardContent>
         </Card>
 
@@ -317,100 +285,15 @@ export default function Configuracoes() {
               <Button 
                 className="w-full mt-4 hover-gold"
                 onClick={handleSaveWorkingHours}
+                disabled={isSavingHours}
               >
                 <Save className="h-4 w-4 mr-2" />
-                Salvar Horários
+                {isSavingHours ? 'Salvando...' : 'Salvar Horários'}
               </Button>
             </div>
           </CardContent>
         </Card>
       </div>
-
-      {/* Configurações Gerais */}
-      <Card>
-        <CardHeader>
-          <CardTitle className="flex items-center gap-2">
-            <Settings className="h-5 w-5 text-accent" />
-            Configurações Gerais
-          </CardTitle>
-        </CardHeader>
-        <CardContent>
-          <div className="grid grid-cols-1 md:grid-cols-2 gap-6">
-            <div className="space-y-4">
-              <div>
-                <Label htmlFor="barbershop-name">Nome da Barbearia</Label>
-                <Input 
-                  id="barbershop-name" 
-                  value={formData.name}
-                  onChange={(e) => setFormData({...formData, name: e.target.value})}
-                  placeholder="Nexio Premium" 
-                />
-              </div>
-              <div>
-                <Label htmlFor="address">Endereço</Label>
-                <Input 
-                  id="address" 
-                  value={formData.address}
-                  onChange={(e) => setFormData({...formData, address: e.target.value})}
-                  placeholder="Rua das Flores, 123" 
-                />
-              </div>
-              <div>
-                <Label htmlFor="phone">Telefone</Label>
-                <Input 
-                  id="phone" 
-                  value={formData.phone}
-                  onChange={(e) => setFormData({...formData, phone: e.target.value})}
-                  placeholder="(11) 99999-9999" 
-                />
-              </div>
-            </div>
-            <div className="space-y-4">
-              <div>
-                <Label htmlFor="description">Descrição</Label>
-                <Input 
-                  id="description" 
-                  value={formData.description}
-                  onChange={(e) => setFormData({...formData, description: e.target.value})}
-                  placeholder="Breve descrição do estabelecimento" 
-                />
-              </div>
-              <div>
-                <Label htmlFor="interval">Intervalo entre Agendamentos (min)</Label>
-                <Input 
-                  id="interval" 
-                  type="number" 
-                  value={formData.schedulingInterval}
-                  onChange={(e) => setFormData({...formData, schedulingInterval: parseInt(e.target.value) || 30})}
-                  placeholder="15" 
-                />
-              </div>
-              <div className="flex items-center justify-between">
-                <Label htmlFor="notifications">Notificações Automáticas</Label>
-                <Switch id="notifications" />
-              </div>
-              <div className="mt-4">
-                <Button 
-                  variant="outline" 
-                  className="w-full"
-                  onClick={() => window.location.href = '/notificacoes'}
-                >
-                  <Settings className="h-4 w-4 mr-2" />
-                  Configurar SMS/WhatsApp/E-mail
-                </Button>
-              </div>
-            </div>
-          </div>
-          <Button 
-            className="mt-6 hover-gold"
-            onClick={handleSaveSettings}
-            disabled={isSaving}
-          >
-            <Save className="h-4 w-4 mr-2" />
-            {isSaving ? 'Salvando...' : 'Salvar Configurações'}
-          </Button>
-        </CardContent>
-      </Card>
     </div>
   );
 }
