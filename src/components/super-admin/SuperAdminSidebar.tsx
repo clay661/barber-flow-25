@@ -8,7 +8,9 @@ import {
   Users, 
   Shield,
   Crown,
-  PieChart
+  PieChart,
+  UserCheck,
+  Percent
 } from "lucide-react";
 import {
   Sidebar,
@@ -30,6 +32,8 @@ const menuItems = [
   { title: "Gestão de Assinaturas", url: "/super-admin/assinaturas", icon: CreditCard },
   { title: "Planos e Cobrança", url: "/super-admin/planos", icon: DollarSign },
   { title: "Financeiro", url: "/super-admin/financeiro", icon: PieChart },
+  { title: "Afiliados", url: "/super-admin/afiliados", icon: UserCheck },
+  { title: "Cupons de Desconto", url: "/super-admin/descontos", icon: Percent },
   { title: "Configurações do SaaS", url: "/super-admin/configuracoes", icon: Settings },
   { title: "Segurança", url: "/super-admin/seguranca", icon: Shield },
 ];

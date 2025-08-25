@@ -28,7 +28,10 @@ import SuperAdminEmpresas from "./pages/super-admin/SuperAdminEmpresas";
 import SuperAdminAssinaturas from "./pages/super-admin/SuperAdminAssinaturas";
 import SuperAdminPlanos from "./pages/super-admin/SuperAdminPlanos";
 import SuperAdminFinanceiro from "./pages/super-admin/SuperAdminFinanceiro";
+import SuperAdminAfiliados from "./pages/super-admin/SuperAdminAfiliados";
+import SuperAdminDescontos from "./pages/super-admin/SuperAdminDescontos";
 import SuperAdminConfiguracoes from "./pages/super-admin/SuperAdminConfiguracoes";
+import SuperAdminSeguranca from "./pages/super-admin/SuperAdminSeguranca";
 
 const queryClient = new QueryClient();
 
@@ -56,8 +59,10 @@ const App = () => (
                 <Route path="assinaturas" element={<SuperAdminAssinaturas />} />
                 <Route path="planos" element={<SuperAdminPlanos />} />
                 <Route path="financeiro" element={<SuperAdminFinanceiro />} />
+                <Route path="afiliados" element={<SuperAdminAfiliados />} />
+                <Route path="descontos" element={<SuperAdminDescontos />} />
                 <Route path="configuracoes" element={<SuperAdminConfiguracoes />} />
-                <Route path="seguranca" element={<div className="p-6"><h1 className="text-2xl font-bold">Segurança</h1><p className="text-muted-foreground">Logs de acessos e alertas de fraude em desenvolvimento...</p></div>} />
+                <Route path="seguranca" element={<SuperAdminSeguranca />} />
               </Route>
               
               {/* Regular user routes */}
