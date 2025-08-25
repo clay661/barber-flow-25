@@ -11,10 +11,19 @@ import {
 import { SidebarTrigger, useSidebar } from "@/components/ui/sidebar";
 import { User, Settings, LogOut, Bell } from "lucide-react";
 import { useIsMobile } from "@/hooks/use-mobile";
+import { useAuth } from "@/hooks/useAuth";
+import { useNavigate } from "react-router-dom";
 
 export function Header() {
   const isMobile = useIsMobile();
   const { state } = useSidebar();
+  const { employee, logout } = useAuth();
+  const navigate = useNavigate();
+
+  const handleLogout = async () => {
+    await logout();
+    navigate('/login');
+  };
 
   return (
     <header className="border-b border-border px-3 sm:px-4 md:px-6 py-3 md:py-4 bg-card/95 backdrop-blur-sm sticky top-0 z-20">
@@ -45,30 +54,26 @@ export function Header() {
               <Button variant="ghost" className="relative h-8 w-8 md:h-10 md:w-10 rounded-full hover-glow">
                 <Avatar className="h-8 w-8 md:h-10 md:w-10">
                   <AvatarImage src="/avatars/01.png" alt="Avatar" />
-                  <AvatarFallback>AD</AvatarFallback>
+                  <AvatarFallback>{employee?.name?.charAt(0) || 'U'}</AvatarFallback>
                 </Avatar>
               </Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent className="w-56" align="end" forceMount>
               <DropdownMenuLabel className="font-normal">
                 <div className="flex flex-col space-y-1">
-                  <p className="text-sm font-medium leading-none">Administrador</p>
+                  <p className="text-sm font-medium leading-none">{employee?.name || 'Usuário'}</p>
                   <p className="text-xs leading-none text-muted-foreground">
-                    admin@nexio.com
+                    {employee?.pro_email || ''}
                   </p>
                 </div>
               </DropdownMenuLabel>
               <DropdownMenuSeparator />
-              <DropdownMenuItem className="hover-darken">
-                <User className="mr-2 h-4 w-4" />
-                <span>Perfil</span>
-              </DropdownMenuItem>
-              <DropdownMenuItem className="hover-darken">
+              <DropdownMenuItem className="hover-darken" onClick={() => navigate('/configuracoes')}>
                 <Settings className="mr-2 h-4 w-4" />
                 <span>Configurações</span>
               </DropdownMenuItem>
               <DropdownMenuSeparator />
-              <DropdownMenuItem className="hover-darken">
+              <DropdownMenuItem className="hover-darken" onClick={handleLogout}>
                 <LogOut className="mr-2 h-4 w-4" />
                 <span>Sair</span>
               </DropdownMenuItem>
