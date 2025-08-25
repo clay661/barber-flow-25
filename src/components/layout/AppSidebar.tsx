@@ -30,9 +30,7 @@ const menuItems = [
 ];
 
 export function AppSidebar() {
-  const { state } = useSidebar();
   const location = useLocation();
-  const isCollapsed = state === "collapsed";
 
   const isActive = (path: string) => {
     if (path === "/") return location.pathname === "/";
@@ -40,28 +38,26 @@ export function AppSidebar() {
   };
 
   return (
-    <Sidebar className={isCollapsed ? "w-14" : "w-64"} collapsible="icon">
-      <SidebarContent className="bg-primary text-primary-foreground">
+    <Sidebar className="w-64" collapsible="none">
+      <SidebarContent className="bg-sidebar-background text-sidebar-foreground border-r border-sidebar-border">
         {/* Logo */}
-        <div className="p-4 border-b border-primary/20">
+        <div className="p-4 border-b border-sidebar-border">
           <div className="flex items-center gap-3">
             <img 
               src={barbershopLogo} 
               alt="Nexio" 
               className="w-8 h-8 rounded-md"
             />
-            {!isCollapsed && (
-              <div>
-                <h1 className="text-lg font-bold">Nexio</h1>
-                <p className="text-xs opacity-80">Sistema de Gestão</p>
-              </div>
-            )}
+            <div>
+              <h1 className="text-lg font-bold text-sidebar-foreground">Nexio</h1>
+              <p className="text-xs text-sidebar-foreground/70">Sistema de Gestão</p>
+            </div>
           </div>
         </div>
 
         <SidebarGroup>
-          <SidebarGroupLabel className="text-primary-foreground/70">
-            {!isCollapsed && "Menu Principal"}
+          <SidebarGroupLabel className="text-sidebar-foreground/70 px-3 py-2">
+            Menu Principal
           </SidebarGroupLabel>
           <SidebarGroupContent>
             <SidebarMenu>
@@ -69,15 +65,15 @@ export function AppSidebar() {
                 <SidebarMenuItem key={item.title}>
                   <SidebarMenuButton 
                     asChild
-                    className={`hover-menu ${
+                    className={`mx-2 my-1 rounded-lg transition-all duration-200 ${
                       isActive(item.url)
-                        ? "bg-accent text-accent-foreground font-medium border-l-3 border-accent"
-                        : "text-sidebar-foreground"
+                        ? "bg-accent text-accent-foreground font-medium shadow-md"
+                        : "text-sidebar-foreground hover:bg-sidebar-accent hover:text-accent hover:shadow-sm hover:translate-x-1"
                     }`}
                   >
-                    <NavLink to={item.url} className="flex items-center gap-3">
-                      <item.icon className="h-4 w-4" />
-                      {!isCollapsed && <span>{item.title}</span>}
+                    <NavLink to={item.url} className="flex items-center gap-3 px-3 py-2">
+                      <item.icon className="h-5 w-5 flex-shrink-0" />
+                      <span className="font-medium">{item.title}</span>
                     </NavLink>
                   </SidebarMenuButton>
                 </SidebarMenuItem>
