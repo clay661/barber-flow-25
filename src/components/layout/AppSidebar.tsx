@@ -47,12 +47,12 @@ export function AppSidebar() {
           <div className="flex items-center gap-3">
             <img 
               src={barbershopLogo} 
-              alt="BarberShop" 
+              alt="Nexio" 
               className="w-8 h-8 rounded-md"
             />
             {!isCollapsed && (
               <div>
-                <h1 className="text-lg font-bold">BarberFlow</h1>
+                <h1 className="text-lg font-bold">Nexio</h1>
                 <p className="text-xs opacity-80">Sistema de Gestão</p>
               </div>
             )}

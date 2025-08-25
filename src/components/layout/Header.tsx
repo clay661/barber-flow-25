@@ -17,7 +17,7 @@ export function Header() {
         <SidebarTrigger />
         <div className="hidden md:block">
           <h2 className="text-lg font-semibold text-foreground">
-            Sistema de Gestão - Barbearia
+            Nexio - Sistema de Gestão
           </h2>
         </div>
       </div>

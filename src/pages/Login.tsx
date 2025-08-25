@@ -14,14 +14,14 @@ export default function Login() {
           <div className="flex justify-center">
             <img 
               src={barbershopLogo} 
-              alt="BarberFlow" 
+              alt="Nexio" 
               className="w-16 h-16 rounded-lg shadow-md"
             />
           </div>
           <div>
             <CardTitle className="text-2xl font-bold text-foreground flex items-center justify-center gap-2">
               <Scissors className="h-6 w-6 text-accent" />
-              BarberFlow
+              Nexio
             </CardTitle>
             <CardDescription className="text-muted-foreground">
               Sistema de Gestão para Barbearias

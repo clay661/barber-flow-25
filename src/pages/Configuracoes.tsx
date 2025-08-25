@@ -190,7 +190,7 @@ export default function Configuracoes() {
             <div className="space-y-4">
               <div>
                 <Label htmlFor="barbershop-name">Nome da Barbearia</Label>
-                <Input id="barbershop-name" placeholder="BarberFlow Premium" />
+                <Input id="barbershop-name" placeholder="Nexio Premium" />
               </div>
               <div>
                 <Label htmlFor="address">Endereço</Label>
