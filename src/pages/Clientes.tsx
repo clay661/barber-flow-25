@@ -20,51 +20,74 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-
-// Dados mockados
-const mockClients = [
-  {
-    id: 1,
-    name: "João Silva",
-    phone: "(11) 99999-9999",
-    email: "joao@email.com",
-    createdAt: "2024-01-15",
-    totalVisits: 12
-  },
-  {
-    id: 2,
-    name: "Pedro Santos",
-    phone: "(11) 88888-8888", 
-    email: "pedro@email.com",
-    createdAt: "2024-02-20",
-    totalVisits: 8
-  },
-  {
-    id: 3,
-    name: "Lucas Costa",
-    phone: "(11) 77777-7777",
-    email: "lucas@email.com", 
-    createdAt: "2024-03-10",
-    totalVisits: 5
-  },
-  {
-    id: 4,
-    name: "Carlos Oliveira",
-    phone: "(11) 66666-6666",
-    email: "carlos@email.com",
-    createdAt: "2024-03-25", 
-    totalVisits: 3
-  }
-];
+import { useClients, Client } from '@/hooks/useClients';
+import { ClientForm } from '@/components/forms/ClientForm';
+import { DeleteConfirmDialog } from '@/components/forms/DeleteConfirmDialog';
 
 export default function Clientes() {
   const [searchTerm, setSearchTerm] = useState("");
+  const [clientFormOpen, setClientFormOpen] = useState(false);
+  const [editingClient, setEditingClient] = useState<Client | null>(null);
+  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
+  const [clientToDelete, setClientToDelete] = useState<Client | null>(null);
+  const [loading, setLoading] = useState(false);
 
-  const filteredClients = mockClients.filter(client =>
+  const { clients, loading: clientsLoading, createClient, updateClient, deleteClient } = useClients();
+
+  const filteredClients = clients.filter(client =>
     client.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    client.phone.includes(searchTerm) ||
-    client.email.toLowerCase().includes(searchTerm.toLowerCase())
+    (client.telefone && client.telefone.includes(searchTerm)) ||
+    (client.email && client.email.toLowerCase().includes(searchTerm.toLowerCase()))
   );
+
+  const handleCreateClient = async (data: Omit<Client, 'id' | 'created_at' | 'total_visits'>) => {
+    setLoading(true);
+    try {
+      await createClient(data);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleUpdateClient = async (data: Omit<Client, 'id' | 'created_at' | 'total_visits'>) => {
+    if (!editingClient) return;
+    
+    setLoading(true);
+    try {
+      await updateClient(editingClient.id, data);
+      setEditingClient(null);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleDeleteClient = async () => {
+    if (!clientToDelete) return;
+    
+    setLoading(true);
+    try {
+      await deleteClient(clientToDelete.id);
+      setClientToDelete(null);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const openEditForm = (client: Client) => {
+    setEditingClient(client);
+    setClientFormOpen(true);
+  };
+
+  const openDeleteDialog = (client: Client) => {
+    setClientToDelete(client);
+    setDeleteDialogOpen(true);
+  };
+
+  const newClientsThisMonth = clients.filter(client => {
+    const clientDate = new Date(client.created_at);
+    const now = new Date();
+    return clientDate.getMonth() === now.getMonth() && clientDate.getFullYear() === now.getFullYear();
+  }).length;
 
   return (
     <div className="space-y-4 md:space-y-6">
@@ -75,7 +98,13 @@ export default function Clientes() {
             Gerencie sua base de clientes
           </p>
         </div>
-        <Button className="bg-primary hover:bg-primary/90 hover-gold w-full sm:w-auto">
+        <Button 
+          className="bg-primary hover:bg-primary/90 hover-gold w-full sm:w-auto"
+          onClick={() => {
+            setEditingClient(null);
+            setClientFormOpen(true);
+          }}
+        >
           <Plus className="h-4 w-4 mr-2" />
           Novo Cliente
         </Button>
@@ -90,7 +119,7 @@ export default function Clientes() {
             </CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="text-xl md:text-2xl font-bold text-foreground">{mockClients.length}</div>
+            <div className="text-xl md:text-2xl font-bold text-foreground">{clients.length}</div>
           </CardContent>
         </Card>
 
@@ -101,7 +130,7 @@ export default function Clientes() {
             </CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="text-xl md:text-2xl font-bold text-success">2</div>
+            <div className="text-xl md:text-2xl font-bold text-success">{newClientsThisMonth}</div>
           </CardContent>
         </Card>
 
@@ -112,7 +141,7 @@ export default function Clientes() {
             </CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="text-xl md:text-2xl font-bold text-accent">{mockClients.length}</div>
+            <div className="text-xl md:text-2xl font-bold text-accent">{clients.filter(c => c.status === 'ativo').length}</div>
           </CardContent>
         </Card>
       </div>
@@ -148,50 +177,95 @@ export default function Clientes() {
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {filteredClients.map((client) => (
-                  <TableRow key={client.id}>
-                    <TableCell>
-                      <div className="font-medium text-sm">{client.name}</div>
-                    </TableCell>
-                    <TableCell className="hidden md:table-cell">
-                      <div className="space-y-1">
-                        <div className="flex items-center gap-2 text-xs">
-                          <Phone className="h-3 w-3 text-muted-foreground" />
-                          {client.phone}
-                        </div>
-                        <div className="flex items-center gap-2 text-xs">
-                          <Mail className="h-3 w-3 text-muted-foreground" />
-                          {client.email}
-                        </div>
-                      </div>
-                    </TableCell>
-                    <TableCell className="md:hidden text-sm">{client.phone}</TableCell>
-                    <TableCell className="hidden lg:table-cell">
-                      <div className="flex items-center gap-2 text-sm">
-                        <CalendarIcon className="h-3 w-3 text-muted-foreground" />
-                        {new Date(client.createdAt).toLocaleDateString('pt-BR')}
-                      </div>
-                    </TableCell>
-                    <TableCell>
-                      <Badge variant="secondary" className="text-xs">{client.totalVisits} visitas</Badge>
-                    </TableCell>
-                    <TableCell className="text-right">
-                      <div className="flex justify-end gap-1 sm:gap-2">
-                        <Button variant="ghost" size="icon" className="hover-glow h-8 w-8 p-0 sm:h-9 sm:w-9">
-                          <Edit className="h-3 w-3 sm:h-4 sm:w-4" />
-                        </Button>
-                        <Button variant="ghost" size="icon" className="text-destructive hover:text-destructive hover-darken h-8 w-8 p-0 sm:h-9 sm:w-9">
-                          <Trash2 className="h-3 w-3 sm:h-4 sm:w-4" />
-                        </Button>
-                      </div>
+                {clientsLoading ? (
+                  <TableRow>
+                    <TableCell colSpan={6} className="text-center py-8">
+                      Carregando clientes...
                     </TableCell>
                   </TableRow>
-                ))}
+                ) : filteredClients.length === 0 ? (
+                  <TableRow>
+                    <TableCell colSpan={6} className="text-center py-8">
+                      {searchTerm ? 'Nenhum cliente encontrado com esse filtro.' : 'Nenhum cliente cadastrado ainda.'}
+                    </TableCell>
+                  </TableRow>
+                ) : (
+                  filteredClients.map((client) => (
+                    <TableRow key={client.id}>
+                      <TableCell>
+                        <div className="font-medium text-sm">{client.name}</div>
+                      </TableCell>
+                      <TableCell className="hidden md:table-cell">
+                        <div className="space-y-1">
+                          {client.telefone && (
+                            <div className="flex items-center gap-2 text-xs">
+                              <Phone className="h-3 w-3 text-muted-foreground" />
+                              {client.telefone}
+                            </div>
+                          )}
+                          {client.email && (
+                            <div className="flex items-center gap-2 text-xs">
+                              <Mail className="h-3 w-3 text-muted-foreground" />
+                              {client.email}
+                            </div>
+                          )}
+                        </div>
+                      </TableCell>
+                      <TableCell className="md:hidden text-sm">{client.telefone || 'N/A'}</TableCell>
+                      <TableCell className="hidden lg:table-cell">
+                        <div className="flex items-center gap-2 text-sm">
+                          <CalendarIcon className="h-3 w-3 text-muted-foreground" />
+                          {new Date(client.created_at).toLocaleDateString('pt-BR')}
+                        </div>
+                      </TableCell>
+                      <TableCell>
+                        <Badge variant="secondary" className="text-xs">{client.total_visits} visitas</Badge>
+                      </TableCell>
+                      <TableCell className="text-right">
+                        <div className="flex justify-end gap-1 sm:gap-2">
+                          <Button 
+                            variant="ghost" 
+                            size="icon" 
+                            className="hover-glow h-8 w-8 p-0 sm:h-9 sm:w-9"
+                            onClick={() => openEditForm(client)}
+                          >
+                            <Edit className="h-3 w-3 sm:h-4 sm:w-4" />
+                          </Button>
+                          <Button 
+                            variant="ghost" 
+                            size="icon" 
+                            className="text-destructive hover:text-destructive hover-darken h-8 w-8 p-0 sm:h-9 sm:w-9"
+                            onClick={() => openDeleteDialog(client)}
+                          >
+                            <Trash2 className="h-3 w-3 sm:h-4 sm:w-4" />
+                          </Button>
+                        </div>
+                      </TableCell>
+                    </TableRow>
+                  ))
+                )}
               </TableBody>
             </Table>
           </div>
         </CardContent>
       </Card>
+
+      <ClientForm
+        open={clientFormOpen}
+        onOpenChange={setClientFormOpen}
+        client={editingClient}
+        onSubmit={editingClient ? handleUpdateClient : handleCreateClient}
+        loading={loading}
+      />
+
+      <DeleteConfirmDialog
+        open={deleteDialogOpen}
+        onOpenChange={setDeleteDialogOpen}
+        onConfirm={handleDeleteClient}
+        title="Excluir Cliente"
+        description={`Tem certeza que deseja excluir o cliente "${clientToDelete?.name}"? Esta ação também removerá todos os agendamentos relacionados e não pode ser desfeita.`}
+        loading={loading}
+      />
     </div>
   );
 }

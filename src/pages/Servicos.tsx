@@ -20,70 +20,73 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-
-// Dados mockados
-const mockServices = [
-  {
-    id: 1,
-    name: "Corte Simples",
-    price: 25,
-    duration: 30,
-    category: "Corte",
-    active: true
-  },
-  {
-    id: 2,
-    name: "Corte + Barba",
-    price: 45,
-    duration: 60,
-    category: "Combo", 
-    active: true
-  },
-  {
-    id: 3,
-    name: "Barba Simples",
-    price: 20,
-    duration: 20,
-    category: "Barba",
-    active: true
-  },
-  {
-    id: 4,
-    name: "Corte Degradê",
-    price: 35,
-    duration: 45,
-    category: "Corte",
-    active: true
-  },
-  {
-    id: 5,
-    name: "Barba Completa",
-    price: 30,
-    duration: 30,
-    category: "Barba",
-    active: true
-  },
-  {
-    id: 6,
-    name: "Sobrancelha",
-    price: 15,
-    duration: 15,
-    category: "Extras",
-    active: false
-  }
-];
+import { useServices, Service } from '@/hooks/useServices';
+import { ServiceForm } from '@/components/forms/ServiceForm';
+import { DeleteConfirmDialog } from '@/components/forms/DeleteConfirmDialog';
 
 export default function Servicos() {
   const [searchTerm, setSearchTerm] = useState("");
+  const [serviceFormOpen, setServiceFormOpen] = useState(false);
+  const [editingService, setEditingService] = useState<Service | null>(null);
+  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
+  const [serviceToDelete, setServiceToDelete] = useState<Service | null>(null);
+  const [loading, setLoading] = useState(false);
 
-  const filteredServices = mockServices.filter(service =>
+  const { services, loading: servicesLoading, createService, updateService, deleteService } = useServices();
+
+  const filteredServices = services.filter(service =>
     service.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
     service.category.toLowerCase().includes(searchTerm.toLowerCase())
   );
 
-  const activeServices = mockServices.filter(s => s.active).length;
-  const averagePrice = Math.round(mockServices.filter(s => s.active).reduce((sum, s) => sum + s.price, 0) / activeServices);
-  const totalRevenue = mockServices.filter(s => s.active).reduce((sum, s) => sum + s.price, 0);
+  const handleCreateService = async (data: Omit<Service, 'id' | 'created_at'>) => {
+    setLoading(true);
+    try {
+      await createService(data);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleUpdateService = async (data: Omit<Service, 'id' | 'created_at'>) => {
+    if (!editingService) return;
+    
+    setLoading(true);
+    try {
+      await updateService(editingService.id, data);
+      setEditingService(null);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleDeleteService = async () => {
+    if (!serviceToDelete) return;
+    
+    setLoading(true);
+    try {
+      await deleteService(serviceToDelete.id);
+      setServiceToDelete(null);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const openEditForm = (service: Service) => {
+    setEditingService(service);
+    setServiceFormOpen(true);
+  };
+
+  const openDeleteDialog = (service: Service) => {
+    setServiceToDelete(service);
+    setDeleteDialogOpen(true);
+  };
+
+  const activeServices = services.filter(s => s.status === 'ativo');
+  const averagePrice = activeServices.length > 0 
+    ? Math.round(activeServices.reduce((sum, s) => sum + s.price, 0) / activeServices.length) 
+    : 0;
+  const totalRevenue = activeServices.reduce((sum, s) => sum + s.price, 0);
 
   return (
     <div className="space-y-4 md:space-y-6">
@@ -94,7 +97,13 @@ export default function Servicos() {
             Gerencie os serviços oferecidos pela barbearia
           </p>
         </div>
-        <Button className="bg-primary hover:bg-primary/90 hover-gold w-full sm:w-auto">
+        <Button 
+          className="bg-primary hover:bg-primary/90 hover-gold w-full sm:w-auto"
+          onClick={() => {
+            setEditingService(null);
+            setServiceFormOpen(true);
+          }}
+        >
           <Plus className="h-4 w-4 mr-2" />
           Novo Serviço
         </Button>
@@ -110,7 +119,7 @@ export default function Servicos() {
             </CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="text-xl md:text-2xl font-bold text-foreground">{activeServices}</div>
+            <div className="text-xl md:text-2xl font-bold text-foreground">{activeServices.length}</div>
           </CardContent>
         </Card>
 
@@ -133,8 +142,8 @@ export default function Servicos() {
             </CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="text-xl md:text-2xl font-bold text-success">
-              R$ {Math.max(...mockServices.map(s => s.price))}
+            <div className="text-xl md:text-2xl font-bold text-foreground">
+              R$ {services.length > 0 ? Math.max(...services.map(s => s.price)) : 0}
             </div>
           </CardContent>
         </Card>
@@ -182,51 +191,92 @@ export default function Servicos() {
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {filteredServices.map((service) => (
-                  <TableRow key={service.id}>
-                    <TableCell>
-                      <div className="flex items-center gap-2">
-                        <Scissors className="h-4 w-4 text-accent" />
-                        <span className="font-medium text-sm">{service.name}</span>
-                      </div>
-                    </TableCell>
-                    <TableCell className="hidden md:table-cell">
-                      <Badge variant="outline" className="text-xs">{service.category}</Badge>
-                    </TableCell>
-                    <TableCell>
-                      <div className="flex items-center gap-2">
-                        <Clock className="h-4 w-4 text-muted-foreground" />
-                        <span className="text-sm">{service.duration} min</span>
-                      </div>
-                    </TableCell>
-                    <TableCell>
-                      <div className="flex items-center gap-2">
-                        <DollarSign className="h-4 w-4 text-success" />
-                        <span className="font-medium text-sm">R$ {service.price}</span>
-                      </div>
-                    </TableCell>
-                    <TableCell className="hidden sm:table-cell">
-                      <Badge variant={service.active ? "default" : "secondary"} className="text-xs">
-                        {service.active ? "Ativo" : "Inativo"}
-                      </Badge>
-                    </TableCell>
-                    <TableCell className="text-right">
-                      <div className="flex justify-end gap-1 sm:gap-2">
-                        <Button variant="ghost" size="icon" className="hover-glow h-8 w-8 p-0 sm:h-9 sm:w-9">
-                          <Edit className="h-3 w-3 sm:h-4 sm:w-4" />
-                        </Button>
-                        <Button variant="ghost" size="icon" className="text-destructive hover:text-destructive hover-darken h-8 w-8 p-0 sm:h-9 sm:w-9">
-                          <Trash2 className="h-3 w-3 sm:h-4 sm:w-4" />
-                        </Button>
-                      </div>
+                {servicesLoading ? (
+                  <TableRow>
+                    <TableCell colSpan={6} className="text-center py-8">
+                      Carregando serviços...
                     </TableCell>
                   </TableRow>
-                ))}
+                ) : filteredServices.length === 0 ? (
+                  <TableRow>
+                    <TableCell colSpan={6} className="text-center py-8">
+                      {searchTerm ? 'Nenhum serviço encontrado com esse filtro.' : 'Nenhum serviço cadastrado ainda.'}
+                    </TableCell>
+                  </TableRow>
+                ) : (
+                  filteredServices.map((service) => (
+                    <TableRow key={service.id}>
+                      <TableCell>
+                        <div className="flex items-center gap-2">
+                          <Scissors className="h-4 w-4 text-accent" />
+                          <span className="font-medium text-sm">{service.name}</span>
+                        </div>
+                      </TableCell>
+                      <TableCell className="hidden md:table-cell">
+                        <Badge variant="outline" className="text-xs">{service.category}</Badge>
+                      </TableCell>
+                      <TableCell>
+                        <div className="flex items-center gap-2">
+                          <Clock className="h-4 w-4 text-muted-foreground" />
+                          <span className="text-sm">{service.duration_minutes} min</span>
+                        </div>
+                      </TableCell>
+                      <TableCell>
+                        <div className="flex items-center gap-2">
+                          <DollarSign className="h-4 w-4 text-success" />
+                          <span className="font-medium text-sm">R$ {service.price}</span>
+                        </div>
+                      </TableCell>
+                      <TableCell className="hidden sm:table-cell">
+                        <Badge variant={service.status === 'ativo' ? "default" : "secondary"} className="text-xs">
+                          {service.status === 'ativo' ? "Ativo" : "Inativo"}
+                        </Badge>
+                      </TableCell>
+                      <TableCell className="text-right">
+                        <div className="flex justify-end gap-1 sm:gap-2">
+                          <Button 
+                            variant="ghost" 
+                            size="icon" 
+                            className="hover-glow h-8 w-8 p-0 sm:h-9 sm:w-9"
+                            onClick={() => openEditForm(service)}
+                          >
+                            <Edit className="h-3 w-3 sm:h-4 sm:w-4" />
+                          </Button>
+                          <Button 
+                            variant="ghost" 
+                            size="icon" 
+                            className="text-destructive hover:text-destructive hover-darken h-8 w-8 p-0 sm:h-9 sm:w-9"
+                            onClick={() => openDeleteDialog(service)}
+                          >
+                            <Trash2 className="h-3 w-3 sm:h-4 sm:w-4" />
+                          </Button>
+                        </div>
+                      </TableCell>
+                    </TableRow>
+                  ))
+                )}
               </TableBody>
             </Table>
           </div>
         </CardContent>
       </Card>
+
+      <ServiceForm
+        open={serviceFormOpen}
+        onOpenChange={setServiceFormOpen}
+        service={editingService}
+        onSubmit={editingService ? handleUpdateService : handleCreateService}
+        loading={loading}
+      />
+
+      <DeleteConfirmDialog
+        open={deleteDialogOpen}
+        onOpenChange={setDeleteDialogOpen}
+        onConfirm={handleDeleteService}
+        title="Excluir Serviço"
+        description={`Tem certeza que deseja excluir o serviço "${serviceToDelete?.name}"? Esta ação também removerá todos os agendamentos relacionados e não pode ser desfeita.`}
+        loading={loading}
+      />
     </div>
   );
 }

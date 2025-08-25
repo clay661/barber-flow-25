@@ -21,75 +21,103 @@ import {
   TableHeader,
   TableRow,
 } from "@/components/ui/table";
-
-// Dados mockados
-const mockAppointments = [
-  {
-    id: 1,
-    client: "João Silva",
-    service: "Corte + Barba", 
-    barber: "Carlos",
-    date: "2024-08-25",
-    time: "14:30",
-    status: "Confirmado",
-    price: 45
-  },
-  {
-    id: 2,
-    client: "Pedro Santos",
-    service: "Corte Simples",
-    barber: "Miguel", 
-    date: "2024-08-25",
-    time: "15:00",
-    status: "Confirmado",
-    price: 25
-  },
-  {
-    id: 3,
-    client: "Lucas Costa",
-    service: "Barba",
-    barber: "Carlos",
-    date: "2024-08-25", 
-    time: "15:30",
-    status: "Aguardando",
-    price: 20
-  },
-  {
-    id: 4,
-    client: "Carlos Oliveira",
-    service: "Corte + Barba",
-    barber: "Miguel",
-    date: "2024-08-26",
-    time: "09:00", 
-    status: "Confirmado",
-    price: 45
-  }
-];
+import { useAppointments, Appointment } from '@/hooks/useAppointments';
+import { AppointmentForm } from '@/components/forms/AppointmentForm';
+import { DeleteConfirmDialog } from '@/components/forms/DeleteConfirmDialog';
 
 const getStatusBadge = (status: string) => {
   const variants = {
-    "Confirmado": "default",
-    "Aguardando": "secondary", 
-    "Concluído": "default",
-    "Cancelado": "destructive"
+    "CONFIRMADO": "default",
+    "PENDENTE": "secondary", 
+    "CONCLUIDO": "default",
+    "CANCELADO": "destructive"
   } as const;
   
-  return <Badge variant={variants[status as keyof typeof variants] || "secondary"}>{status}</Badge>;
+  const labels = {
+    "CONFIRMADO": "Confirmado",
+    "PENDENTE": "Pendente",
+    "CONCLUIDO": "Concluído", 
+    "CANCELADO": "Cancelado"
+  } as const;
+  
+  return <Badge variant={variants[status as keyof typeof variants] || "secondary"}>
+    {labels[status as keyof typeof labels] || status}
+  </Badge>;
 };
 
 export default function Agendamentos() {
   const [searchTerm, setSearchTerm] = useState("");
   const [selectedDate, setSelectedDate] = useState(new Date().toISOString().split('T')[0]);
+  const [appointmentFormOpen, setAppointmentFormOpen] = useState(false);
+  const [editingAppointment, setEditingAppointment] = useState<Appointment | null>(null);
+  const [deleteDialogOpen, setDeleteDialogOpen] = useState(false);
+  const [appointmentToDelete, setAppointmentToDelete] = useState<Appointment | null>(null);
+  const [loading, setLoading] = useState(false);
 
-  const filteredAppointments = mockAppointments.filter(appointment =>
-    appointment.client.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    appointment.service.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    appointment.barber.toLowerCase().includes(searchTerm.toLowerCase())
-  ).filter(appointment => appointment.date === selectedDate);
+  const { appointments, loading: appointmentsLoading, createAppointment, updateAppointment, deleteAppointment } = useAppointments();
 
-  const totalAppointments = mockAppointments.length;
-  const todayAppointments = mockAppointments.filter(a => a.date === selectedDate).length;
-  const confirmedAppointments = mockAppointments.filter(a => a.status === "Confirmado").length;
+  const filteredAppointments = appointments.filter(appointment => {
+    const matchesSearch = 
+      appointment.client?.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      appointment.service?.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+      appointment.employee?.name.toLowerCase().includes(searchTerm.toLowerCase());
+    
+    const appointmentDate = new Date(appointment.date).toISOString().split('T')[0];
+    const matchesDate = appointmentDate === selectedDate;
+    
+    return matchesSearch && matchesDate;
+  });
+
+  const handleCreateAppointment = async (data: Omit<Appointment, 'id' | 'created_at' | 'client' | 'employee' | 'service'>) => {
+    setLoading(true);
+    try {
+      await createAppointment(data);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleUpdateAppointment = async (data: Omit<Appointment, 'id' | 'created_at' | 'client' | 'employee' | 'service'>) => {
+    if (!editingAppointment) return;
+    
+    setLoading(true);
+    try {
+      await updateAppointment(editingAppointment.id, data);
+      setEditingAppointment(null);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const handleDeleteAppointment = async () => {
+    if (!appointmentToDelete) return;
+    
+    setLoading(true);
+    try {
+      await deleteAppointment(appointmentToDelete.id);
+      setAppointmentToDelete(null);
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const openEditForm = (appointment: Appointment) => {
+    setEditingAppointment(appointment);
+    setAppointmentFormOpen(true);
+  };
+
+  const openDeleteDialog = (appointment: Appointment) => {
+    setAppointmentToDelete(appointment);
+    setDeleteDialogOpen(true);
+  };
+
+  const totalAppointments = appointments.length;
+  const todayAppointments = appointments.filter(a => {
+    const appointmentDate = new Date(a.date).toISOString().split('T')[0];
+    const today = new Date().toISOString().split('T')[0];
+    return appointmentDate === today;
+  }).length;
+  const confirmedAppointments = appointments.filter(a => a.status === "CONFIRMADO").length;
 
   return (
     <div className="space-y-4 md:space-y-6">
@@ -100,7 +128,13 @@ export default function Agendamentos() {
             Gerencie os agendamentos da barbearia
           </p>
         </div>
-        <Button className="bg-primary hover:bg-primary/90 hover-gold w-full sm:w-auto">
+        <Button 
+          className="bg-primary hover:bg-primary/90 hover-gold w-full sm:w-auto"
+          onClick={() => {
+            setEditingAppointment(null);
+            setAppointmentFormOpen(true);
+          }}
+        >
           <Plus className="h-4 w-4 mr-2" />
           Novo Agendamento
         </Button>
@@ -151,7 +185,7 @@ export default function Agendamentos() {
           </CardHeader>
           <CardContent>
             <div className="text-xl md:text-2xl font-bold text-foreground">
-              R$ {filteredAppointments.reduce((sum, a) => sum + a.price, 0)}
+              R$ {filteredAppointments.reduce((sum, a) => sum + (a.total_price || a.service?.price || 0), 0)}
             </div>
           </CardContent>
         </Card>
@@ -197,48 +231,94 @@ export default function Agendamentos() {
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {filteredAppointments.map((appointment) => (
-                  <TableRow key={appointment.id}>
-                    <TableCell>
-                      <div className="flex items-center gap-2">
-                        <User className="h-4 w-4 text-muted-foreground" />
-                        <span className="font-medium text-sm">{appointment.client}</span>
-                      </div>
-                    </TableCell>
-                    <TableCell className="hidden md:table-cell">
-                      <div className="flex items-center gap-2">
-                        <Scissors className="h-4 w-4 text-accent" />
-                        <span className="text-sm">{appointment.service}</span>
-                      </div>
-                    </TableCell>
-                    <TableCell className="hidden lg:table-cell text-sm">{appointment.barber}</TableCell>
-                    <TableCell>
-                      <div className="flex items-center gap-2">
-                        <Clock className="h-4 w-4 text-muted-foreground" />
-                        <span className="text-sm">{appointment.time}</span>
-                      </div>
-                    </TableCell>
-                    <TableCell>{getStatusBadge(appointment.status)}</TableCell>
-                    <TableCell className="font-medium hidden sm:table-cell text-sm">
-                      R$ {appointment.price}
-                    </TableCell>
-                    <TableCell className="text-right">
-                      <div className="flex justify-end gap-1 sm:gap-2">
-                        <Button variant="ghost" size="icon" className="hover-glow h-8 w-8 p-0 sm:h-9 sm:w-9">
-                          <Edit className="h-3 w-3 sm:h-4 sm:w-4" />
-                        </Button>
-                        <Button variant="ghost" size="icon" className="text-destructive hover:text-destructive hover-darken h-8 w-8 p-0 sm:h-9 sm:w-9">
-                          <X className="h-3 w-3 sm:h-4 sm:w-4" />
-                        </Button>
-                      </div>
+                {appointmentsLoading ? (
+                  <TableRow>
+                    <TableCell colSpan={7} className="text-center py-8">
+                      Carregando agendamentos...
                     </TableCell>
                   </TableRow>
-                ))}
+                ) : filteredAppointments.length === 0 ? (
+                  <TableRow>
+                    <TableCell colSpan={7} className="text-center py-8">
+                      {searchTerm ? 'Nenhum agendamento encontrado com esse filtro.' : 'Nenhum agendamento para esta data.'}
+                    </TableCell>
+                  </TableRow>
+                ) : (
+                  filteredAppointments.map((appointment) => (
+                    <TableRow key={appointment.id}>
+                      <TableCell>
+                        <div className="flex items-center gap-2">
+                          <User className="h-4 w-4 text-muted-foreground" />
+                          <span className="font-medium text-sm">{appointment.client?.name || 'N/A'}</span>
+                        </div>
+                      </TableCell>
+                      <TableCell className="hidden md:table-cell">
+                        <div className="flex items-center gap-2">
+                          <Scissors className="h-4 w-4 text-accent" />
+                          <span className="text-sm">{appointment.service?.name || 'N/A'}</span>
+                        </div>
+                      </TableCell>
+                      <TableCell className="hidden lg:table-cell text-sm">{appointment.employee?.name || 'N/A'}</TableCell>
+                      <TableCell>
+                        <div className="flex items-center gap-2">
+                          <Clock className="h-4 w-4 text-muted-foreground" />
+                          <span className="text-sm">
+                            {new Date(appointment.date).toLocaleTimeString('pt-BR', { 
+                              hour: '2-digit', 
+                              minute: '2-digit' 
+                            })}
+                          </span>
+                        </div>
+                      </TableCell>
+                      <TableCell>{getStatusBadge(appointment.status)}</TableCell>
+                      <TableCell className="font-medium hidden sm:table-cell text-sm">
+                        R$ {appointment.total_price || appointment.service?.price || 0}
+                      </TableCell>
+                      <TableCell className="text-right">
+                        <div className="flex justify-end gap-1 sm:gap-2">
+                          <Button 
+                            variant="ghost" 
+                            size="icon" 
+                            className="hover-glow h-8 w-8 p-0 sm:h-9 sm:w-9"
+                            onClick={() => openEditForm(appointment)}
+                          >
+                            <Edit className="h-3 w-3 sm:h-4 sm:w-4" />
+                          </Button>
+                          <Button 
+                            variant="ghost" 
+                            size="icon" 
+                            className="text-destructive hover:text-destructive hover-darken h-8 w-8 p-0 sm:h-9 sm:w-9"
+                            onClick={() => openDeleteDialog(appointment)}
+                          >
+                            <X className="h-3 w-3 sm:h-4 sm:w-4" />
+                          </Button>
+                        </div>
+                      </TableCell>
+                    </TableRow>
+                  ))
+                )}
               </TableBody>
             </Table>
           </div>
         </CardContent>
       </Card>
+
+      <AppointmentForm
+        open={appointmentFormOpen}
+        onOpenChange={setAppointmentFormOpen}
+        appointment={editingAppointment}
+        onSubmit={editingAppointment ? handleUpdateAppointment : handleCreateAppointment}
+        loading={loading}
+      />
+
+      <DeleteConfirmDialog
+        open={deleteDialogOpen}
+        onOpenChange={setDeleteDialogOpen}
+        onConfirm={handleDeleteAppointment}
+        title="Excluir Agendamento"
+        description={`Tem certeza que deseja excluir este agendamento? Esta ação não pode ser desfeita.`}
+        loading={loading}
+      />
     </div>
   );
 }
