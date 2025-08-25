@@ -52,16 +52,19 @@ export default function Login() {
     try {
       // Verificar se é super admin primeiro
       if (email === 'luizasbs70@gmail.com' && password === '10luiz10') {
-        console.log('Attempting super admin login');
+        console.log('Super admin login detected, redirecting...');
+        // Fazer login super admin e redirecionar
         const result = await superLogin(email, password);
         if (result.success) {
           toast({
             title: "Login realizado com sucesso",
             description: "Bem-vindo ao painel Super Admin!",
           });
-          navigate('/super-admin');
+          // Forçar redirecionamento para super admin
+          window.location.href = '/super-admin';
           return;
         } else {
+          console.error('Super admin login failed:', result.error);
           toast({
             variant: "destructive",
             title: "Erro no login",
@@ -71,6 +74,7 @@ export default function Login() {
         }
       }
 
+      // Login normal para usuários regulares
       if (isRegisterMode) {
         const result = await register(name, email, password);
         
@@ -100,7 +104,10 @@ export default function Login() {
             title: "Login realizado com sucesso",
             description: "Bem-vindo ao sistema!",
           });
-          navigate('/');
+          // Aguardar um pouco e redirecionar
+          setTimeout(() => {
+            navigate('/');
+          }, 500);
         } else {
           toast({
             variant: "destructive",
@@ -110,6 +117,7 @@ export default function Login() {
         }
       }
     } catch (error) {
+      console.error('Login error:', error);
       toast({
         variant: "destructive",
         title: isRegisterMode ? "Erro no cadastro" : "Erro no login",

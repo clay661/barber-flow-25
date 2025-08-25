@@ -26,6 +26,9 @@ import FinancasSubAdmin from "./pages/FinancasSubAdmin";
 import SuperAdminDashboard from "./pages/super-admin/SuperAdminDashboard";
 import SuperAdminEmpresas from "./pages/super-admin/SuperAdminEmpresas";
 import SuperAdminAssinaturas from "./pages/super-admin/SuperAdminAssinaturas";
+import SuperAdminPlanos from "./pages/super-admin/SuperAdminPlanos";
+import SuperAdminFinanceiro from "./pages/super-admin/SuperAdminFinanceiro";
+import SuperAdminConfiguracoes from "./pages/super-admin/SuperAdminConfiguracoes";
 
 const queryClient = new QueryClient();
 
@@ -93,10 +96,10 @@ function SuperAdminRoutes() {
           <Route index element={<SuperAdminDashboard />} />
           <Route path="empresas" element={<SuperAdminEmpresas />} />
           <Route path="assinaturas" element={<SuperAdminAssinaturas />} />
-          <Route path="planos" element={<div>Planos e Cobrança</div>} />
-          <Route path="financeiro" element={<div>Financeiro</div>} />
-          <Route path="configuracoes" element={<div>Configurações do SaaS</div>} />
-          <Route path="seguranca" element={<div>Segurança</div>} />
+          <Route path="planos" element={<SuperAdminPlanos />} />
+          <Route path="financeiro" element={<SuperAdminFinanceiro />} />
+          <Route path="configuracoes" element={<SuperAdminConfiguracoes />} />
+          <Route path="seguranca" element={<div className="p-6"><h1 className="text-2xl font-bold">Segurança</h1><p className="text-muted-foreground">Logs de acessos e alertas de fraude em desenvolvimento...</p></div>} />
         </Route>
       </Routes>
     </SuperAuthProvider>

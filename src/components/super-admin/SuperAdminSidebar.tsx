@@ -7,7 +7,8 @@ import {
   Settings, 
   Users, 
   Shield,
-  Crown
+  Crown,
+  PieChart
 } from "lucide-react";
 import {
   Sidebar,
@@ -28,7 +29,7 @@ const menuItems = [
   { title: "Gestão de Empresas", url: "/super-admin/empresas", icon: Building2 },
   { title: "Gestão de Assinaturas", url: "/super-admin/assinaturas", icon: CreditCard },
   { title: "Planos e Cobrança", url: "/super-admin/planos", icon: DollarSign },
-  { title: "Financeiro", url: "/super-admin/financeiro", icon: DollarSign },
+  { title: "Financeiro", url: "/super-admin/financeiro", icon: PieChart },
   { title: "Configurações do SaaS", url: "/super-admin/configuracoes", icon: Settings },
   { title: "Segurança", url: "/super-admin/seguranca", icon: Shield },
 ];
