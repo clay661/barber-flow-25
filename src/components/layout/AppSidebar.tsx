@@ -1,10 +1,11 @@
 import { 
-  LayoutDashboard, 
-  Users, 
-  Calendar, 
-  Scissors, 
-  DollarSign, 
-  Settings 
+  LayoutDashboard,
+  Users,
+  UserCheck,
+  Calendar,
+  Scissors,
+  DollarSign,
+  Settings
 } from "lucide-react";
 import { NavLink, useLocation } from "react-router-dom";
 import {
@@ -24,6 +25,7 @@ import barbershopLogo from "@/assets/barbershop-logo.jpg";
 const menuItems = [
   { title: "Dashboard", url: "/", icon: LayoutDashboard },
   { title: "Clientes", url: "/clientes", icon: Users },
+  { title: "Funcionários", url: "/funcionarios", icon: UserCheck },
   { title: "Agendamentos", url: "/agendamentos", icon: Calendar },
   { title: "Serviços", url: "/servicos", icon: Scissors },
   { title: "Finanças", url: "/financas", icon: DollarSign },
