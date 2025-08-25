@@ -12,10 +12,25 @@ import barbershopLogo from "@/assets/barbershop-logo.jpg";
 export default function Login() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
+  const [name, setName] = useState('');
   const [showPassword, setShowPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
-  const { login, employee, loading } = useAuth();
+  const [isRegisterMode, setIsRegisterMode] = useState(false);
+  const [adminExists, setAdminExists] = useState(true);
+  const { login, register, checkAdminExists, employee, loading } = useAuth();
   const { toast } = useToast();
+
+  // Check if admin exists on component mount
+  useEffect(() => {
+    const checkAdmin = async () => {
+      const exists = await checkAdminExists();
+      setAdminExists(exists);
+    };
+    
+    if (!loading) {
+      checkAdmin();
+    }
+  }, [loading, checkAdminExists]);
 
   // Redirect if already logged in
   if (!loading && employee) {
@@ -27,24 +42,47 @@ export default function Login() {
     setIsLoading(true);
 
     try {
-      const result = await login(email, password);
-      
-      if (result.success) {
-        toast({
-          title: "Login realizado com sucesso",
-          description: "Bem-vindo ao sistema!",
-        });
+      if (isRegisterMode) {
+        const result = await register(name, email, password);
+        
+        if (result.success) {
+          toast({
+            title: "Administrador cadastrado com sucesso!",
+            description: "Agora você pode fazer login com seus dados.",
+          });
+          // Reset form and switch to login mode
+          setName('');
+          setEmail('');
+          setPassword('');
+          setIsRegisterMode(false);
+          setAdminExists(true);
+        } else {
+          toast({
+            variant: "destructive",
+            title: "Erro no cadastro",
+            description: result.error || "Não foi possível cadastrar o administrador",
+          });
+        }
       } else {
-        toast({
-          variant: "destructive",
-          title: "Erro no login",
-          description: result.error || "Credenciais inválidas",
-        });
+        const result = await login(email, password);
+        
+        if (result.success) {
+          toast({
+            title: "Login realizado com sucesso",
+            description: "Bem-vindo ao sistema!",
+          });
+        } else {
+          toast({
+            variant: "destructive",
+            title: "Erro no login",
+            description: result.error || "Credenciais inválidas",
+          });
+        }
       }
     } catch (error) {
       toast({
         variant: "destructive",
-        title: "Erro no login",
+        title: isRegisterMode ? "Erro no cadastro" : "Erro no login",
         description: "Ocorreu um erro inesperado",
       });
     } finally {
@@ -77,19 +115,33 @@ export default function Login() {
               Nexio
             </CardTitle>
             <CardDescription className="text-muted-foreground">
-              Sistema de Gestão para Barbearias
+              {isRegisterMode ? "Cadastro do Administrador" : "Sistema de Gestão para Barbearias"}
             </CardDescription>
           </div>
         </CardHeader>
         
         <form onSubmit={handleSubmit}>
           <CardContent className="space-y-4">
+            {isRegisterMode && (
+              <div className="space-y-2">
+                <Label htmlFor="name">Nome Completo</Label>
+                <Input
+                  id="name"
+                  type="text"
+                  placeholder="Digite seu nome completo"
+                  value={name}
+                  onChange={(e) => setName(e.target.value)}
+                  className="bg-background"
+                  required
+                />
+              </div>
+            )}
             <div className="space-y-2">
-              <Label htmlFor="email">Email Profissional</Label>
+              <Label htmlFor="email">{isRegisterMode ? "E-mail" : "Email Profissional"}</Label>
               <Input
                 id="email"
                 type="email"
-                placeholder="seu.email@meusalon.com"
+                placeholder={isRegisterMode ? "seu@email.com" : "seu.email@meusalon.com"}
                 value={email}
                 onChange={(e) => setEmail(e.target.value)}
                 className="bg-background"
@@ -102,9 +154,11 @@ export default function Login() {
                 <Input
                   id="password"
                   type={showPassword ? "text" : "password"}
+                  placeholder={isRegisterMode ? "Mínimo 6 caracteres" : ""}
                   value={password}
                   onChange={(e) => setPassword(e.target.value)}
                   className="bg-background pr-10"
+                  minLength={isRegisterMode ? 6 : undefined}
                   required
                 />
                 <Button
@@ -123,14 +177,34 @@ export default function Login() {
               </div>
             </div>
           </CardContent>
-          <CardFooter>
+          <CardFooter className="flex flex-col space-y-3">
             <Button 
               type="submit" 
               className="w-full bg-primary hover:bg-primary/90 text-primary-foreground font-medium" 
               disabled={isLoading}
             >
-              {isLoading ? "Entrando..." : "Entrar no Sistema"}
+              {isLoading 
+                ? (isRegisterMode ? "Cadastrando..." : "Entrando...") 
+                : (isRegisterMode ? "Criar Administrador" : "Entrar no Sistema")
+              }
             </Button>
+            
+            {!adminExists && (
+              <Button
+                type="button"
+                variant="ghost"
+                className="w-full text-muted-foreground hover:text-foreground"
+                onClick={() => {
+                  setIsRegisterMode(!isRegisterMode);
+                  setName('');
+                  setEmail('');
+                  setPassword('');
+                }}
+                disabled={isLoading}
+              >
+                {isRegisterMode ? "Já tenho uma conta" : "Cadastrar Novo Usuário"}
+              </Button>
+            )}
           </CardFooter>
         </form>
       </Card>

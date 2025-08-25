@@ -15,6 +15,8 @@ export interface AuthContextType {
   loading: boolean;
   login: (email: string, password: string) => Promise<{ success: boolean; error?: any }>;
   logout: () => Promise<void>;
+  register: (name: string, email: string, password: string) => Promise<{ success: boolean; error?: any }>;
+  checkAdminExists: () => Promise<boolean>;
   isAdmin: boolean;
 }
 
@@ -63,6 +65,62 @@ export function useAuthState() {
     localStorage.removeItem('employee_id');
   };
 
+  const register = async (name: string, email: string, password: string) => {
+    try {
+      // First check if an admin already exists
+      const adminExists = await checkAdminExists();
+      if (adminExists) {
+        return { success: false, error: 'Já existe um administrador no sistema' };
+      }
+
+      // Create the admin employee
+      const { data: newEmployee, error } = await supabase
+        .from('employees')
+        .insert({
+          name,
+          pro_email: email,
+          pro_password: password,
+          role: 'ADMIN',
+          status: 'ativo'
+        })
+        .select()
+        .single();
+
+      if (error) {
+        if (error.code === '23505') { // Unique constraint violation
+          return { success: false, error: 'Este e-mail já está em uso' };
+        }
+        return { success: false, error: error.message };
+      }
+
+      return { success: true };
+    } catch (error) {
+      console.error('Register error:', error);
+      return { success: false, error: 'Erro ao criar administrador' };
+    }
+  };
+
+  const checkAdminExists = async () => {
+    try {
+      const { data, error } = await supabase
+        .from('employees')
+        .select('id')
+        .eq('role', 'ADMIN')
+        .eq('status', 'ativo')
+        .limit(1);
+
+      if (error) {
+        console.error('Error checking admin:', error);
+        return false;
+      }
+
+      return data && data.length > 0;
+    } catch (error) {
+      console.error('Error checking admin:', error);
+      return false;
+    }
+  };
+
   const checkAuthState = async () => {
     const employeeId = localStorage.getItem('employee_id');
     if (employeeId) {
@@ -96,6 +154,8 @@ export function useAuthState() {
     loading,
     login,
     logout,
+    register,
+    checkAdminExists,
     isAdmin: employee?.role === 'ADMIN' || employee?.role === 'SUBADMIN'
   };
 }
