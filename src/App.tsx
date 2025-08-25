@@ -17,6 +17,7 @@ import NotificationSettings from "./pages/NotificationSettings";
 import Login from "./pages/Login";
 import PublicBooking from "./pages/PublicBooking";
 import NotFound from "./pages/NotFound";
+import Divulgacao from "./pages/Divulgacao";
 
 const queryClient = new QueryClient();
 
@@ -44,6 +45,7 @@ const App = () => (
               <Route path="agendamentos" element={<Agendamentos />} />
               <Route path="servicos" element={<Servicos />} />
               <Route path="financas" element={<Financas />} />
+              <Route path="divulgacao" element={<Divulgacao />} />
               <Route path="configuracoes" element={
                 <ProtectedRoute adminOnly>
                   <Configuracoes />

@@ -4,6 +4,7 @@ import { supabase } from '@/integrations/supabase/client';
 export interface SalonSettings {
   id: string;
   name: string;
+  description: string | null;
   logo_url: string | null;
   banner_url: string | null;
   public_link: string;
@@ -31,7 +32,7 @@ export function useSalonSettings() {
     }
   };
 
-  const updateSettings = async (updates: Partial<Omit<SalonSettings, 'id' | 'created_at' | 'updated_at' | 'public_link'>>) => {
+  const updateSettings = async (updates: Partial<Omit<SalonSettings, 'id' | 'created_at' | 'updated_at'>>) => {
     try {
       const { data, error } = await supabase
         .from('salon_settings')

@@ -11,8 +11,8 @@ import { useSalonSettings } from '@/hooks/useSalonSettings';
 import { useAuth } from '@/hooks/useAuth';
 
 const Divulgacao = () => {
-  const { user } = useAuth();
-  const isAdmin = user?.email?.includes('@admin'); // Verificação simples de admin
+  const { employee } = useAuth();
+  const isAdmin = employee?.role === 'ADMIN' || employee?.role === 'SUBADMIN';
   const { settings, loading, updateSettings, uploadImage } = useSalonSettings();
   const { toast } = useToast();
   

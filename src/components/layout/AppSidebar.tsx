@@ -5,7 +5,8 @@ import {
   Calendar,
   Scissors,
   DollarSign,
-  Settings
+  Settings,
+  Share2
 } from "lucide-react";
 import { NavLink, useLocation } from "react-router-dom";
 import {
@@ -29,6 +30,7 @@ const menuItems = [
   { title: "Agendamentos", url: "/agendamentos", icon: Calendar },
   { title: "Serviços", url: "/servicos", icon: Scissors },
   { title: "Finanças", url: "/financas", icon: DollarSign },
+  { title: "Divulgação", url: "/divulgacao", icon: Share2 },
   { title: "Configurações", url: "/configuracoes", icon: Settings },
 ];
 
