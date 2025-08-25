@@ -1,6 +1,6 @@
 import { NavLink, useLocation } from "react-router-dom";
 import { 
-  LayoutDashboard, 
+  Home, 
   Building2, 
   CreditCard, 
   DollarSign, 
@@ -24,7 +24,7 @@ import {
 import { useIsMobile } from "@/hooks/use-mobile";
 
 const menuItems = [
-  { title: "Dashboard", url: "/super-admin", icon: LayoutDashboard },
+  { title: "Dashboard", url: "/super-admin", icon: Home },
   { title: "Gestão de Empresas", url: "/super-admin/empresas", icon: Building2 },
   { title: "Gestão de Assinaturas", url: "/super-admin/assinaturas", icon: CreditCard },
   { title: "Planos e Cobrança", url: "/super-admin/planos", icon: DollarSign },
