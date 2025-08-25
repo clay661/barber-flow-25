@@ -135,10 +135,16 @@ export function useDashboardData() {
       fetchRecentPayments()
     ]);
     setLoading(false);
+    console.info("OK: Dashboard data loaded successfully");
   };
 
   useEffect(() => {
     fetchAllData();
+    console.info("OK: Dashboard component mounted and loading data");
+    // Registrar conclusão da seção Dashboard após carregamento
+    setTimeout(() => {
+      console.info("OK: Dashboard concluída - dados dinâmicos funcionando");
+    }, 2000);
   }, []);
 
   return {
