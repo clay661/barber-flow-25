@@ -222,11 +222,6 @@ const Divulgacao = () => {
                 placeholder="link-personalizado"
                 disabled={!isAdmin}
               />
-              {bookingUrl && (
-                <p className="text-sm text-muted-foreground">
-                  URL completa: {bookingUrl}
-                </p>
-              )}
             </div>
 
             {isAdmin && (
@@ -321,67 +316,68 @@ const Divulgacao = () => {
       </div>
 
       {/* QR Code e Link */}
-      <Card>
-        <CardHeader>
+      <Card className="max-w-4xl mx-auto">
+        <CardHeader className="text-center">
           <CardTitle>QR Code e Link de Agendamento</CardTitle>
           <CardDescription>
             Compartilhe o link ou QR Code para que clientes possam agendar
           </CardDescription>
         </CardHeader>
         <CardContent>
-          <div className="grid gap-6 md:grid-cols-2">
-            {/* QR Code */}
+          <div className="flex flex-col items-center space-y-8">
+            {/* QR Code centralizado */}
             <div className="flex flex-col items-center space-y-4">
-              <div className="bg-white p-4 rounded-lg border">
+              <div className="bg-white p-6 rounded-2xl border shadow-lg">
                 {qrCodeUrl ? (
                   <img
                     src={qrCodeUrl}
                     alt="QR Code do agendamento"
-                    className="w-48 h-48"
+                    className="w-56 h-56"
                   />
                 ) : (
-                  <div className="w-48 h-48 bg-muted rounded-lg flex items-center justify-center">
+                  <div className="w-56 h-56 bg-muted rounded-lg flex items-center justify-center">
                     <span className="text-muted-foreground">Configure o link primeiro</span>
                   </div>
                 )}
               </div>
               {qrCodeUrl && (
-                <Button onClick={downloadQRCode} variant="outline" className="w-full">
+                <Button onClick={downloadQRCode} variant="outline" size="lg">
                   <Download className="h-4 w-4 mr-2" />
                   Baixar QR Code
                 </Button>
               )}
             </div>
 
-            {/* Link */}
-            <div className="space-y-4">
-              <div>
-                <Label>Link de Agendamento</Label>
-                <div className="flex mt-2">
+            {/* Link centralizado */}
+            <div className="w-full max-w-2xl space-y-4">
+              <div className="text-center">
+                <Label className="text-lg font-semibold">Link de Agendamento</Label>
+                <div className="flex mt-3">
                   <Input
                     value={bookingUrl}
                     readOnly
-                    className="rounded-r-none"
+                    className="rounded-r-none text-center bg-muted/50"
                   />
                   <Button
                     onClick={copyLink}
-                    variant="outline"
-                    className="rounded-l-none border-l-0"
+                    variant="default"
+                    className="rounded-l-none border-l-0 px-6"
                     disabled={!bookingUrl}
                   >
-                    <Copy className="h-4 w-4" />
+                    <Copy className="h-4 w-4 mr-2" />
+                    Copiar
                   </Button>
                 </div>
               </div>
               
-              <div className="space-y-2">
-                <h4 className="font-medium">Como usar:</h4>
-                <ul className="text-sm text-muted-foreground space-y-1">
-                  <li>• Compartilhe o link diretamente com clientes</li>
-                  <li>• Imprima e cole o QR Code no estabelecimento</li>
-                  <li>• Publique nas redes sociais</li>
-                  <li>• Adicione ao site ou cartão de visita</li>
-                </ul>
+              <div className="bg-muted/30 rounded-lg p-4 text-center">
+                <h4 className="font-medium mb-3">Como usar:</h4>
+                <div className="grid sm:grid-cols-2 gap-2 text-sm text-muted-foreground">
+                  <div>• Compartilhe o link com clientes</div>
+                  <div>• Cole o QR Code no estabelecimento</div>
+                  <div>• Publique nas redes sociais</div>
+                  <div>• Adicione ao site ou cartão</div>
+                </div>
               </div>
             </div>
           </div>

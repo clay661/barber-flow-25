@@ -229,11 +229,60 @@ export default function PublicBooking() {
           </div>
         </div>
 
-        <div className="grid lg:grid-cols-3 gap-8">
-          {/* Main Content */}
-          <div className="lg:col-span-2 space-y-8">
-            
-            {/* Services Section */}
+        <div className="max-w-3xl mx-auto space-y-6">
+          
+          {/* Client Information - First Step */}
+          <Card className="shadow-lg border-0 bg-card/60 backdrop-blur-sm">
+            <CardHeader>
+              <CardTitle className="flex items-center gap-3 text-2xl">
+                <div className="w-8 h-8 bg-accent/20 rounded-full flex items-center justify-center">
+                  <User className="h-4 w-4 text-accent" />
+                </div>
+                Suas informações
+              </CardTitle>
+            </CardHeader>
+            <CardContent className="space-y-4">
+              <div className="grid md:grid-cols-2 gap-4">
+                <div className="space-y-2">
+                  <Label htmlFor="name" className="text-sm font-medium">Nome completo *</Label>
+                  <Input
+                    id="name"
+                    placeholder="Seu nome completo"
+                    value={clientData.name}
+                    onChange={(e) => setClientData(prev => ({ ...prev, name: e.target.value }))}
+                    className="bg-background/50 backdrop-blur-sm"
+                  />
+                </div>
+                
+                <div className="space-y-2">
+                  <Label htmlFor="phone" className="text-sm font-medium">Telefone/WhatsApp *</Label>
+                  <Input
+                    id="phone"
+                    placeholder="(11) 99999-9999"
+                    value={clientData.phone}
+                    onChange={handlePhoneChange}
+                    maxLength={15}
+                    className="bg-background/50 backdrop-blur-sm"
+                  />
+                </div>
+              </div>
+              
+              <div className="space-y-2">
+                <Label htmlFor="email" className="text-sm font-medium">Email (opcional)</Label>
+                <Input
+                  id="email"
+                  type="email"
+                  placeholder="seu@email.com"
+                  value={clientData.email}
+                  onChange={(e) => setClientData(prev => ({ ...prev, email: e.target.value }))}
+                  className="bg-background/50 backdrop-blur-sm"
+                />
+              </div>
+            </CardContent>
+          </Card>
+
+          {/* Services Section */}
+          {clientData.name && clientData.phone && (
             <Card className="shadow-lg border-0 bg-card/60 backdrop-blur-sm">
               <CardHeader>
                 <CardTitle className="flex items-center gap-3 text-2xl">
@@ -249,7 +298,7 @@ export default function PublicBooking() {
                     <Card 
                       key={service.id}
                       className={cn(
-                        "cursor-pointer transition-all duration-200 hover:shadow-md hover:scale-[1.02]",
+                        "cursor-pointer transition-all duration-200 hover:shadow-md",
                         selectedServices.includes(service.id) && "ring-2 ring-accent bg-accent/5"
                       )}
                       onClick={() => handleServiceToggle(service.id)}
@@ -281,275 +330,213 @@ export default function PublicBooking() {
                 </div>
               </CardContent>
             </Card>
+          )}
 
-            {/* Employees Section */}
-            {selectedServices.length > 0 && (
-              <Card className="shadow-lg border-0 bg-card/60 backdrop-blur-sm">
-                <CardHeader>
-                  <CardTitle className="flex items-center gap-3 text-2xl">
-                    <div className="w-8 h-8 bg-accent/20 rounded-full flex items-center justify-center">
-                      <User className="h-4 w-4 text-accent" />
-                    </div>
-                    Selecione o profissional
-                  </CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <div className="grid sm:grid-cols-2 gap-4">
-                    {employees.map((employee) => (
-                      <Card 
-                        key={employee.id}
-                        className={cn(
-                          "cursor-pointer transition-all duration-200 hover:shadow-md hover:scale-[1.02]",
-                          selectedEmployee === employee.id && "ring-2 ring-accent bg-accent/5"
-                        )}
-                        onClick={() => handleEmployeeSelect(employee.id)}
-                      >
-                        <CardContent className="p-4">
-                          <div className="flex items-center gap-3">
-                            <Avatar className="w-12 h-12">
-                              <AvatarFallback className="bg-accent/20 text-accent font-semibold">
-                                {employee.name.charAt(0).toUpperCase()}
-                              </AvatarFallback>
-                            </Avatar>
-                            <div className="flex-1">
-                              <h3 className="font-semibold text-lg">{employee.name}</h3>
-                              <p className="text-sm text-muted-foreground">Profissional</p>
-                            </div>
-                            {selectedEmployee === employee.id && (
-                              <div className="w-6 h-6 bg-accent rounded-full flex items-center justify-center">
-                                <Check className="h-4 w-4 text-white" />
-                              </div>
-                            )}
+          {/* Employees Section */}
+          {selectedServices.length > 0 && (
+            <Card className="shadow-lg border-0 bg-card/60 backdrop-blur-sm">
+              <CardHeader>
+                <CardTitle className="flex items-center gap-3 text-2xl">
+                  <div className="w-8 h-8 bg-accent/20 rounded-full flex items-center justify-center">
+                    <User className="h-4 w-4 text-accent" />
+                  </div>
+                  Selecione o profissional
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="grid sm:grid-cols-2 gap-4">
+                  {employees.map((employee) => (
+                    <Card 
+                      key={employee.id}
+                      className={cn(
+                        "cursor-pointer transition-all duration-200 hover:shadow-md",
+                        selectedEmployee === employee.id && "ring-2 ring-accent bg-accent/5"
+                      )}
+                      onClick={() => handleEmployeeSelect(employee.id)}
+                    >
+                      <CardContent className="p-4">
+                        <div className="flex items-center gap-3">
+                          <Avatar className="w-12 h-12">
+                            <AvatarFallback className="bg-accent/20 text-accent font-semibold">
+                              {employee.name.charAt(0).toUpperCase()}
+                            </AvatarFallback>
+                          </Avatar>
+                          <div className="flex-1">
+                            <h3 className="font-semibold text-lg">{employee.name}</h3>
+                            <p className="text-sm text-muted-foreground">Profissional</p>
                           </div>
-                        </CardContent>
-                      </Card>
-                    ))}
-                  </div>
-                </CardContent>
-              </Card>
-            )}
-
-            {/* Date and Time Section */}
-            {selectedServices.length > 0 && selectedEmployee && (
-              <Card className="shadow-lg border-0 bg-card/60 backdrop-blur-sm">
-                <CardHeader>
-                  <CardTitle className="flex items-center gap-3 text-2xl">
-                    <div className="w-8 h-8 bg-accent/20 rounded-full flex items-center justify-center">
-                      <CalendarIcon className="h-4 w-4 text-accent" />
-                    </div>
-                    Escolha data e horário
-                  </CardTitle>
-                </CardHeader>
-                <CardContent>
-                  <div className="grid md:grid-cols-2 gap-8">
-                    {/* Calendar */}
-                    <div>
-                      <h3 className="font-semibold mb-4">Selecione a data:</h3>
-                      <Calendar
-                        mode="single"
-                        selected={selectedDate}
-                        onSelect={handleDateSelect}
-                        disabled={(date) => date < new Date()}
-                        locale={ptBR}
-                        className="rounded-lg border bg-background/50 backdrop-blur-sm p-3 pointer-events-auto"
-                      />
-                    </div>
-                    
-                    {/* Time Slots */}
-                    {selectedDate && (
-                      <div>
-                        <h3 className="font-semibold mb-4">Horários disponíveis:</h3>
-                        <div className="grid grid-cols-3 gap-2 max-h-80 overflow-y-auto">
-                          {timeSlots.map((slot) => (
-                            <Button
-                              key={slot.time}
-                              variant={selectedTime === slot.time ? "default" : "outline"}
-                              size="sm"
-                              disabled={!slot.available}
-                              onClick={() => setSelectedTime(slot.time)}
-                              className={cn(
-                                "transition-all duration-200",
-                                selectedTime === slot.time && "bg-accent hover:bg-accent/90",
-                                !slot.available && "opacity-50 cursor-not-allowed"
-                              )}
-                            >
-                              {slot.time}
-                            </Button>
-                          ))}
+                          {selectedEmployee === employee.id && (
+                            <div className="w-6 h-6 bg-accent rounded-full flex items-center justify-center">
+                              <Check className="h-4 w-4 text-white" />
+                            </div>
+                          )}
                         </div>
-                        {timeSlots.length === 0 && (
-                          <p className="text-sm text-muted-foreground text-center py-8">
-                            Nenhum horário disponível para esta data
-                          </p>
-                        )}
-                      </div>
-                    )}
-                  </div>
-                </CardContent>
-              </Card>
-            )}
+                      </CardContent>
+                    </Card>
+                  ))}
+                </div>
+              </CardContent>
+            </Card>
+          )}
 
-            {/* Client Information */}
-            {selectedServices.length > 0 && selectedEmployee && selectedDate && selectedTime && (
-              <Card className="shadow-lg border-0 bg-card/60 backdrop-blur-sm">
-                <CardHeader>
-                  <CardTitle className="flex items-center gap-3 text-2xl">
-                    <div className="w-8 h-8 bg-accent/20 rounded-full flex items-center justify-center">
-                      <User className="h-4 w-4 text-accent" />
-                    </div>
-                    Suas informações
-                  </CardTitle>
-                </CardHeader>
-                <CardContent className="space-y-4">
-                  <div className="grid md:grid-cols-2 gap-4">
-                    <div className="space-y-2">
-                      <Label htmlFor="name" className="text-sm font-medium">Nome completo *</Label>
-                      <Input
-                        id="name"
-                        placeholder="Seu nome completo"
-                        value={clientData.name}
-                        onChange={(e) => setClientData(prev => ({ ...prev, name: e.target.value }))}
-                        className="bg-background/50 backdrop-blur-sm"
-                      />
-                    </div>
-                    
-                    <div className="space-y-2">
-                      <Label htmlFor="phone" className="text-sm font-medium">Telefone/WhatsApp *</Label>
-                      <Input
-                        id="phone"
-                        placeholder="(11) 99999-9999"
-                        value={clientData.phone}
-                        onChange={handlePhoneChange}
-                        maxLength={15}
-                        className="bg-background/50 backdrop-blur-sm"
-                      />
-                    </div>
+          {/* Date and Time Section */}
+          {selectedServices.length > 0 && selectedEmployee && (
+            <Card className="shadow-lg border-0 bg-card/60 backdrop-blur-sm">
+              <CardHeader>
+                <CardTitle className="flex items-center gap-3 text-2xl">
+                  <div className="w-8 h-8 bg-accent/20 rounded-full flex items-center justify-center">
+                    <CalendarIcon className="h-4 w-4 text-accent" />
                   </div>
-                  
-                  <div className="space-y-2">
-                    <Label htmlFor="email" className="text-sm font-medium">Email (opcional)</Label>
-                    <Input
-                      id="email"
-                      type="email"
-                      placeholder="seu@email.com"
-                      value={clientData.email}
-                      onChange={(e) => setClientData(prev => ({ ...prev, email: e.target.value }))}
-                      className="bg-background/50 backdrop-blur-sm"
+                  Escolha data e horário
+                </CardTitle>
+              </CardHeader>
+              <CardContent>
+                <div className="grid md:grid-cols-2 gap-8">
+                  {/* Calendar */}
+                  <div>
+                    <h3 className="font-semibold mb-4">Selecione a data:</h3>
+                    <Calendar
+                      mode="single"
+                      selected={selectedDate}
+                      onSelect={handleDateSelect}
+                      disabled={(date) => {
+                        const today = new Date();
+                        today.setHours(0, 0, 0, 0);
+                        return date < today;
+                      }}
+                      locale={ptBR}
+                      className="rounded-lg border bg-background/50 backdrop-blur-sm p-3 pointer-events-auto"
                     />
                   </div>
-                </CardContent>
-              </Card>
-            )}
-          </div>
-
-          {/* Sidebar - Summary */}
-          <div className="lg:col-span-1">
-            <div className="sticky top-8">
-              <Card className="shadow-xl border-0 bg-card/80 backdrop-blur-sm">
-                <CardHeader>
-                  <CardTitle className="text-xl">Resumo do Agendamento</CardTitle>
-                </CardHeader>
-                <CardContent className="space-y-6">
                   
-                  {/* Services Summary */}
-                  {selectedServicesData.length > 0 && (
+                  {/* Time Slots */}
+                  {selectedDate && (
                     <div>
-                      <h4 className="font-semibold mb-3 flex items-center gap-2">
-                        <Star className="h-4 w-4 text-accent" />
-                        Serviços
-                      </h4>
-                      <div className="space-y-2">
-                        {selectedServicesData.map(service => (
-                          <div key={service.id} className="flex justify-between items-center p-2 bg-accent/5 rounded-lg">
-                            <div>
-                              <p className="font-medium text-sm">{service.name}</p>
-                              <p className="text-xs text-muted-foreground">{service.duration_minutes}min</p>
-                            </div>
-                            <span className="font-bold text-accent">R$ {Number(service.price).toFixed(2)}</span>
-                          </div>
+                      <h3 className="font-semibold mb-4">Horários disponíveis:</h3>
+                      <div className="grid grid-cols-3 gap-2 max-h-80 overflow-y-auto">
+                        {timeSlots.map((slot) => (
+                          <Button
+                            key={slot.time}
+                            variant={selectedTime === slot.time ? "default" : "outline"}
+                            size="sm"
+                            disabled={!slot.available}
+                            onClick={() => setSelectedTime(slot.time)}
+                            className={cn(
+                              "transition-all duration-200",
+                              selectedTime === slot.time && "bg-accent hover:bg-accent/90",
+                              !slot.available && "opacity-50 cursor-not-allowed"
+                            )}
+                          >
+                            {slot.time}
+                          </Button>
                         ))}
                       </div>
-                    </div>
-                  )}
-                  
-                  {/* Professional */}
-                  {selectedEmployeeData && (
-                    <div>
-                      <h4 className="font-semibold mb-3 flex items-center gap-2">
-                        <User className="h-4 w-4 text-accent" />
-                        Profissional
-                      </h4>
-                      <div className="flex items-center gap-3 p-2 bg-accent/5 rounded-lg">
-                        <Avatar className="w-8 h-8">
-                          <AvatarFallback className="bg-accent/20 text-accent text-xs">
-                            {selectedEmployeeData.name.charAt(0)}
-                          </AvatarFallback>
-                        </Avatar>
-                        <span className="font-medium">{selectedEmployeeData.name}</span>
-                      </div>
-                    </div>
-                  )}
-                  
-                  {/* Date and Time */}
-                  {selectedDate && selectedTime && (
-                    <div>
-                      <h4 className="font-semibold mb-3 flex items-center gap-2">
-                        <CalendarIcon className="h-4 w-4 text-accent" />
-                        Data e Horário
-                      </h4>
-                      <div className="p-2 bg-accent/5 rounded-lg">
-                        <p className="font-medium">
-                          {format(selectedDate, "EEEE, dd 'de' MMMM", { locale: ptBR })}
+                      {timeSlots.length === 0 && (
+                        <p className="text-sm text-muted-foreground text-center py-8">
+                          Nenhum horário disponível para esta data
                         </p>
-                        <p className="text-sm text-muted-foreground">às {selectedTime}</p>
-                      </div>
+                      )}
                     </div>
                   )}
-                  
-                  {/* Total */}
-                  {selectedServicesData.length > 0 && (
-                    <div className="pt-4 border-t border-border/50">
-                      <div className="flex justify-between items-center mb-2">
-                        <span className="font-semibold">Duração total:</span>
-                        <span>{Math.floor(totalDuration / 60)}h {totalDuration % 60}min</span>
+                </div>
+              </CardContent>
+            </Card>
+          )}
+
+          {/* Summary and Confirmation */}
+          {canConfirmBooking() && (
+            <Card className="shadow-xl border-0 bg-card/80 backdrop-blur-sm">
+              <CardHeader>
+                <CardTitle className="text-xl text-center">Resumo do Agendamento</CardTitle>
+              </CardHeader>
+              <CardContent className="space-y-6">
+                
+                {/* Services Summary */}
+                <div>
+                  <h4 className="font-semibold mb-3 flex items-center gap-2">
+                    <Star className="h-4 w-4 text-accent" />
+                    Serviços
+                  </h4>
+                  <div className="space-y-2">
+                    {selectedServicesData.map(service => (
+                      <div key={service.id} className="flex justify-between items-center p-2 bg-accent/5 rounded-lg">
+                        <div>
+                          <p className="font-medium text-sm">{service.name}</p>
+                          <p className="text-xs text-muted-foreground">{service.duration_minutes}min</p>
+                        </div>
+                        <span className="font-bold text-accent">R$ {Number(service.price).toFixed(2)}</span>
                       </div>
-                      <div className="flex justify-between items-center">
-                        <span className="font-bold text-lg">Total:</span>
-                        <span className="font-bold text-2xl text-accent">R$ {totalPrice.toFixed(2)}</span>
-                      </div>
+                    ))}
+                  </div>
+                </div>
+                
+                {/* Professional and Date/Time */}
+                <div className="grid md:grid-cols-2 gap-4">
+                  <div>
+                    <h4 className="font-semibold mb-3 flex items-center gap-2">
+                      <User className="h-4 w-4 text-accent" />
+                      Profissional
+                    </h4>
+                    <div className="flex items-center gap-3 p-2 bg-accent/5 rounded-lg">
+                      <Avatar className="w-8 h-8">
+                        <AvatarFallback className="bg-accent/20 text-accent text-xs">
+                          {selectedEmployeeData?.name.charAt(0)}
+                        </AvatarFallback>
+                      </Avatar>
+                      <span className="font-medium">{selectedEmployeeData?.name}</span>
                     </div>
-                  )}
+                  </div>
                   
-                  {/* Confirm Button */}
-                  <Button
-                    onClick={handleConfirmBooking}
-                    disabled={!canConfirmBooking() || isCreatingBooking}
-                    className="w-full bg-accent hover:bg-accent/90 text-white font-semibold py-3 text-lg"
-                    size="lg"
-                  >
-                    {isCreatingBooking ? (
-                      <>
-                        <Loader2 className="h-5 w-5 animate-spin mr-2" />
-                        Confirmando...
-                      </>
-                    ) : (
-                      <>
-                        Confirmar Agendamento
-                        <ChevronRight className="h-5 w-5 ml-2" />
-                      </>
-                    )}
-                  </Button>
-                  
-                  {!canConfirmBooking() && (
-                    <p className="text-xs text-muted-foreground text-center">
-                      Complete todas as etapas para confirmar seu agendamento
-                    </p>
+                  <div>
+                    <h4 className="font-semibold mb-3 flex items-center gap-2">
+                      <CalendarIcon className="h-4 w-4 text-accent" />
+                      Data e Horário
+                    </h4>
+                    <div className="p-2 bg-accent/5 rounded-lg">
+                      <p className="font-medium text-sm">
+                        {selectedDate && format(selectedDate, "dd/MM/yyyy", { locale: ptBR })}
+                      </p>
+                      <p className="text-sm text-muted-foreground">às {selectedTime}</p>
+                    </div>
+                  </div>
+                </div>
+                
+                {/* Total */}
+                <div className="pt-4 border-t border-border/50">
+                  <div className="flex justify-between items-center mb-2">
+                    <span className="font-semibold">Duração total:</span>
+                    <span>{Math.floor(totalDuration / 60)}h {totalDuration % 60}min</span>
+                  </div>
+                  <div className="flex justify-between items-center">
+                    <span className="font-bold text-lg">Total:</span>
+                    <span className="font-bold text-2xl text-accent">R$ {totalPrice.toFixed(2)}</span>
+                  </div>
+                </div>
+                
+                {/* Confirm Button */}
+                <Button
+                  onClick={handleConfirmBooking}
+                  disabled={!canConfirmBooking() || isCreatingBooking}
+                  className="w-full bg-accent hover:bg-accent/90 text-white font-semibold py-3 text-lg"
+                  size="lg"
+                >
+                  {isCreatingBooking ? (
+                    <>
+                      <Loader2 className="h-5 w-5 animate-spin mr-2" />
+                      Confirmando...
+                    </>
+                  ) : (
+                    <>
+                      Confirmar Agendamento
+                      <ChevronRight className="h-5 w-5 ml-2" />
+                    </>
                   )}
-                </CardContent>
-              </Card>
-            </div>
-          </div>
+                </Button>
+              </CardContent>
+            </Card>
+          )}
         </div>
+
       </div>
     </div>
   );
