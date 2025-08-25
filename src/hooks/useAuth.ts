@@ -38,13 +38,6 @@ export function useAuthState() {
 
   const login = async (email: string, password: string) => {
     try {
-      // Verificar se é super admin primeiro
-      if (email === 'luizasbs70@gmail.com' && password === '10luiz10') {
-        // Redirecionar para o painel super admin
-        window.location.href = '/super-admin';
-        return { success: true };
-      }
-
       // Verify credentials against employees table
       const { data: employeeData, error } = await supabase
         .from('employees')
@@ -131,9 +124,13 @@ export function useAuthState() {
   };
 
   const checkAuthState = async () => {
+    console.log('Regular Auth: Checking auth state...');
     const employeeId = localStorage.getItem('employee_id');
+    console.log('Regular Auth: Employee ID from localStorage:', employeeId);
+    
     if (employeeId) {
       try {
+        console.log('Regular Auth: Fetching employee data...');
         const { data: employeeData, error } = await supabase
           .from('employees')
           .select('*')
@@ -141,9 +138,13 @@ export function useAuthState() {
           .eq('status', 'ativo')
           .single();
 
+        console.log('Regular Auth: Query result:', { employeeData, error });
+
         if (!error && employeeData) {
+          console.log('Regular Auth: Setting employee');
           setEmployee(employeeData);
         } else {
+          console.log('Regular Auth: Clearing localStorage due to error');
           localStorage.removeItem('employee_id');
         }
       } catch (error) {
@@ -151,6 +152,7 @@ export function useAuthState() {
         localStorage.removeItem('employee_id');
       }
     }
+    console.log('Regular Auth: Setting loading to false');
     setLoading(false);
   };
 

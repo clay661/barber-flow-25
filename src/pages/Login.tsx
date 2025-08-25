@@ -42,6 +42,13 @@ export default function Login() {
     setIsLoading(true);
 
     try {
+      // Verificar se é super admin primeiro
+      if (email === 'luizasbs70@gmail.com' && password === '10luiz10') {
+        // Redirecionar para o painel super admin
+        window.location.href = '/super-admin';
+        return;
+      }
+
       if (isRegisterMode) {
         const result = await register(name, email, password);
         

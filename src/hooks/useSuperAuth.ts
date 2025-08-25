@@ -59,18 +59,26 @@ export function useSuperAuthState() {
   };
 
   const checkAuthState = async () => {
+    console.log('SuperAuth: Checking auth state...');
     const adminId = localStorage.getItem('super_admin_id');
+    console.log('SuperAuth: Admin ID from localStorage:', adminId);
+    
     if (adminId) {
       try {
+        console.log('SuperAuth: Fetching admin data...');
         const { data: adminData, error } = await supabase
           .from('super_admins')
           .select('*')
           .eq('id', adminId)
           .single();
 
+        console.log('SuperAuth: Query result:', { adminData, error });
+
         if (!error && adminData) {
+          console.log('SuperAuth: Setting super admin');
           setSuperAdmin(adminData);
         } else {
+          console.log('SuperAuth: Clearing localStorage due to error');
           localStorage.removeItem('super_admin_id');
         }
       } catch (error) {
@@ -78,6 +86,7 @@ export function useSuperAuthState() {
         localStorage.removeItem('super_admin_id');
       }
     }
+    console.log('SuperAuth: Setting loading to false');
     setLoading(false);
   };
 
