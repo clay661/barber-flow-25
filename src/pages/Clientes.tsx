@@ -75,7 +75,7 @@ export default function Clientes() {
             Gerencie sua base de clientes
           </p>
         </div>
-        <Button className="bg-primary hover:bg-primary/90">
+        <Button className="bg-primary hover:bg-primary/90 hover-gold">
           <Plus className="h-4 w-4 mr-2" />
           Novo Cliente
         </Button>
@@ -83,7 +83,7 @@ export default function Clientes() {
 
       {/* Cards de Resumo */}
       <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
-        <Card>
+        <Card className="hover-card">
           <CardHeader className="pb-2">
             <CardTitle className="text-sm font-medium text-muted-foreground">
               Total de Clientes
@@ -94,7 +94,7 @@ export default function Clientes() {
           </CardContent>
         </Card>
 
-        <Card>
+        <Card className="hover-card">
           <CardHeader className="pb-2">
             <CardTitle className="text-sm font-medium text-muted-foreground">
               Novos este Mês
@@ -105,7 +105,7 @@ export default function Clientes() {
           </CardContent>
         </Card>
 
-        <Card>
+        <Card className="hover-card">
           <CardHeader className="pb-2">
             <CardTitle className="text-sm font-medium text-muted-foreground">
               Clientes Ativos
@@ -175,10 +175,10 @@ export default function Clientes() {
                     </TableCell>
                     <TableCell className="text-right">
                       <div className="flex justify-end gap-2">
-                        <Button variant="ghost" size="icon">
+                        <Button variant="ghost" size="icon" className="hover-glow">
                           <Edit className="h-4 w-4" />
                         </Button>
-                        <Button variant="ghost" size="icon" className="text-destructive hover:text-destructive">
+                        <Button variant="ghost" size="icon" className="text-destructive hover:text-destructive hover-darken">
                           <Trash2 className="h-4 w-4" />
                         </Button>
                       </div>

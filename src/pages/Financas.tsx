@@ -73,6 +73,7 @@ export default function Financas() {
             variant={selectedPeriod === "diario" ? "default" : "outline"}
             size="sm"
             onClick={() => setSelectedPeriod("diario")}
+            className="hover-glow"
           >
             Dia
           </Button>
@@ -80,6 +81,7 @@ export default function Financas() {
             variant={selectedPeriod === "semanal" ? "default" : "outline"}
             size="sm"
             onClick={() => setSelectedPeriod("semanal")}
+            className="hover-glow"
           >
             Semana
           </Button>
@@ -87,6 +89,7 @@ export default function Financas() {
             variant={selectedPeriod === "mensal" ? "default" : "outline"}
             size="sm"
             onClick={() => setSelectedPeriod("mensal")}
+            className="hover-glow"
           >
             Mês
           </Button>
@@ -95,7 +98,7 @@ export default function Financas() {
 
       {/* Cards de Resumo Financeiro */}
       <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-        <Card className="col-span-1 md:col-span-2">
+        <Card className="col-span-1 md:col-span-2 hover-card">
           <CardHeader className="pb-2">
             <CardTitle className="text-sm font-medium text-muted-foreground flex items-center gap-2">
               <DollarSign className="h-4 w-4" />
@@ -114,7 +117,7 @@ export default function Financas() {
           </CardContent>
         </Card>
 
-        <Card>
+        <Card className="hover-card">
           <CardHeader className="pb-2">
             <CardTitle className="text-sm font-medium text-muted-foreground">
               Transações
@@ -126,7 +129,7 @@ export default function Financas() {
           </CardContent>
         </Card>
 
-        <Card>
+        <Card className="hover-card">
           <CardHeader className="pb-2">
             <CardTitle className="text-sm font-medium text-muted-foreground">
               Ticket Médio
@@ -140,7 +143,7 @@ export default function Financas() {
       </div>
 
       {/* Gráfico de Receita (Placeholder) */}
-      <Card>
+      <Card className="hover-card">
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
             <BarChart3 className="h-5 w-5 text-accent" />
@@ -150,7 +153,7 @@ export default function Financas() {
         <CardContent>
           <div className="h-64 flex items-center justify-center bg-gradient-to-br from-accent/10 to-transparent rounded-lg">
             <div className="text-center">
-              <BarChart3 className="h-12 w-12 text-accent mx-auto mb-2" />
+              <BarChart3 className="h-12 w-12 text-accent mx-auto mb-2 animate-glow-pulse" />
               <p className="text-muted-foreground">Gráfico de receita semanal</p>
               <p className="text-sm text-muted-foreground mt-1">Implementar com biblioteca de gráficos</p>
             </div>
@@ -159,7 +162,7 @@ export default function Financas() {
       </Card>
 
       {/* Últimas Transações */}
-      <Card>
+      <Card className="hover-card">
         <CardHeader>
           <CardTitle className="flex items-center gap-2">
             <Calendar className="h-5 w-5 text-accent" />

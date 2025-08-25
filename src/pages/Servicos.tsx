@@ -94,7 +94,7 @@ export default function Servicos() {
             Gerencie os serviços oferecidos pela barbearia
           </p>
         </div>
-        <Button className="bg-primary hover:bg-primary/90">
+        <Button className="bg-primary hover:bg-primary/90 hover-gold">
           <Plus className="h-4 w-4 mr-2" />
           Novo Serviço
         </Button>
@@ -102,7 +102,7 @@ export default function Servicos() {
 
       {/* Cards de Resumo */}
       <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-        <Card>
+        <Card className="hover-card">
           <CardHeader className="pb-2">
             <CardTitle className="text-sm font-medium text-muted-foreground flex items-center gap-2">
               <Scissors className="h-4 w-4" />
@@ -114,7 +114,7 @@ export default function Servicos() {
           </CardContent>
         </Card>
 
-        <Card>
+        <Card className="hover-card">
           <CardHeader className="pb-2">
             <CardTitle className="text-sm font-medium text-muted-foreground flex items-center gap-2">
               <DollarSign className="h-4 w-4" />
@@ -126,7 +126,7 @@ export default function Servicos() {
           </CardContent>
         </Card>
 
-        <Card>
+        <Card className="hover-card">
           <CardHeader className="pb-2">
             <CardTitle className="text-sm font-medium text-muted-foreground">
               Mais Caro
@@ -139,7 +139,7 @@ export default function Servicos() {
           </CardContent>
         </Card>
 
-        <Card>
+        <Card className="hover-card">
           <CardHeader className="pb-2">
             <CardTitle className="text-sm font-medium text-muted-foreground">
               Receita Potencial
@@ -212,10 +212,10 @@ export default function Servicos() {
                     </TableCell>
                     <TableCell className="text-right">
                       <div className="flex justify-end gap-2">
-                        <Button variant="ghost" size="icon">
+                        <Button variant="ghost" size="icon" className="hover-glow">
                           <Edit className="h-4 w-4" />
                         </Button>
-                        <Button variant="ghost" size="icon" className="text-destructive hover:text-destructive">
+                        <Button variant="ghost" size="icon" className="text-destructive hover:text-destructive hover-darken">
                           <Trash2 className="h-4 w-4" />
                         </Button>
                       </div>

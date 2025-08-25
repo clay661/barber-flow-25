@@ -84,7 +84,7 @@ export default function Configuracoes() {
                 <User className="h-5 w-5 text-accent" />
                 Barbeiros
               </CardTitle>
-              <Button size="sm" className="bg-primary hover:bg-primary/90">
+              <Button size="sm" className="bg-primary hover:bg-primary/90 hover-gold">
                 <Plus className="h-4 w-4 mr-2" />
                 Adicionar
               </Button>
@@ -108,10 +108,10 @@ export default function Configuracoes() {
                       {barber.active ? "Ativo" : "Inativo"}
                     </Badge>
                     <div className="flex gap-1">
-                      <Button variant="ghost" size="icon">
+                      <Button variant="ghost" size="icon" className="hover-glow">
                         <Edit className="h-4 w-4" />
                       </Button>
-                      <Button variant="ghost" size="icon" className="text-destructive hover:text-destructive">
+                      <Button variant="ghost" size="icon" className="text-destructive hover:text-destructive hover-darken">
                         <Trash2 className="h-4 w-4" />
                       </Button>
                     </div>
@@ -168,7 +168,7 @@ export default function Configuracoes() {
                   <Separator />
                 </div>
               ))}
-              <Button className="w-full mt-4">
+              <Button className="w-full mt-4 hover-gold">
                 <Save className="h-4 w-4 mr-2" />
                 Salvar Horários
               </Button>
@@ -216,7 +216,7 @@ export default function Configuracoes() {
               </div>
             </div>
           </div>
-          <Button className="mt-6">
+          <Button className="mt-6 hover-gold">
             <Save className="h-4 w-4 mr-2" />
             Salvar Configurações
           </Button>

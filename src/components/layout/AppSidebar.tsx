@@ -69,10 +69,10 @@ export function AppSidebar() {
                 <SidebarMenuItem key={item.title}>
                   <SidebarMenuButton 
                     asChild
-                    className={`${
+                    className={`hover-menu ${
                       isActive(item.url)
-                        ? "bg-accent text-accent-foreground font-medium"
-                        : "text-primary-foreground hover:bg-primary/20"
+                        ? "bg-accent text-accent-foreground font-medium border-l-3 border-accent"
+                        : "text-sidebar-foreground"
                     }`}
                   >
                     <NavLink to={item.url} className="flex items-center gap-3">

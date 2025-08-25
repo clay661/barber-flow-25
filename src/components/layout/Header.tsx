@@ -23,14 +23,14 @@ export function Header() {
       </div>
 
       <div className="flex items-center gap-4">
-        <Button variant="ghost" size="icon" className="relative">
+        <Button variant="ghost" size="icon" className="relative hover-glow">
           <Bell className="h-4 w-4" />
-          <span className="absolute -top-1 -right-1 h-3 w-3 bg-accent rounded-full text-xs"></span>
+          <span className="absolute -top-1 -right-1 h-3 w-3 bg-accent rounded-full text-xs animate-glow-pulse"></span>
         </Button>
 
         <DropdownMenu>
           <DropdownMenuTrigger asChild>
-            <Button variant="ghost" className="flex items-center gap-2">
+            <Button variant="ghost" className="flex items-center gap-2 hover-glow">
               <Avatar className="h-8 w-8">
                 <AvatarImage src="/placeholder-avatar.jpg" />
                 <AvatarFallback className="bg-accent text-accent-foreground">
@@ -41,12 +41,12 @@ export function Header() {
             </Button>
           </DropdownMenuTrigger>
           <DropdownMenuContent align="end" className="bg-popover">
-            <DropdownMenuItem>
+            <DropdownMenuItem className="hover-darken">
               <User className="mr-2 h-4 w-4" />
               Perfil
             </DropdownMenuItem>
             <DropdownMenuSeparator />
-            <DropdownMenuItem className="text-destructive">
+            <DropdownMenuItem className="text-destructive hover-darken hover:bg-destructive/10 hover:text-destructive">
               <LogOut className="mr-2 h-4 w-4" />
               Sair
             </DropdownMenuItem>
