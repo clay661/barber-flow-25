@@ -184,30 +184,48 @@ export type Database = {
           api_key_sid: string
           auth_token: string
           created_at: string
+          from_email: string | null
           id: string
           is_active: boolean | null
+          notification_mode: string
           phone_number: string
           provider: string
+          smtp_host: string | null
+          smtp_password: string | null
+          smtp_port: number | null
+          smtp_user: string | null
           updated_at: string
         }
         Insert: {
           api_key_sid: string
           auth_token: string
           created_at?: string
+          from_email?: string | null
           id?: string
           is_active?: boolean | null
+          notification_mode?: string
           phone_number: string
           provider: string
+          smtp_host?: string | null
+          smtp_password?: string | null
+          smtp_port?: number | null
+          smtp_user?: string | null
           updated_at?: string
         }
         Update: {
           api_key_sid?: string
           auth_token?: string
           created_at?: string
+          from_email?: string | null
           id?: string
           is_active?: boolean | null
+          notification_mode?: string
           phone_number?: string
           provider?: string
+          smtp_host?: string | null
+          smtp_password?: string | null
+          smtp_port?: number | null
+          smtp_user?: string | null
           updated_at?: string
         }
         Relationships: []
