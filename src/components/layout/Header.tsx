@@ -17,7 +17,7 @@ export function Header() {
   const { state } = useSidebar();
 
   return (
-    <header className="border-b border-border px-3 sm:px-4 md:px-6 py-3 md:py-4 bg-card">
+    <header className="border-b border-border px-3 sm:px-4 md:px-6 py-3 md:py-4 bg-card sticky top-0 z-20">
       <div className="flex items-center justify-between">
         <div className="flex items-center space-x-2 md:space-x-4">
           <SidebarTrigger className="hover-glow" />

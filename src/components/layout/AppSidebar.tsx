@@ -43,22 +43,29 @@ export function AppSidebar() {
   };
 
   return (
-    <Sidebar 
-      className={`${isMobile ? 'fixed z-50' : 'relative'} ${
-        isMobile && open ? 'w-64' : isMobile ? 'w-0' : state === 'collapsed' ? 'w-16' : 'w-64'
-      } transition-all duration-300 ease-in-out`}
-      collapsible={isMobile ? "offcanvas" : "icon"}
-      side="left"
-    >
+    <>
       {/* Mobile overlay */}
       {isMobile && open && (
         <div 
-          className="fixed inset-0 bg-black/50 z-40" 
+          className="fixed inset-0 bg-black/50 z-40 lg:hidden" 
           onClick={() => setOpen(false)}
         />
       )}
       
-      <SidebarContent className="bg-sidebar-background text-sidebar-foreground border-r border-sidebar-border z-50">
+      <Sidebar 
+        className={`${
+          isMobile 
+            ? `fixed left-0 top-0 h-full z-50 transform transition-transform duration-300 ease-in-out ${
+                open ? 'translate-x-0' : '-translate-x-full'
+              } w-64`
+            : `fixed left-0 top-0 h-full z-30 transform transition-all duration-300 ease-in-out ${
+                state === 'collapsed' ? 'w-16' : 'w-64'
+              }`
+        }`}
+        collapsible={isMobile ? "offcanvas" : "icon"}
+        side="left"
+      >
+        <SidebarContent className="bg-sidebar-background text-sidebar-foreground border-r border-sidebar-border h-full overflow-y-auto">
         {/* Logo */}
         <div className="p-4 border-b border-sidebar-border">
           <div className="flex items-center gap-3">
@@ -113,5 +120,6 @@ export function AppSidebar() {
         </SidebarGroup>
       </SidebarContent>
     </Sidebar>
+    </>
   );
 }

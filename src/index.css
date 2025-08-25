@@ -265,4 +265,21 @@ All colors MUST be HSL.
       background-position: 200% 0;
     }
   }
+
+  /* Layout adjustments for sidebar */
+  @media (min-width: 1024px) {
+    .sidebar-layout-main {
+      margin-left: 4rem; /* space for collapsed sidebar */
+    }
+    
+    .sidebar-layout-main.expanded {
+      margin-left: 16rem; /* space for expanded sidebar */
+    }
+  }
+
+  @media (max-width: 1023px) {
+    .sidebar-layout-main {
+      margin-left: 0;
+    }
+  }
 }
