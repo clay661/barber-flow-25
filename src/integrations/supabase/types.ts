@@ -14,7 +14,157 @@ export type Database = {
   }
   public: {
     Tables: {
-      [_ in never]: never
+      appointments: {
+        Row: {
+          client_id: string | null
+          created_at: string | null
+          date: string
+          employee_id: string | null
+          id: string
+          notes: string | null
+          service_id: string | null
+          status: string | null
+          total_price: number | null
+        }
+        Insert: {
+          client_id?: string | null
+          created_at?: string | null
+          date: string
+          employee_id?: string | null
+          id?: string
+          notes?: string | null
+          service_id?: string | null
+          status?: string | null
+          total_price?: number | null
+        }
+        Update: {
+          client_id?: string | null
+          created_at?: string | null
+          date?: string
+          employee_id?: string | null
+          id?: string
+          notes?: string | null
+          service_id?: string | null
+          status?: string | null
+          total_price?: number | null
+        }
+        Relationships: [
+          {
+            foreignKeyName: "appointments_client_id_fkey"
+            columns: ["client_id"]
+            isOneToOne: false
+            referencedRelation: "clients"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "appointments_employee_id_fkey"
+            columns: ["employee_id"]
+            isOneToOne: false
+            referencedRelation: "employees"
+            referencedColumns: ["id"]
+          },
+          {
+            foreignKeyName: "appointments_service_id_fkey"
+            columns: ["service_id"]
+            isOneToOne: false
+            referencedRelation: "services"
+            referencedColumns: ["id"]
+          },
+        ]
+      }
+      clients: {
+        Row: {
+          created_at: string | null
+          email: string | null
+          id: string
+          name: string
+          status: string | null
+          telefone: string | null
+          total_visits: number | null
+        }
+        Insert: {
+          created_at?: string | null
+          email?: string | null
+          id?: string
+          name: string
+          status?: string | null
+          telefone?: string | null
+          total_visits?: number | null
+        }
+        Update: {
+          created_at?: string | null
+          email?: string | null
+          id?: string
+          name?: string
+          status?: string | null
+          telefone?: string | null
+          total_visits?: number | null
+        }
+        Relationships: []
+      }
+      employees: {
+        Row: {
+          created_at: string | null
+          id: string
+          name: string
+          pro_email: string | null
+          pro_password: string | null
+          role: Database["public"]["Enums"]["employee_role"] | null
+          status: string | null
+          telefone: string | null
+        }
+        Insert: {
+          created_at?: string | null
+          id?: string
+          name: string
+          pro_email?: string | null
+          pro_password?: string | null
+          role?: Database["public"]["Enums"]["employee_role"] | null
+          status?: string | null
+          telefone?: string | null
+        }
+        Update: {
+          created_at?: string | null
+          id?: string
+          name?: string
+          pro_email?: string | null
+          pro_password?: string | null
+          role?: Database["public"]["Enums"]["employee_role"] | null
+          status?: string | null
+          telefone?: string | null
+        }
+        Relationships: []
+      }
+      services: {
+        Row: {
+          category: string | null
+          created_at: string | null
+          duration_minutes: number
+          id: string
+          name: string
+          price: number
+          status: string | null
+        }
+        Insert: {
+          category?: string | null
+          created_at?: string | null
+          duration_minutes: number
+          id?: string
+          name: string
+          price: number
+          status?: string | null
+        }
+        Update: {
+          category?: string | null
+          created_at?: string | null
+          duration_minutes?: number
+          id?: string
+          name?: string
+          price?: number
+          status?: string | null
+        }
+        Relationships: []
+      }
     }
     Views: {
       [_ in never]: never
@@ -23,7 +173,7 @@ export type Database = {
       [_ in never]: never
     }
     Enums: {
-      [_ in never]: never
+      employee_role: "ADMIN" | "SUBADMIN" | "FUNCIONARIO" | "RECEPCIONISTA"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -150,6 +300,8 @@ export type CompositeTypes<
 
 export const Constants = {
   public: {
-    Enums: {},
+    Enums: {
+      employee_role: ["ADMIN", "SUBADMIN", "FUNCIONARIO", "RECEPCIONISTA"],
+    },
   },
 } as const
