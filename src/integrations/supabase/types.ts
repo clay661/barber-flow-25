@@ -135,6 +135,36 @@ export type Database = {
         }
         Relationships: []
       }
+      salon_settings: {
+        Row: {
+          banner_url: string | null
+          created_at: string
+          id: string
+          logo_url: string | null
+          name: string
+          public_link: string
+          updated_at: string
+        }
+        Insert: {
+          banner_url?: string | null
+          created_at?: string
+          id?: string
+          logo_url?: string | null
+          name?: string
+          public_link?: string
+          updated_at?: string
+        }
+        Update: {
+          banner_url?: string | null
+          created_at?: string
+          id?: string
+          logo_url?: string | null
+          name?: string
+          public_link?: string
+          updated_at?: string
+        }
+        Relationships: []
+      }
       services: {
         Row: {
           category: string | null
