@@ -267,19 +267,62 @@ All colors MUST be HSL.
   }
 
   /* Layout adjustments for sidebar */
+  .sidebar-fixed {
+    position: fixed;
+    left: 0;
+    top: 0;
+    height: 100vh;
+    z-index: 30;
+  }
+
+  .sidebar-mobile-overlay {
+    position: fixed;
+    inset: 0;
+    background-color: rgba(0, 0, 0, 0.5);
+    z-index: 40;
+  }
+
+  .main-content-desktop {
+    min-height: 100vh;
+    display: flex;
+    flex-direction: column;
+    transition: margin-left 300ms ease-in-out;
+  }
+
   @media (min-width: 1024px) {
-    .sidebar-layout-main {
-      margin-left: 4rem; /* space for collapsed sidebar */
+    .main-content-desktop.collapsed {
+      margin-left: 4rem;
     }
     
-    .sidebar-layout-main.expanded {
-      margin-left: 16rem; /* space for expanded sidebar */
+    .main-content-desktop.expanded {
+      margin-left: 16rem;
     }
   }
 
   @media (max-width: 1023px) {
-    .sidebar-layout-main {
+    .main-content-desktop {
       margin-left: 0;
+    }
+  }
+
+  /* Header sticky positioning */
+  .header-sticky {
+    position: sticky;
+    top: 0;
+    z-index: 20;
+    backdrop-filter: blur(8px);
+    background-color: hsl(var(--card) / 0.95);
+  }
+
+  /* Responsive table improvements */
+  .table-responsive {
+    overflow-x: auto;
+    -webkit-overflow-scrolling: touch;
+  }
+
+  @media (max-width: 768px) {
+    .table-responsive table {
+      min-width: 600px;
     }
   }
 }

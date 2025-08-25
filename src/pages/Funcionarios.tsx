@@ -49,6 +49,7 @@ interface Funcionario {
   phone: string;
   email: string;
   role: string;
+  status: 'ativo' | 'inativo';
   createdAt: string;
 }
 
@@ -60,6 +61,7 @@ const initialFuncionarios: Funcionario[] = [
     phone: "(11) 99999-9999",
     email: "maria@barbershop.com",
     role: "Cabeleireira",
+    status: "ativo",
     createdAt: "2024-01-15"
   },
   {
@@ -68,6 +70,7 @@ const initialFuncionarios: Funcionario[] = [
     phone: "(11) 88888-8888", 
     email: "joao@barbershop.com",
     role: "Barbeiro",
+    status: "ativo",
     createdAt: "2024-02-20"
   },
   {
@@ -76,6 +79,7 @@ const initialFuncionarios: Funcionario[] = [
     phone: "(11) 77777-7777",
     email: "ana@barbershop.com", 
     role: "Manicure",
+    status: "inativo",
     createdAt: "2024-03-10"
   }
 ];
@@ -93,7 +97,8 @@ export default function Funcionarios() {
     name: "",
     phone: "",
     email: "",
-    role: ""
+    role: "",
+    status: "ativo" as "ativo" | "inativo"
   });
 
   const filteredFuncionarios = funcionarios.filter(funcionario =>
@@ -110,7 +115,8 @@ export default function Funcionarios() {
         name: funcionario.name,
         phone: funcionario.phone,
         email: funcionario.email,
-        role: funcionario.role
+        role: funcionario.role,
+        status: funcionario.status
       });
     } else {
       setEditingFuncionario(null);
@@ -118,7 +124,8 @@ export default function Funcionarios() {
         name: "",
         phone: "",
         email: "",
-        role: ""
+        role: "",
+        status: "ativo"
       });
     }
     setIsDialogOpen(true);
@@ -131,7 +138,8 @@ export default function Funcionarios() {
       name: "",
       phone: "",
       email: "",
-      role: ""
+      role: "",
+      status: "ativo"
     });
   };
 
@@ -226,12 +234,12 @@ export default function Funcionarios() {
         <Card className="hover-card">
           <CardHeader className="pb-2">
             <CardTitle className="text-sm font-medium text-muted-foreground">
-              Barbeiros
+              Funcionários Ativos
             </CardTitle>
           </CardHeader>
           <CardContent>
             <div className="text-xl md:text-2xl font-bold text-success">
-              {funcionarios.filter(f => f.role.toLowerCase().includes('barbeiro')).length}
+              {funcionarios.filter(f => f.status === 'ativo').length}
             </div>
           </CardContent>
         </Card>
@@ -239,12 +247,12 @@ export default function Funcionarios() {
         <Card className="hover-card sm:col-span-2 lg:col-span-1">
           <CardHeader className="pb-2">
             <CardTitle className="text-sm font-medium text-muted-foreground">
-              Cabeleireiras
+              Funcionários Inativos
             </CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="text-xl md:text-2xl font-bold text-accent">
-              {funcionarios.filter(f => f.role.toLowerCase().includes('cabeleireira')).length}
+            <div className="text-xl md:text-2xl font-bold text-destructive">
+              {funcionarios.filter(f => f.status === 'inativo').length}
             </div>
           </CardContent>
         </Card>
@@ -276,6 +284,7 @@ export default function Funcionarios() {
                   <TableHead className="w-[120px] sm:w-auto">Telefone</TableHead>
                   <TableHead className="w-[150px] sm:w-auto hidden md:table-cell">E-mail</TableHead>
                   <TableHead className="w-[120px] sm:w-auto">Função</TableHead>
+                  <TableHead className="w-[80px] sm:w-auto hidden sm:table-cell">Status</TableHead>
                   <TableHead className="w-[100px] sm:w-auto hidden lg:table-cell">Data Cadastro</TableHead>
                   <TableHead className="text-right w-[100px] sm:w-auto">Ações</TableHead>
                 </TableRow>
@@ -303,6 +312,11 @@ export default function Funcionarios() {
                     </TableCell>
                     <TableCell>
                       <Badge variant="secondary" className="text-xs">{funcionario.role}</Badge>
+                    </TableCell>
+                    <TableCell className="hidden sm:table-cell">
+                      <Badge variant={funcionario.status === 'ativo' ? 'default' : 'secondary'} className="text-xs">
+                        {funcionario.status === 'ativo' ? 'Ativo' : 'Inativo'}
+                      </Badge>
                     </TableCell>
                     <TableCell className="hidden lg:table-cell">
                       <div className="flex items-center gap-2 text-sm">
@@ -381,8 +395,20 @@ export default function Funcionarios() {
                 id="role"
                 value={formData.role}
                 onChange={(e) => setFormData(prev => ({ ...prev, role: e.target.value }))}
-                placeholder="Ex: Barbeiro, Cabeleireira, Manicure"
+                placeholder="Ex: Cabeleireira, Manicure, Especialista"
               />
+            </div>
+            <div className="grid gap-2">
+              <Label htmlFor="status">Status</Label>
+              <select
+                id="status"
+                value={formData.status}
+                onChange={(e) => setFormData(prev => ({ ...prev, status: e.target.value as "ativo" | "inativo" }))}
+                className="flex h-10 w-full rounded-md border border-input bg-background px-3 py-2 text-sm ring-offset-background file:border-0 file:bg-transparent file:text-sm file:font-medium placeholder:text-muted-foreground focus-visible:outline-none focus-visible:ring-2 focus-visible:ring-ring focus-visible:ring-offset-2 disabled:cursor-not-allowed disabled:opacity-50"
+              >
+                <option value="ativo">Ativo</option>
+                <option value="inativo">Inativo</option>
+              </select>
             </div>
           </div>
           <DialogFooter>

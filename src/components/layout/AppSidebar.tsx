@@ -55,10 +55,10 @@ export function AppSidebar() {
       <Sidebar 
         className={`${
           isMobile 
-            ? `fixed left-0 top-0 h-full z-50 transform transition-transform duration-300 ease-in-out ${
+            ? `fixed left-0 top-0 h-screen z-50 transform transition-transform duration-300 ease-in-out ${
                 open ? 'translate-x-0' : '-translate-x-full'
               } w-64`
-            : `fixed left-0 top-0 h-full z-30 transform transition-all duration-300 ease-in-out ${
+            : `fixed left-0 top-0 h-screen z-30 transform transition-all duration-300 ease-in-out ${
                 state === 'collapsed' ? 'w-16' : 'w-64'
               }`
         }`}

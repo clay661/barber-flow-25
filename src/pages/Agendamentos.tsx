@@ -189,7 +189,7 @@ export default function Agendamentos() {
                 <TableRow>
                   <TableHead className="w-[120px] sm:w-auto">Cliente</TableHead>
                   <TableHead className="w-[120px] sm:w-auto hidden md:table-cell">Serviço</TableHead>
-                  <TableHead className="w-[100px] sm:w-auto hidden lg:table-cell">Barbeiro</TableHead>
+                  <TableHead className="w-[100px] sm:w-auto hidden lg:table-cell">Funcionário</TableHead>
                   <TableHead className="w-[80px] sm:w-auto">Horário</TableHead>
                   <TableHead className="w-[80px] sm:w-auto">Status</TableHead>
                   <TableHead className="w-[80px] sm:w-auto hidden sm:table-cell">Valor</TableHead>

@@ -9,17 +9,17 @@ function LayoutContent() {
   const isMobile = useIsMobile();
   
   return (
-    <div className="min-h-screen w-full">
+    <div className="min-h-screen w-full flex">
       <AppSidebar />
-      <div className={`min-h-screen flex flex-col ${
+      <div className={`min-h-screen flex flex-col flex-1 ${
         isMobile 
           ? '' 
           : state === 'collapsed' 
-            ? 'lg:ml-16' 
-            : 'lg:ml-64'
+            ? 'ml-16' 
+            : 'ml-64'
       } transition-all duration-300 ease-in-out`}>
         <Header />
-        <main className="flex-1 p-3 sm:p-4 md:p-6 bg-background overflow-x-auto">
+        <main className="flex-1 p-3 sm:p-4 md:p-6 bg-background overflow-auto">
           <Outlet />
         </main>
       </div>
