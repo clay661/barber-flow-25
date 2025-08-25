@@ -4,18 +4,27 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Switch } from "@/components/ui/switch";
 import { Badge } from "@/components/ui/badge";
-import { Shield, Key, Clock, MapPin } from "lucide-react";
-import { useSecuritySettings } from "@/hooks/useSuperAdminData";
+import { Shield, Key, Clock, MapPin, Eye, EyeOff, Copy } from "lucide-react";
+import { useSecuritySettings, useSaaSSettings } from "@/hooks/useSuperAdminData";
 import { useState } from "react";
 import { useToast } from "@/hooks/use-toast";
 
 export default function SuperAdminSeguranca() {
   const { settings, loading, updateSettings } = useSecuritySettings();
+  const { settings: saasSettings, loading: saasLoading } = useSaaSSettings();
   const { toast } = useToast();
   const [passwordData, setPasswordData] = useState({
     current: '',
     new: '',
     confirm: ''
+  });
+  
+  const [showSecrets, setShowSecrets] = useState({
+    resend_api_key: false,
+    stripe_secret_key: false,
+    stripe_publishable_key: false,
+    twilio_sid: false,
+    twilio_token: false
   });
 
   const handleToggle2FA = async (enabled: boolean) => {
@@ -67,7 +76,24 @@ export default function SuperAdminSeguranca() {
     });
   };
 
-  if (loading) {
+  const toggleSecretVisibility = (key: keyof typeof showSecrets) => {
+    setShowSecrets(prev => ({ ...prev, [key]: !prev[key] }));
+  };
+
+  const copyToClipboard = (text: string, label: string) => {
+    navigator.clipboard.writeText(text);
+    toast({
+      title: "Copiado!",
+      description: `${label} copiado para a área de transferência`,
+    });
+  };
+
+  const maskSecret = (secret: string | null, show: boolean) => {
+    if (!secret) return '-';
+    return show ? secret : '••••••••••••••••••••';
+  };
+
+  if (loading || saasLoading) {
     return <div className="p-6">Carregando...</div>;
   }
 
@@ -272,6 +298,208 @@ export default function SuperAdminSeguranca() {
               </div>
               <Badge className="bg-red-100 text-red-800">Falha</Badge>
             </div>
+          </div>
+        </CardContent>
+      </Card>
+
+      {/* Visualização de Chaves e Tokens */}
+      <Card>
+        <CardHeader>
+          <CardTitle className="flex items-center gap-2">
+            <Key className="h-5 w-5" />
+            Chaves e Tokens de API
+          </CardTitle>
+          <CardDescription>
+            Visualize e copie suas chaves de API e tokens de integração
+          </CardDescription>
+        </CardHeader>
+        <CardContent className="space-y-6">
+          {/* Resend API Key */}
+          <div className="space-y-2">
+            <Label className="text-sm font-medium">Chave API Resend</Label>
+            <div className="flex items-center gap-2">
+              <Input
+                type="text"
+                value={maskSecret(saasSettings?.resend_api_key || null, showSecrets.resend_api_key)}
+                readOnly
+                className="font-mono text-sm"
+              />
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => toggleSecretVisibility('resend_api_key')}
+              >
+                {showSecrets.resend_api_key ? (
+                  <EyeOff className="h-4 w-4" />
+                ) : (
+                  <Eye className="h-4 w-4" />
+                )}
+              </Button>
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => copyToClipboard(saasSettings?.resend_api_key || '', 'Chave API Resend')}
+                disabled={!saasSettings?.resend_api_key}
+              >
+                <Copy className="h-4 w-4" />
+              </Button>
+            </div>
+          </div>
+
+          {/* Stripe Publishable Key */}
+          <div className="space-y-2">
+            <Label className="text-sm font-medium">Chave Pública Stripe</Label>
+            <div className="flex items-center gap-2">
+              <Input
+                type="text"
+                value={maskSecret(saasSettings?.stripe_publishable_key || null, showSecrets.stripe_publishable_key)}
+                readOnly
+                className="font-mono text-sm"
+              />
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => toggleSecretVisibility('stripe_publishable_key')}
+              >
+                {showSecrets.stripe_publishable_key ? (
+                  <EyeOff className="h-4 w-4" />
+                ) : (
+                  <Eye className="h-4 w-4" />
+                )}
+              </Button>
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => copyToClipboard(saasSettings?.stripe_publishable_key || '', 'Chave Pública Stripe')}
+                disabled={!saasSettings?.stripe_publishable_key}
+              >
+                <Copy className="h-4 w-4" />
+              </Button>
+            </div>
+          </div>
+
+          {/* Stripe Secret Key */}
+          <div className="space-y-2">
+            <Label className="text-sm font-medium">Chave Secreta Stripe</Label>
+            <div className="flex items-center gap-2">
+              <Input
+                type="text"
+                value={maskSecret(saasSettings?.stripe_secret_key || null, showSecrets.stripe_secret_key)}
+                readOnly
+                className="font-mono text-sm"
+              />
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => toggleSecretVisibility('stripe_secret_key')}
+              >
+                {showSecrets.stripe_secret_key ? (
+                  <EyeOff className="h-4 w-4" />
+                ) : (
+                  <Eye className="h-4 w-4" />
+                )}
+              </Button>
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => copyToClipboard(saasSettings?.stripe_secret_key || '', 'Chave Secreta Stripe')}
+                disabled={!saasSettings?.stripe_secret_key}
+              >
+                <Copy className="h-4 w-4" />
+              </Button>
+            </div>
+          </div>
+
+          {/* Twilio Account SID */}
+          <div className="space-y-2">
+            <Label className="text-sm font-medium">Twilio Account SID</Label>
+            <div className="flex items-center gap-2">
+              <Input
+                type="text"
+                value={maskSecret(saasSettings?.sms_provider_config?.account_sid || null, showSecrets.twilio_sid)}
+                readOnly
+                className="font-mono text-sm"
+              />
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => toggleSecretVisibility('twilio_sid')}
+              >
+                {showSecrets.twilio_sid ? (
+                  <EyeOff className="h-4 w-4" />
+                ) : (
+                  <Eye className="h-4 w-4" />
+                )}
+              </Button>
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => copyToClipboard(saasSettings?.sms_provider_config?.account_sid || '', 'Twilio Account SID')}
+                disabled={!saasSettings?.sms_provider_config?.account_sid}
+              >
+                <Copy className="h-4 w-4" />
+              </Button>
+            </div>
+          </div>
+
+          {/* Twilio Auth Token */}
+          <div className="space-y-2">
+            <Label className="text-sm font-medium">Twilio Auth Token</Label>
+            <div className="flex items-center gap-2">
+              <Input
+                type="text"
+                value={maskSecret(saasSettings?.sms_provider_config?.auth_token || null, showSecrets.twilio_token)}
+                readOnly
+                className="font-mono text-sm"
+              />
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => toggleSecretVisibility('twilio_token')}
+              >
+                {showSecrets.twilio_token ? (
+                  <EyeOff className="h-4 w-4" />
+                ) : (
+                  <Eye className="h-4 w-4" />
+                )}
+              </Button>
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => copyToClipboard(saasSettings?.sms_provider_config?.auth_token || '', 'Twilio Auth Token')}
+                disabled={!saasSettings?.sms_provider_config?.auth_token}
+              >
+                <Copy className="h-4 w-4" />
+              </Button>
+            </div>
+          </div>
+
+          {/* Email Settings */}
+          <div className="space-y-2">
+            <Label className="text-sm font-medium">Email Remetente</Label>
+            <div className="flex items-center gap-2">
+              <Input
+                type="text"
+                value={saasSettings?.sender_email || '-'}
+                readOnly
+                className="font-mono text-sm"
+              />
+              <Button
+                variant="outline"
+                size="sm"
+                onClick={() => copyToClipboard(saasSettings?.sender_email || '', 'Email Remetente')}
+                disabled={!saasSettings?.sender_email}
+              >
+                <Copy className="h-4 w-4" />
+              </Button>
+            </div>
+          </div>
+
+          <div className="mt-4 p-4 bg-yellow-50 border border-yellow-200 rounded-lg">
+            <p className="text-sm text-yellow-800">
+              <strong>Atenção:</strong> Mantenha suas chaves de API seguras e nunca as compartilhe. 
+              Use os botões de visualização apenas quando necessário.
+            </p>
           </div>
         </CardContent>
       </Card>

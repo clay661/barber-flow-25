@@ -4,8 +4,110 @@ import { Input } from "@/components/ui/input";
 import { Label } from "@/components/ui/label";
 import { Textarea } from "@/components/ui/textarea";
 import { Settings, Mail, CreditCard, MessageSquare, Upload } from "lucide-react";
+import { useSaaSSettings } from "@/hooks/useSuperAdminData";
+import { useState, useEffect } from "react";
+import { useToast } from "@/hooks/use-toast";
 
 export default function SuperAdminConfiguracoes() {
+  const { settings, loading, updateSettings } = useSaaSSettings();
+  const { toast } = useToast();
+  
+  const [formData, setFormData] = useState({
+    name: '',
+    description: '',
+    domain: '',
+    logo_url: '',
+    sender_email: '',
+    sender_name: '',
+    resend_api_key: '',
+    stripe_publishable_key: '',
+    stripe_secret_key: '',
+    stripe_webhook_secret: '',
+    sms_provider: '',
+    sms_number: '',
+    twilio_sid: '',
+    twilio_token: ''
+  });
+
+  useEffect(() => {
+    if (settings) {
+      setFormData({
+        name: settings.name || '',
+        description: '',
+        domain: '',
+        logo_url: settings.logo_url || '',
+        sender_email: settings.sender_email || '',
+        sender_name: '',
+        resend_api_key: settings.resend_api_key || '',
+        stripe_publishable_key: settings.stripe_publishable_key || '',
+        stripe_secret_key: settings.stripe_secret_key || '',
+        stripe_webhook_secret: '',
+        sms_provider: settings.sms_provider_config?.provider || '',
+        sms_number: settings.sms_provider_config?.number || '',
+        twilio_sid: settings.sms_provider_config?.account_sid || '',
+        twilio_token: settings.sms_provider_config?.auth_token || ''
+      });
+    }
+  }, [settings]);
+
+  const handleSaveGeneral = async () => {
+    try {
+      await updateSettings({
+        name: formData.name,
+        logo_url: formData.logo_url
+      });
+      console.info("OK: General settings saved");
+    } catch (error) {
+      console.error("Error saving general settings:", error);
+    }
+  };
+
+  const handleSaveEmail = async () => {
+    try {
+      await updateSettings({
+        sender_email: formData.sender_email,
+        resend_api_key: formData.resend_api_key
+      });
+      console.info("OK: Email settings saved");
+    } catch (error) {
+      console.error("Error saving email settings:", error);
+    }
+  };
+
+  const handleSaveStripe = async () => {
+    try {
+      await updateSettings({
+        stripe_publishable_key: formData.stripe_publishable_key,
+        stripe_secret_key: formData.stripe_secret_key
+      });
+      console.info("OK: Stripe settings saved");
+    } catch (error) {
+      console.error("Error saving Stripe settings:", error);
+    }
+  };
+
+  const handleSaveSMS = async () => {
+    try {
+      const smsProviderConfig = {
+        provider: formData.sms_provider,
+        number: formData.sms_number,
+        account_sid: formData.twilio_sid,
+        auth_token: formData.twilio_token
+      };
+      
+      await updateSettings({
+        sms_provider_config: smsProviderConfig
+      });
+      console.info("OK: SMS settings saved");
+    } catch (error) {
+      console.error("Error saving SMS settings:", error);
+    }
+  };
+
+  if (loading) {
+    return <div className="p-6">Carregando configurações...</div>;
+  }
+
   return (
     <div className="space-y-6">
       <div>
@@ -33,7 +135,8 @@ export default function SuperAdminConfiguracoes() {
               <Input
                 id="saas-name"
                 placeholder="Nexio SaaS"
-                defaultValue="Nexio SaaS"
+                value={formData.name}
+                onChange={(e) => setFormData(prev => ({ ...prev, name: e.target.value }))}
               />
             </div>
             <div className="space-y-2">
@@ -41,7 +144,8 @@ export default function SuperAdminConfiguracoes() {
               <Input
                 id="saas-domain"
                 placeholder="app.nexio.com"
-                defaultValue="app.nexio.com"
+                value={formData.domain}
+                onChange={(e) => setFormData(prev => ({ ...prev, domain: e.target.value }))}
               />
             </div>
           </div>
@@ -51,7 +155,8 @@ export default function SuperAdminConfiguracoes() {
             <Textarea
               id="saas-description"
               placeholder="Sistema completo para gestão de salões de beleza e barbearias"
-              defaultValue="Sistema completo para gestão de salões de beleza e barbearias"
+              value={formData.description}
+              onChange={(e) => setFormData(prev => ({ ...prev, description: e.target.value }))}
               rows={3}
             />
           </div>
@@ -69,7 +174,7 @@ export default function SuperAdminConfiguracoes() {
             </div>
           </div>
 
-          <Button>Salvar Alterações</Button>
+          <Button onClick={handleSaveGeneral}>Salvar Alterações</Button>
         </CardContent>
       </Card>
 
@@ -92,7 +197,8 @@ export default function SuperAdminConfiguracoes() {
                 id="sender-email"
                 type="email"
                 placeholder="noreply@nexio.com"
-                defaultValue="noreply@nexio.com"
+                value={formData.sender_email}
+                onChange={(e) => setFormData(prev => ({ ...prev, sender_email: e.target.value }))}
               />
             </div>
             <div className="space-y-2">
@@ -100,7 +206,8 @@ export default function SuperAdminConfiguracoes() {
               <Input
                 id="sender-name"
                 placeholder="Nexio SaaS"
-                defaultValue="Nexio SaaS"
+                value={formData.sender_name}
+                onChange={(e) => setFormData(prev => ({ ...prev, sender_name: e.target.value }))}
               />
             </div>
           </div>
@@ -111,11 +218,12 @@ export default function SuperAdminConfiguracoes() {
               id="resend-api"
               type="password"
               placeholder="re_xxxxxxxxxxxxxxxxx"
-              defaultValue="••••••••••••••••••••"
+              value={formData.resend_api_key}
+              onChange={(e) => setFormData(prev => ({ ...prev, resend_api_key: e.target.value }))}
             />
           </div>
 
-          <Button>Salvar Configurações</Button>
+          <Button onClick={handleSaveEmail}>Salvar Configurações</Button>
         </CardContent>
       </Card>
 
@@ -137,7 +245,8 @@ export default function SuperAdminConfiguracoes() {
               <Input
                 id="stripe-public"
                 placeholder="pk_test_..."
-                defaultValue="pk_test_••••••••••••••••••••"
+                value={formData.stripe_publishable_key}
+                onChange={(e) => setFormData(prev => ({ ...prev, stripe_publishable_key: e.target.value }))}
               />
             </div>
             <div className="space-y-2">
@@ -146,7 +255,8 @@ export default function SuperAdminConfiguracoes() {
                 id="stripe-secret"
                 type="password"
                 placeholder="sk_test_..."
-                defaultValue="••••••••••••••••••••"
+                value={formData.stripe_secret_key}
+                onChange={(e) => setFormData(prev => ({ ...prev, stripe_secret_key: e.target.value }))}
               />
             </div>
           </div>
@@ -157,11 +267,12 @@ export default function SuperAdminConfiguracoes() {
               id="webhook-secret"
               type="password"
               placeholder="whsec_..."
-              defaultValue="••••••••••••••••••••"
+              value={formData.stripe_webhook_secret}
+              onChange={(e) => setFormData(prev => ({ ...prev, stripe_webhook_secret: e.target.value }))}
             />
           </div>
 
-          <Button>Salvar Configurações</Button>
+          <Button onClick={handleSaveStripe}>Salvar Configurações</Button>
         </CardContent>
       </Card>
 
@@ -183,7 +294,8 @@ export default function SuperAdminConfiguracoes() {
               <Input
                 id="sms-provider"
                 placeholder="Twilio"
-                defaultValue="Twilio"
+                value={formData.sms_provider}
+                onChange={(e) => setFormData(prev => ({ ...prev, sms_provider: e.target.value }))}
               />
             </div>
             <div className="space-y-2">
@@ -191,7 +303,8 @@ export default function SuperAdminConfiguracoes() {
               <Input
                 id="sms-number"
                 placeholder="+55 11 99999-9999"
-                defaultValue="+55 11 99999-9999"
+                value={formData.sms_number}
+                onChange={(e) => setFormData(prev => ({ ...prev, sms_number: e.target.value }))}
               />
             </div>
           </div>
@@ -203,7 +316,8 @@ export default function SuperAdminConfiguracoes() {
                 id="twilio-sid"
                 type="password"
                 placeholder="AC..."
-                defaultValue="••••••••••••••••••••"
+                value={formData.twilio_sid}
+                onChange={(e) => setFormData(prev => ({ ...prev, twilio_sid: e.target.value }))}
               />
             </div>
             <div className="space-y-2">
@@ -212,12 +326,13 @@ export default function SuperAdminConfiguracoes() {
                 id="twilio-token"
                 type="password"
                 placeholder="..."
-                defaultValue="••••••••••••••••••••"
+                value={formData.twilio_token}
+                onChange={(e) => setFormData(prev => ({ ...prev, twilio_token: e.target.value }))}
               />
             </div>
           </div>
 
-          <Button>Salvar Configurações</Button>
+          <Button onClick={handleSaveSMS}>Salvar Configurações</Button>
         </CardContent>
       </Card>
     </div>

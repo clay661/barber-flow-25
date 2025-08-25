@@ -38,6 +38,20 @@ export interface SecuritySettings {
   updated_at: string;
 }
 
+export interface SubscriptionPlan {
+  id: string;
+  name: string;
+  description: string | null;
+  price_monthly: number;
+  price_yearly: number | null;
+  features: any;
+  status: 'active' | 'inactive';
+  stripe_price_id: string | null;
+  trial_days: number;
+  created_at: string;
+  updated_at: string;
+}
+
 export function useDiscountCoupons() {
   const [coupons, setCoupons] = useState<DiscountCoupon[]>([]);
   const [loading, setLoading] = useState(true);
@@ -278,6 +292,99 @@ export function useAffiliates() {
   };
 }
 
+export interface SaaSSettings {
+  id: string;
+  name: string;
+  logo_url: string | null;
+  sender_email: string | null;
+  resend_api_key: string | null;
+  stripe_publishable_key: string | null;
+  stripe_secret_key: string | null;
+  sms_provider_config: any | null;
+  created_at: string;
+  updated_at: string;
+}
+
+export function useSaaSSettings() {
+  const [settings, setSettings] = useState<SaaSSettings | null>(null);
+  const [loading, setLoading] = useState(true);
+  const { toast } = useToast();
+
+  const fetchSettings = async () => {
+    try {
+      const { data, error } = await supabase
+        .from('saas_settings')
+        .select('*')
+        .single();
+
+      if (error && error.code !== 'PGRST116') throw error;
+      setSettings(data as SaaSSettings || null);
+    } catch (error) {
+      console.error('Error fetching SaaS settings:', error);
+      toast({
+        title: "Erro",
+        description: "Erro ao carregar configurações do SaaS",
+        variant: "destructive",
+      });
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const updateSettings = async (updates: Partial<SaaSSettings>) => {
+    try {
+      let data;
+      if (settings) {
+        const { data: updateData, error } = await supabase
+          .from('saas_settings')
+          .update(updates)
+          .eq('id', settings.id)
+          .select()
+          .single();
+
+        if (error) throw error;
+        data = updateData;
+      } else {
+        const { data: insertData, error } = await supabase
+          .from('saas_settings')
+          .insert([updates])
+          .select()
+          .single();
+
+        if (error) throw error;
+        data = insertData;
+      }
+
+      setSettings(data as SaaSSettings);
+      toast({
+        title: "Sucesso",
+        description: "Configurações salvas com sucesso",
+      });
+      console.info("OK: SaaS settings updated successfully");
+      return data;
+    } catch (error) {
+      console.error('Error updating SaaS settings:', error);
+      toast({
+        title: "Erro",
+        description: "Erro ao salvar configurações",
+        variant: "destructive",
+      });
+      throw error;
+    }
+  };
+
+  useEffect(() => {
+    fetchSettings();
+  }, []);
+
+  return {
+    settings,
+    loading,
+    updateSettings,
+    refetch: fetchSettings
+  };
+}
+
 export function useSecuritySettings() {
   const [settings, setSettings] = useState<SecuritySettings | null>(null);
   const [loading, setLoading] = useState(true);
@@ -354,5 +461,155 @@ export function useSecuritySettings() {
     loading,
     updateSettings,
     refetch: fetchSettings
+  };
+}
+
+export function useSubscriptionPlans() {
+  const [plans, setPlans] = useState<SubscriptionPlan[]>([]);
+  const [loading, setLoading] = useState(true);
+  const { toast } = useToast();
+
+  const fetchPlans = async () => {
+    try {
+      const { data, error } = await supabase
+        .from('subscription_plans')
+        .select('*')
+        .order('price_monthly');
+
+      if (error) throw error;
+      setPlans(data as SubscriptionPlan[] || []);
+      console.info("OK: Subscription plans loaded successfully");
+    } catch (error) {
+      console.error('Error fetching subscription plans:', error);
+      toast({
+        title: "Erro",
+        description: "Erro ao carregar planos",
+        variant: "destructive",
+      });
+    } finally {
+      setLoading(false);
+    }
+  };
+
+  const createPlan = async (planData: Omit<SubscriptionPlan, 'id' | 'created_at' | 'updated_at'>) => {
+    try {
+      const { data, error } = await supabase
+        .from('subscription_plans')
+        .insert([planData])
+        .select()
+        .single();
+
+      if (error) throw error;
+      
+      setPlans(prev => [...prev, data as SubscriptionPlan]);
+      toast({
+        title: "Sucesso",
+        description: "Plano criado com sucesso",
+      });
+      console.info("OK: Subscription plan created:", data.id);
+      return data;
+    } catch (error) {
+      console.error('Error creating subscription plan:', error);
+      toast({
+        title: "Erro",
+        description: "Erro ao criar plano",
+        variant: "destructive",
+      });
+      throw error;
+    }
+  };
+
+  const updatePlan = async (id: string, updates: Partial<SubscriptionPlan>) => {
+    try {
+      const { data, error } = await supabase
+        .from('subscription_plans')
+        .update(updates)
+        .eq('id', id)
+        .select()
+        .single();
+
+      if (error) throw error;
+
+      setPlans(prev => prev.map(plan => plan.id === id ? data as SubscriptionPlan : plan));
+      toast({
+        title: "Sucesso",
+        description: "Plano atualizado com sucesso",
+      });
+      console.info("OK: Subscription plan updated:", id);
+      return data;
+    } catch (error) {
+      console.error('Error updating subscription plan:', error);
+      toast({
+        title: "Erro",
+        description: "Erro ao atualizar plano",
+        variant: "destructive",
+      });
+      throw error;
+    }
+  };
+
+  const togglePlanStatus = async (id: string, currentStatus: string) => {
+    const newStatus = currentStatus === 'active' ? 'inactive' : 'active';
+    return updatePlan(id, { status: newStatus as 'active' | 'inactive' });
+  };
+
+  const deletePlan = async (id: string) => {
+    try {
+      const { error } = await supabase
+        .from('subscription_plans')
+        .delete()
+        .eq('id', id);
+
+      if (error) throw error;
+
+      setPlans(prev => prev.filter(plan => plan.id !== id));
+      toast({
+        title: "Sucesso",
+        description: "Plano excluído com sucesso",
+      });
+      console.info("OK: Subscription plan deleted:", id);
+    } catch (error) {
+      console.error('Error deleting subscription plan:', error);
+      toast({
+        title: "Erro",
+        description: "Erro ao excluir plano",
+        variant: "destructive",
+      });
+      throw error;
+    }
+  };
+
+  const formatCurrency = (value: number) => {
+    return new Intl.NumberFormat('pt-BR', {
+      style: 'currency',
+      currency: 'BRL'
+    }).format(value);
+  };
+
+  const getStatusBadge = (status: string) => {
+    switch (status) {
+      case 'active':
+        return { className: "bg-green-100 text-green-800", text: "Ativo" };
+      case 'inactive':
+        return { className: "bg-gray-100 text-gray-800", text: "Inativo" };
+      default:
+        return { className: "bg-gray-100 text-gray-800", text: status };
+    }
+  };
+
+  useEffect(() => {
+    fetchPlans();
+  }, []);
+
+  return {
+    plans,
+    loading,
+    createPlan,
+    updatePlan,
+    togglePlanStatus,
+    deletePlan,
+    formatCurrency,
+    getStatusBadge,
+    refetch: fetchPlans
   };
 }
