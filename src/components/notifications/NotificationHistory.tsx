@@ -58,6 +58,8 @@ export function NotificationHistory({ history, loading }: NotificationHistoryPro
     const providerNames = {
       twilio: 'Twilio (SMS)',
       ultramsg: 'UltraMsg (WhatsApp)',
+      email: 'E-mail',
+      both: 'E-mail + SMS/WhatsApp',
       none: 'Não configurado'
     } as const;
 

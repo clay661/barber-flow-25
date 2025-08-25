@@ -9,6 +9,12 @@ export interface NotificationSettings {
   auth_token: string;
   phone_number: string;
   is_active: boolean;
+  notification_mode: 'sms_whatsapp' | 'email' | 'both';
+  smtp_host?: string;
+  smtp_port?: number;
+  smtp_user?: string;
+  smtp_password?: string;
+  from_email?: string;
   created_at: string;
   updated_at: string;
 }
