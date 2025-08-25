@@ -60,20 +60,20 @@ export default function Financas() {
   );
 
   return (
-    <div className="space-y-6">
-      <div className="flex items-center justify-between">
+    <div className="space-y-4 md:space-y-6">
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
-          <h1 className="text-3xl font-bold text-foreground">Finanças</h1>
+          <h1 className="text-2xl md:text-3xl font-bold text-foreground">Finanças</h1>
           <p className="text-muted-foreground">
             Acompanhe a performance financeira da barbearia
           </p>
         </div>
-        <div className="flex gap-2">
+        <div className="flex gap-2 w-full sm:w-auto">
           <Button 
             variant={selectedPeriod === "diario" ? "default" : "outline"}
             size="sm"
             onClick={() => setSelectedPeriod("diario")}
-            className="hover-glow"
+            className="hover-glow flex-1 sm:flex-none"
           >
             Dia
           </Button>
@@ -81,7 +81,7 @@ export default function Financas() {
             variant={selectedPeriod === "semanal" ? "default" : "outline"}
             size="sm"
             onClick={() => setSelectedPeriod("semanal")}
-            className="hover-glow"
+            className="hover-glow flex-1 sm:flex-none"
           >
             Semana
           </Button>
@@ -89,7 +89,7 @@ export default function Financas() {
             variant={selectedPeriod === "mensal" ? "default" : "outline"}
             size="sm"
             onClick={() => setSelectedPeriod("mensal")}
-            className="hover-glow"
+            className="hover-glow flex-1 sm:flex-none"
           >
             Mês
           </Button>
@@ -97,8 +97,8 @@ export default function Financas() {
       </div>
 
       {/* Cards de Resumo Financeiro */}
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
-        <Card className="col-span-1 md:col-span-2 hover-card">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
+        <Card className="col-span-1 sm:col-span-2 lg:col-span-2 hover-card">
           <CardHeader className="pb-2">
             <CardTitle className="text-sm font-medium text-muted-foreground flex items-center gap-2">
               <DollarSign className="h-4 w-4" />
@@ -106,7 +106,7 @@ export default function Financas() {
             </CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="text-3xl font-bold text-foreground mb-2">
+            <div className="text-2xl md:text-3xl font-bold text-foreground mb-2">
               R$ {getRevenueByPeriod().toLocaleString('pt-BR')}
             </div>
             <div className="flex items-center gap-2 text-sm">
@@ -124,7 +124,7 @@ export default function Financas() {
             </CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold text-foreground">{totalTransactions}</div>
+            <div className="text-xl md:text-2xl font-bold text-foreground">{totalTransactions}</div>
             <p className="text-xs text-muted-foreground">Total de vendas</p>
           </CardContent>
         </Card>
@@ -136,7 +136,7 @@ export default function Financas() {
             </CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold text-accent">R$ {averageTicket}</div>
+            <div className="text-xl md:text-2xl font-bold text-accent">R$ {averageTicket}</div>
             <p className="text-xs text-muted-foreground">Por atendimento</p>
           </CardContent>
         </Card>
@@ -151,7 +151,7 @@ export default function Financas() {
           </CardTitle>
         </CardHeader>
         <CardContent>
-          <div className="h-64 flex items-center justify-center bg-gradient-to-br from-accent/10 to-transparent rounded-lg">
+          <div className="h-48 md:h-64 flex items-center justify-center bg-gradient-to-br from-accent/10 to-transparent rounded-lg">
             <div className="text-center">
               <BarChart3 className="h-12 w-12 text-accent mx-auto mb-2 animate-glow-pulse" />
               <p className="text-muted-foreground">Gráfico de receita semanal</p>
@@ -169,16 +169,16 @@ export default function Financas() {
             Últimas Transações
           </CardTitle>
         </CardHeader>
-        <CardContent>
-          <div className="rounded-md border">
+        <CardContent className="p-0 sm:p-6">
+          <div className="table-responsive">
             <Table>
               <TableHeader>
                 <TableRow>
-                  <TableHead>Data</TableHead>
-                  <TableHead>Cliente</TableHead>
-                  <TableHead>Serviço</TableHead>
-                  <TableHead>Método</TableHead>
-                  <TableHead className="text-right">Valor</TableHead>
+                  <TableHead className="w-[100px] sm:w-auto">Data</TableHead>
+                  <TableHead className="w-[120px] sm:w-auto">Cliente</TableHead>
+                  <TableHead className="w-[120px] sm:w-auto hidden md:table-cell">Serviço</TableHead>
+                  <TableHead className="w-[100px] sm:w-auto hidden sm:table-cell">Método</TableHead>
+                  <TableHead className="text-right w-[80px] sm:w-auto">Valor</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
@@ -186,18 +186,18 @@ export default function Financas() {
                   const PaymentIcon = paymentMethodIcons[transaction.method as keyof typeof paymentMethodIcons];
                   return (
                     <TableRow key={transaction.id}>
-                      <TableCell>
+                      <TableCell className="text-xs sm:text-sm">
                         {new Date(transaction.date).toLocaleDateString('pt-BR')}
                       </TableCell>
-                      <TableCell className="font-medium">{transaction.client}</TableCell>
-                      <TableCell>{transaction.service}</TableCell>
-                      <TableCell>
+                      <TableCell className="font-medium text-sm">{transaction.client}</TableCell>
+                      <TableCell className="hidden md:table-cell text-sm">{transaction.service}</TableCell>
+                      <TableCell className="hidden sm:table-cell">
                         <div className="flex items-center gap-2">
                           <PaymentIcon className="h-4 w-4 text-muted-foreground" />
-                          <Badge variant="outline">{transaction.method}</Badge>
+                          <Badge variant="outline" className="text-xs">{transaction.method}</Badge>
                         </div>
                       </TableCell>
-                      <TableCell className="text-right font-medium text-success">
+                      <TableCell className="text-right font-medium text-success text-sm">
                         R$ {transaction.amount}
                       </TableCell>
                     </TableRow>

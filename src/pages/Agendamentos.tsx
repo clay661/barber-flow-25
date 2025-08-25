@@ -92,22 +92,22 @@ export default function Agendamentos() {
   const confirmedAppointments = mockAppointments.filter(a => a.status === "Confirmado").length;
 
   return (
-    <div className="space-y-6">
-      <div className="flex items-center justify-between">
+    <div className="space-y-4 md:space-y-6">
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
-          <h1 className="text-3xl font-bold text-foreground">Agendamentos</h1>
+          <h1 className="text-2xl md:text-3xl font-bold text-foreground">Agendamentos</h1>
           <p className="text-muted-foreground">
             Gerencie os agendamentos da barbearia
           </p>
         </div>
-        <Button className="bg-primary hover:bg-primary/90 hover-gold">
+        <Button className="bg-primary hover:bg-primary/90 hover-gold w-full sm:w-auto">
           <Plus className="h-4 w-4 mr-2" />
           Novo Agendamento
         </Button>
       </div>
 
       {/* Cards de Resumo */}
-      <div className="grid grid-cols-1 md:grid-cols-4 gap-4">
+      <div className="grid grid-cols-2 sm:grid-cols-2 lg:grid-cols-4 gap-4">
         <Card className="hover-card">
           <CardHeader className="pb-2">
             <CardTitle className="text-sm font-medium text-muted-foreground flex items-center gap-2">
@@ -116,7 +116,7 @@ export default function Agendamentos() {
             </CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold text-foreground">{todayAppointments}</div>
+            <div className="text-xl md:text-2xl font-bold text-foreground">{todayAppointments}</div>
           </CardContent>
         </Card>
 
@@ -128,7 +128,7 @@ export default function Agendamentos() {
             </CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold text-accent">{totalAppointments}</div>
+            <div className="text-xl md:text-2xl font-bold text-accent">{totalAppointments}</div>
           </CardContent>
         </Card>
 
@@ -139,7 +139,7 @@ export default function Agendamentos() {
             </CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold text-success">{confirmedAppointments}</div>
+            <div className="text-xl md:text-2xl font-bold text-success">{confirmedAppointments}</div>
           </CardContent>
         </Card>
 
@@ -150,48 +150,50 @@ export default function Agendamentos() {
             </CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold text-foreground">
+            <div className="text-xl md:text-2xl font-bold text-foreground">
               R$ {filteredAppointments.reduce((sum, a) => sum + a.price, 0)}
             </div>
           </CardContent>
         </Card>
       </div>
 
-      {/* Filtros e Lista */}
+      {/* Lista de Agendamentos */}
       <Card>
         <CardHeader>
           <CardTitle>Lista de Agendamentos</CardTitle>
         </CardHeader>
-        <CardContent>
-          <div className="flex items-center gap-4 mb-6">
-            <div className="relative flex-1 max-w-sm">
-              <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground h-4 w-4" />
+        <CardContent className="p-0 sm:p-6">
+          <div className="p-4 sm:p-0 mb-4 space-y-4 sm:space-y-0">
+            <div className="flex flex-col sm:flex-row gap-4">
+              <div className="relative flex-1">
+                <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground h-4 w-4" />
+                <Input
+                  placeholder="Buscar agendamentos..."
+                  value={searchTerm}
+                  onChange={(e) => setSearchTerm(e.target.value)}
+                  className="pl-10 w-full"
+                />
+              </div>
               <Input
-                placeholder="Buscar agendamentos..."
-                value={searchTerm}
-                onChange={(e) => setSearchTerm(e.target.value)}
-                className="pl-10"
+                type="date"
+                value={selectedDate}
+                onChange={(e) => setSelectedDate(e.target.value)}
+                className="w-full sm:w-auto"
               />
             </div>
-            <Input
-              type="date"
-              value={selectedDate}
-              onChange={(e) => setSelectedDate(e.target.value)}
-              className="w-auto"
-            />
           </div>
 
-          <div className="rounded-md border">
+          <div className="table-responsive">
             <Table>
               <TableHeader>
                 <TableRow>
-                  <TableHead>Cliente</TableHead>
-                  <TableHead>Serviço</TableHead>
-                  <TableHead>Barbeiro</TableHead>
-                  <TableHead>Horário</TableHead>
-                  <TableHead>Status</TableHead>
-                  <TableHead>Valor</TableHead>
-                  <TableHead className="text-right">Ações</TableHead>
+                  <TableHead className="w-[120px] sm:w-auto">Cliente</TableHead>
+                  <TableHead className="w-[120px] sm:w-auto hidden md:table-cell">Serviço</TableHead>
+                  <TableHead className="w-[100px] sm:w-auto hidden lg:table-cell">Barbeiro</TableHead>
+                  <TableHead className="w-[80px] sm:w-auto">Horário</TableHead>
+                  <TableHead className="w-[80px] sm:w-auto">Status</TableHead>
+                  <TableHead className="w-[80px] sm:w-auto hidden sm:table-cell">Valor</TableHead>
+                  <TableHead className="text-right w-[100px] sm:w-auto">Ações</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
@@ -200,33 +202,33 @@ export default function Agendamentos() {
                     <TableCell>
                       <div className="flex items-center gap-2">
                         <User className="h-4 w-4 text-muted-foreground" />
-                        <span className="font-medium">{appointment.client}</span>
+                        <span className="font-medium text-sm">{appointment.client}</span>
                       </div>
                     </TableCell>
-                    <TableCell>
+                    <TableCell className="hidden md:table-cell">
                       <div className="flex items-center gap-2">
                         <Scissors className="h-4 w-4 text-accent" />
-                        {appointment.service}
+                        <span className="text-sm">{appointment.service}</span>
                       </div>
                     </TableCell>
-                    <TableCell>{appointment.barber}</TableCell>
+                    <TableCell className="hidden lg:table-cell text-sm">{appointment.barber}</TableCell>
                     <TableCell>
                       <div className="flex items-center gap-2">
                         <Clock className="h-4 w-4 text-muted-foreground" />
-                        {appointment.time}
+                        <span className="text-sm">{appointment.time}</span>
                       </div>
                     </TableCell>
                     <TableCell>{getStatusBadge(appointment.status)}</TableCell>
-                    <TableCell className="font-medium">
+                    <TableCell className="font-medium hidden sm:table-cell text-sm">
                       R$ {appointment.price}
                     </TableCell>
                     <TableCell className="text-right">
-                      <div className="flex justify-end gap-2">
-                        <Button variant="ghost" size="icon" className="hover-glow">
-                          <Edit className="h-4 w-4" />
+                      <div className="flex justify-end gap-1 sm:gap-2">
+                        <Button variant="ghost" size="icon" className="hover-glow h-8 w-8 p-0 sm:h-9 sm:w-9">
+                          <Edit className="h-3 w-3 sm:h-4 sm:w-4" />
                         </Button>
-                        <Button variant="ghost" size="icon" className="text-destructive hover:text-destructive hover-darken">
-                          <X className="h-4 w-4" />
+                        <Button variant="ghost" size="icon" className="text-destructive hover:text-destructive hover-darken h-8 w-8 p-0 sm:h-9 sm:w-9">
+                          <X className="h-3 w-3 sm:h-4 sm:w-4" />
                         </Button>
                       </div>
                     </TableCell>

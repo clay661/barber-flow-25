@@ -67,22 +67,22 @@ export default function Clientes() {
   );
 
   return (
-    <div className="space-y-6">
-      <div className="flex items-center justify-between">
+    <div className="space-y-4 md:space-y-6">
+      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
-          <h1 className="text-3xl font-bold text-foreground">Clientes</h1>
+          <h1 className="text-2xl md:text-3xl font-bold text-foreground">Clientes</h1>
           <p className="text-muted-foreground">
             Gerencie sua base de clientes
           </p>
         </div>
-        <Button className="bg-primary hover:bg-primary/90 hover-gold">
+        <Button className="bg-primary hover:bg-primary/90 hover-gold w-full sm:w-auto">
           <Plus className="h-4 w-4 mr-2" />
           Novo Cliente
         </Button>
       </div>
 
       {/* Cards de Resumo */}
-      <div className="grid grid-cols-1 md:grid-cols-3 gap-4">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
         <Card className="hover-card">
           <CardHeader className="pb-2">
             <CardTitle className="text-sm font-medium text-muted-foreground">
@@ -90,7 +90,7 @@ export default function Clientes() {
             </CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold text-foreground">{mockClients.length}</div>
+            <div className="text-xl md:text-2xl font-bold text-foreground">{mockClients.length}</div>
           </CardContent>
         </Card>
 
@@ -101,85 +101,87 @@ export default function Clientes() {
             </CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold text-success">2</div>
+            <div className="text-xl md:text-2xl font-bold text-success">2</div>
           </CardContent>
         </Card>
 
-        <Card className="hover-card">
+        <Card className="hover-card sm:col-span-2 lg:col-span-1">
           <CardHeader className="pb-2">
             <CardTitle className="text-sm font-medium text-muted-foreground">
               Clientes Ativos
             </CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold text-accent">{mockClients.length}</div>
+            <div className="text-xl md:text-2xl font-bold text-accent">{mockClients.length}</div>
           </CardContent>
         </Card>
       </div>
 
-      {/* Filtros e Busca */}
+      {/* Lista de Clientes */}
       <Card>
         <CardHeader>
           <CardTitle>Lista de Clientes</CardTitle>
         </CardHeader>
-        <CardContent>
-          <div className="flex items-center gap-4 mb-6">
-            <div className="relative flex-1 max-w-sm">
+        <CardContent className="p-0 sm:p-6">
+          <div className="p-4 sm:p-0 mb-4">
+            <div className="relative w-full">
               <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground h-4 w-4" />
               <Input
                 placeholder="Buscar por nome, telefone ou email..."
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
-                className="pl-10"
+                className="pl-10 w-full"
               />
             </div>
           </div>
 
-          <div className="rounded-md border">
+          <div className="table-responsive">
             <Table>
               <TableHeader>
                 <TableRow>
-                  <TableHead>Nome</TableHead>
-                  <TableHead>Contato</TableHead>
-                  <TableHead>Data de Cadastro</TableHead>
-                  <TableHead>Visitas</TableHead>
-                  <TableHead className="text-right">Ações</TableHead>
+                  <TableHead className="w-[150px] sm:w-auto">Nome</TableHead>
+                  <TableHead className="w-[150px] sm:w-auto hidden md:table-cell">Contato</TableHead>
+                  <TableHead className="w-[120px] sm:w-auto">Telefone</TableHead>
+                  <TableHead className="w-[100px] sm:w-auto hidden lg:table-cell">Data Cadastro</TableHead>
+                  <TableHead className="w-[80px] sm:w-auto">Visitas</TableHead>
+                  <TableHead className="text-right w-[100px] sm:w-auto">Ações</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
                 {filteredClients.map((client) => (
                   <TableRow key={client.id}>
                     <TableCell>
-                      <div className="font-medium">{client.name}</div>
+                      <div className="font-medium text-sm">{client.name}</div>
                     </TableCell>
-                    <TableCell>
+                    <TableCell className="hidden md:table-cell">
                       <div className="space-y-1">
-                        <div className="flex items-center gap-2 text-sm">
+                        <div className="flex items-center gap-2 text-xs">
                           <Phone className="h-3 w-3 text-muted-foreground" />
                           {client.phone}
                         </div>
-                        <div className="flex items-center gap-2 text-sm">
+                        <div className="flex items-center gap-2 text-xs">
                           <Mail className="h-3 w-3 text-muted-foreground" />
                           {client.email}
                         </div>
                       </div>
                     </TableCell>
-                    <TableCell>
-                      <div className="flex items-center gap-2">
+                    <TableCell className="md:hidden text-sm">{client.phone}</TableCell>
+                    <TableCell className="hidden lg:table-cell">
+                      <div className="flex items-center gap-2 text-sm">
                         <CalendarIcon className="h-3 w-3 text-muted-foreground" />
                         {new Date(client.createdAt).toLocaleDateString('pt-BR')}
                       </div>
                     </TableCell>
                     <TableCell>
-                      <Badge variant="secondary">{client.totalVisits} visitas</Badge>
+                      <Badge variant="secondary" className="text-xs">{client.totalVisits} visitas</Badge>
                     </TableCell>
                     <TableCell className="text-right">
-                      <div className="flex justify-end gap-2">
-                        <Button variant="ghost" size="icon" className="hover-glow">
-                          <Edit className="h-4 w-4" />
+                      <div className="flex justify-end gap-1 sm:gap-2">
+                        <Button variant="ghost" size="icon" className="hover-glow h-8 w-8 p-0 sm:h-9 sm:w-9">
+                          <Edit className="h-3 w-3 sm:h-4 sm:w-4" />
                         </Button>
-                        <Button variant="ghost" size="icon" className="text-destructive hover:text-destructive hover-darken">
-                          <Trash2 className="h-4 w-4" />
+                        <Button variant="ghost" size="icon" className="text-destructive hover:text-destructive hover-darken h-8 w-8 p-0 sm:h-9 sm:w-9">
+                          <Trash2 className="h-3 w-3 sm:h-4 sm:w-4" />
                         </Button>
                       </div>
                     </TableCell>
