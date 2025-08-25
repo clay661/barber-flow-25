@@ -1,7 +1,68 @@
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from "@/components/ui/card";
 import { Building2, Users, DollarSign, CreditCard } from "lucide-react";
+import { useDashboardData } from "@/hooks/useDashboardData";
 
 export default function SuperAdminDashboard() {
+  const { stats, recentPayments, loading } = useDashboardData();
+
+  const formatCurrency = (value: number) => {
+    return new Intl.NumberFormat('pt-BR', {
+      style: 'currency',
+      currency: 'BRL'
+    }).format(value / 100); // Assumindo que valores estão em centavos
+  };
+
+  const getStatusColor = (status: string) => {
+    switch (status) {
+      case 'succeeded':
+      case 'paid':
+        return 'bg-green-500';
+      case 'pending':
+        return 'bg-yellow-500';
+      case 'failed':
+        return 'bg-red-500';
+      default:
+        return 'bg-gray-500';
+    }
+  };
+
+  const getStatusText = (status: string) => {
+    switch (status) {
+      case 'succeeded':
+        return 'Pago';
+      case 'pending':
+        return 'Pendente';
+      case 'failed':
+        return 'Falhou';
+      default:
+        return status;
+    }
+  };
+
+  const getStatusTextColor = (status: string) => {
+    switch (status) {
+      case 'succeeded':
+        return 'text-green-600';
+      case 'pending':
+        return 'text-yellow-600';
+      case 'failed':
+        return 'text-red-600';
+      default:
+        return 'text-gray-600';
+    }
+  };
+
+  if (loading) {
+    return (
+      <div className="space-y-6">
+        <div>
+          <h1 className="text-3xl font-bold text-foreground">Dashboard Super Admin</h1>
+          <p className="text-muted-foreground mt-2">Carregando dados...</p>
+        </div>
+      </div>
+    );
+  }
+
   return (
     <div className="space-y-6">
       <div>
@@ -19,7 +80,7 @@ export default function SuperAdminDashboard() {
             <Building2 className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">12</div>
+            <div className="text-2xl font-bold">{stats.totalTenants}</div>
             <p className="text-xs text-muted-foreground">
               Empresas cadastradas
             </p>
@@ -32,7 +93,7 @@ export default function SuperAdminDashboard() {
             <Users className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">48</div>
+            <div className="text-2xl font-bold">{stats.totalUsers}</div>
             <p className="text-xs text-muted-foreground">
               Funcionários ativos
             </p>
@@ -45,7 +106,7 @@ export default function SuperAdminDashboard() {
             <DollarSign className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold">R$ 4.560,00</div>
+            <div className="text-2xl font-bold">{formatCurrency(stats.monthlyRevenue)}</div>
             <p className="text-xs text-muted-foreground">
               Mês atual
             </p>
@@ -58,9 +119,9 @@ export default function SuperAdminDashboard() {
             <CreditCard className="h-4 w-4 text-muted-foreground" />
           </CardHeader>
           <CardContent>
-            <div className="text-2xl font-bold text-green-600">8</div>
+            <div className="text-2xl font-bold text-green-600">{stats.activeSubscriptions}</div>
             <p className="text-xs text-muted-foreground">
-              4 canceladas
+              {stats.canceledSubscriptions} canceladas
             </p>
           </CardContent>
         </Card>
@@ -76,47 +137,31 @@ export default function SuperAdminDashboard() {
         </CardHeader>
         <CardContent>
           <div className="space-y-4">
-            <div className="flex items-center justify-between p-4 border rounded-lg">
-              <div className="flex items-center gap-3">
-                <div className="h-2 w-2 rounded-full bg-green-500" />
-                <div>
-                  <p className="font-medium">Salão da Maria</p>
-                  <p className="text-sm text-muted-foreground">15/01/2025</p>
+            {recentPayments.length > 0 ? (
+              recentPayments.map((payment) => (
+                <div key={payment.id} className="flex items-center justify-between p-4 border rounded-lg">
+                  <div className="flex items-center gap-3">
+                    <div className={`h-2 w-2 rounded-full ${getStatusColor(payment.status)}`} />
+                    <div>
+                      <p className="font-medium">{payment.tenant_name}</p>
+                      <p className="text-sm text-muted-foreground">
+                        {new Date(payment.payment_date).toLocaleDateString('pt-BR')}
+                      </p>
+                    </div>
+                  </div>
+                  <div className="text-right">
+                    <p className="font-medium">{formatCurrency(payment.amount)}</p>
+                    <p className={`text-sm ${getStatusTextColor(payment.status)}`}>
+                      {getStatusText(payment.status)}
+                    </p>
+                  </div>
                 </div>
+              ))
+            ) : (
+              <div className="text-center py-8 text-muted-foreground">
+                Nenhum pagamento encontrado
               </div>
-              <div className="text-right">
-                <p className="font-medium">R$ 99,90</p>
-                <p className="text-sm text-green-600">Pago</p>
-              </div>
-            </div>
-
-            <div className="flex items-center justify-between p-4 border rounded-lg">
-              <div className="flex items-center gap-3">
-                <div className="h-2 w-2 rounded-full bg-green-500" />
-                <div>
-                  <p className="font-medium">Barbearia do João</p>
-                  <p className="text-sm text-muted-foreground">14/01/2025</p>
-                </div>
-              </div>
-              <div className="text-right">
-                <p className="font-medium">R$ 149,90</p>
-                <p className="text-sm text-green-600">Pago</p>
-              </div>
-            </div>
-
-            <div className="flex items-center justify-between p-4 border rounded-lg">
-              <div className="flex items-center gap-3">
-                <div className="h-2 w-2 rounded-full bg-yellow-500" />
-                <div>
-                  <p className="font-medium">Estética Bella</p>
-                  <p className="text-sm text-muted-foreground">10/01/2025</p>
-                </div>
-              </div>
-              <div className="text-right">
-                <p className="font-medium">R$ 199,90</p>
-                <p className="text-sm text-yellow-600">Pendente</p>
-              </div>
-            </div>
+            )}
           </div>
         </CardContent>
       </Card>
