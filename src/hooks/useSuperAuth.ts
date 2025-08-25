@@ -19,6 +19,9 @@ const SuperAuthContext = createContext<SuperAuthContextType | undefined>(undefin
 export function useSuperAuth() {
   const context = useContext(SuperAuthContext);
   if (context === undefined) {
+    // Adicionar mais informações de debug
+    console.error('useSuperAuth called outside SuperAuthProvider. Current location:', window.location.pathname);
+    console.error('SuperAuthContext:', SuperAuthContext);
     throw new Error('useSuperAuth must be used within a SuperAuthProvider');
   }
   return context;
