@@ -227,29 +227,30 @@ export function usePublicBooking(publicLink: string) {
         if (result.error) throw result.error;
       }
 
-      // Enviar notificação de confirmação
-      if (appointmentResults.length > 0 && appointmentResults[0].data) {
+      // Enviar e-mail de confirmação se habilitado
+      if (bookingData.clientEmail && appointmentResults.length > 0 && appointmentResults[0].data) {
         try {
           const employeeName = employees.find(e => e.id === bookingData.selectedEmployee)?.name || 'Profissional';
           const salonName = salonSettings?.name || 'Salão';
           const serviceNames = selectedServices.map(s => s.name).join(', ');
           const appointmentDate = new Date(`${bookingData.selectedDate}T${bookingData.selectedTime}:00`);
-          const formattedDate = appointmentDate.toLocaleDateString('pt-BR');
           const formattedTime = appointmentDate.toLocaleTimeString('pt-BR', { hour: '2-digit', minute: '2-digit' });
 
-          const message = `Olá ${bookingData.clientName}, seu agendamento em ${salonName} foi confirmado para ${formattedDate} às ${formattedTime}. Serviços: ${serviceNames}. Profissional: ${employeeName}.`;
-
-          // Enviar notificação usando o primeiro agendamento criado como referência
-          await supabase.functions.invoke('send-notification', {
+          await supabase.functions.invoke('send-appointment-email', {
             body: {
-              clientPhone: bookingData.clientPhone,
-              message: message,
-              appointmentId: appointmentResults[0].data.id
+              appointmentId: appointmentResults[0].data.id,
+              clientEmail: bookingData.clientEmail,
+              clientName: bookingData.clientName,
+              serviceName: serviceNames,
+              employeeName: employeeName,
+              appointmentDate: bookingData.selectedDate,
+              appointmentTime: formattedTime,
+              salonName: salonName
             }
           });
-        } catch (notificationError) {
-          console.error('Error sending notification:', notificationError);
-          // Não falhar o agendamento se a notificação falhar
+        } catch (emailError) {
+          console.error('Error sending appointment email:', emailError);
+          // Não falhar o agendamento se o e-mail falhar
         }
       }
 

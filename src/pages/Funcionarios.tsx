@@ -72,7 +72,9 @@ export default function Funcionarios() {
     name: "",
     telefone: "",
     role: "FUNCIONARIO" as "ADMIN" | "SUBADMIN" | "FUNCIONARIO" | "RECEPCIONISTA",
-    status: "ativo" as "ativo" | "inativo"
+    status: "ativo" as "ativo" | "inativo",
+    commission_type: "percentage" as "percentage" | "fixed",
+    commission_value: 0
   });
 
   const filteredEmployees = employees.filter(employee =>
@@ -89,7 +91,9 @@ export default function Funcionarios() {
         name: employee.name,
         telefone: employee.telefone || "",
         role: employee.role,
-        status: employee.status
+        status: employee.status,
+        commission_type: employee.commission_type,
+        commission_value: employee.commission_value
       });
     } else {
       setEditingEmployee(null);
@@ -97,7 +101,9 @@ export default function Funcionarios() {
         name: "",
         telefone: "",
         role: "FUNCIONARIO",
-        status: "ativo"
+        status: "ativo",
+        commission_type: "percentage",
+        commission_value: 0
       });
     }
     setIsDialogOpen(true);
@@ -110,7 +116,9 @@ export default function Funcionarios() {
       name: "",
       telefone: "",
       role: "FUNCIONARIO",
-      status: "ativo"
+      status: "ativo",
+      commission_type: "percentage",
+      commission_value: 0
     });
   };
 
@@ -368,6 +376,35 @@ export default function Funcionarios() {
                   <SelectItem value="RECEPCIONISTA">Recepcionista</SelectItem>
                 </SelectContent>
               </Select>
+            </div>
+            <div className="grid gap-2">
+              <Label htmlFor="commission-type">Tipo de Comissão</Label>
+              <Select 
+                value={formData.commission_type} 
+                onValueChange={(value) => setFormData(prev => ({ ...prev, commission_type: value as typeof formData.commission_type }))}
+              >
+                <SelectTrigger>
+                  <SelectValue placeholder="Selecione o tipo" />
+                </SelectTrigger>
+                <SelectContent>
+                  <SelectItem value="percentage">Percentual (%)</SelectItem>
+                  <SelectItem value="fixed">Valor Fixo (R$)</SelectItem>
+                </SelectContent>
+              </Select>
+            </div>
+            <div className="grid gap-2">
+              <Label htmlFor="commission-value">
+                Valor da Comissão ({formData.commission_type === 'percentage' ? '%' : 'R$'})
+              </Label>
+              <Input
+                id="commission-value"
+                type="number"
+                min="0"
+                step={formData.commission_type === 'percentage' ? '0.1' : '0.01'}
+                value={formData.commission_value}
+                onChange={(e) => setFormData(prev => ({ ...prev, commission_value: parseFloat(e.target.value) || 0 }))}
+                placeholder={formData.commission_type === 'percentage' ? '10' : '50.00'}
+              />
             </div>
             <div className="grid gap-2">
               <Label htmlFor="status">Status</Label>

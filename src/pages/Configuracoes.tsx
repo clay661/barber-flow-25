@@ -43,6 +43,7 @@ export default function Configuracoes() {
     phone: '',
     scheduling_interval: 30,
     notifications_enabled: true,
+    email_notifications_enabled: true,
   });
   const [isSaving, setIsSaving] = useState(false);
   const [isSavingHours, setIsSavingHours] = useState(false);
@@ -58,6 +59,7 @@ export default function Configuracoes() {
         phone: settings.phone || '',
         scheduling_interval: settings.scheduling_interval || 30,
         notifications_enabled: settings.notifications_enabled ?? true,
+        email_notifications_enabled: settings.email_notifications_enabled ?? true,
       });
       
       // Carregar horários de funcionamento
@@ -206,11 +208,20 @@ export default function Configuracoes() {
             </div>
             
             <div className="flex items-center justify-between">
-              <Label htmlFor="notifications">Notificações Automáticas</Label>
+              <Label htmlFor="notifications">Notificações SMS/WhatsApp</Label>
               <Switch 
                 id="notifications" 
                 checked={formData.notifications_enabled}
                 onCheckedChange={(checked) => setFormData({...formData, notifications_enabled: checked})}
+              />
+            </div>
+            
+            <div className="flex items-center justify-between">
+              <Label htmlFor="email-notifications">Notificações por E-mail</Label>
+              <Switch 
+                id="email-notifications" 
+                checked={formData.email_notifications_enabled}
+                onCheckedChange={(checked) => setFormData({...formData, email_notifications_enabled: checked})}
               />
             </div>
             

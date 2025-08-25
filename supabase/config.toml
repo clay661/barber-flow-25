@@ -56,6 +56,9 @@ verify_jwt = false
 [functions.appointment-reminders]
 verify_jwt = false
 
+[functions.send-appointment-email]
+verify_jwt = false
+
 [analytics]
 enabled = false
 port = 54327

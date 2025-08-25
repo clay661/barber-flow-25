@@ -10,6 +10,8 @@ export interface Employee {
   status: 'ativo' | 'inativo';
   pro_email: string | null;
   pro_password: string | null;
+  commission_type: 'percentage' | 'fixed';
+  commission_value: number;
   created_at: string;
 }
 

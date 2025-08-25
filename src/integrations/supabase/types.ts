@@ -104,6 +104,8 @@ export type Database = {
       }
       employees: {
         Row: {
+          commission_type: string | null
+          commission_value: number | null
           created_at: string | null
           id: string
           name: string
@@ -114,6 +116,8 @@ export type Database = {
           telefone: string | null
         }
         Insert: {
+          commission_type?: string | null
+          commission_value?: number | null
           created_at?: string | null
           id?: string
           name: string
@@ -124,6 +128,8 @@ export type Database = {
           telefone?: string | null
         }
         Update: {
+          commission_type?: string | null
+          commission_value?: number | null
           created_at?: string | null
           id?: string
           name?: string
@@ -236,6 +242,7 @@ export type Database = {
           banner_url: string | null
           created_at: string
           description: string | null
+          email_notifications_enabled: boolean | null
           id: string
           logo_url: string | null
           name: string
@@ -251,6 +258,7 @@ export type Database = {
           banner_url?: string | null
           created_at?: string
           description?: string | null
+          email_notifications_enabled?: boolean | null
           id?: string
           logo_url?: string | null
           name?: string
@@ -266,6 +274,7 @@ export type Database = {
           banner_url?: string | null
           created_at?: string
           description?: string | null
+          email_notifications_enabled?: boolean | null
           id?: string
           logo_url?: string | null
           name?: string

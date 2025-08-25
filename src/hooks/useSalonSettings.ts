@@ -13,6 +13,7 @@ export interface SalonSettings {
   phone: string | null;
   scheduling_interval: number | null;
   notifications_enabled: boolean | null;
+  email_notifications_enabled: boolean | null;
   created_at: string;
   updated_at: string;
 }
@@ -40,6 +41,7 @@ export function useSalonSettings() {
               phone: '',
               scheduling_interval: 30,
               notifications_enabled: true,
+              email_notifications_enabled: true,
               working_hours: {
                 monday: { start: "08:00", end: "18:00", active: true },
                 tuesday: { start: "08:00", end: "18:00", active: true },
