@@ -14,7 +14,8 @@ import {
   User,
   X,
   Check,
-  Loader2
+  Loader2,
+  Users
 } from "lucide-react";
 import {
   Table,
@@ -49,46 +50,45 @@ import {
   SelectValue,
 } from "@/components/ui/select";
 import { Label } from "@/components/ui/label";
-import { useEmployees, Employee } from "@/hooks/useEmployees";
+import { useClients, Client } from "@/hooks/useClients";
 
-export default function Funcionarios() {
-  const { employees, loading, createEmployee, updateEmployee, deleteEmployee } = useEmployees();
+export default function Clientes() {
+  const { clients, loading, createClient, updateClient, deleteClient } = useClients();
   const [searchTerm, setSearchTerm] = useState("");
   const [isDialogOpen, setIsDialogOpen] = useState(false);
   const [isDeleteDialogOpen, setIsDeleteDialogOpen] = useState(false);
-  const [editingEmployee, setEditingEmployee] = useState<Employee | null>(null);
-  const [deletingEmployee, setDeletingEmployee] = useState<Employee | null>(null);
+  const [editingClient, setEditingClient] = useState<Client | null>(null);
+  const [deletingClient, setDeletingClient] = useState<Client | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
 
   const [formData, setFormData] = useState({
     name: "",
     telefone: "",
-    role: "FUNCIONARIO" as "ADMIN" | "SUBADMIN" | "FUNCIONARIO" | "RECEPCIONISTA",
+    email: "",
     status: "ativo" as "ativo" | "inativo"
   });
 
-  const filteredEmployees = employees.filter(employee =>
-    employee.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
-    (employee.telefone && employee.telefone.includes(searchTerm)) ||
-    (employee.pro_email && employee.pro_email.toLowerCase().includes(searchTerm.toLowerCase())) ||
-    employee.role.toLowerCase().includes(searchTerm.toLowerCase())
+  const filteredClients = clients.filter(client =>
+    client.name.toLowerCase().includes(searchTerm.toLowerCase()) ||
+    (client.telefone && client.telefone.includes(searchTerm)) ||
+    (client.email && client.email.toLowerCase().includes(searchTerm.toLowerCase()))
   );
 
-  const handleOpenDialog = (employee?: Employee) => {
-    if (employee) {
-      setEditingEmployee(employee);
+  const handleOpenDialog = (client?: Client) => {
+    if (client) {
+      setEditingClient(client);
       setFormData({
-        name: employee.name,
-        telefone: employee.telefone || "",
-        role: employee.role,
-        status: employee.status
+        name: client.name,
+        telefone: client.telefone || "",
+        email: client.email || "",
+        status: client.status
       });
     } else {
-      setEditingEmployee(null);
+      setEditingClient(null);
       setFormData({
         name: "",
         telefone: "",
-        role: "FUNCIONARIO",
+        email: "",
         status: "ativo"
       });
     }
@@ -97,60 +97,50 @@ export default function Funcionarios() {
 
   const handleCloseDialog = () => {
     setIsDialogOpen(false);
-    setEditingEmployee(null);
+    setEditingClient(null);
     setFormData({
       name: "",
       telefone: "",
-      role: "FUNCIONARIO",
+      email: "",
       status: "ativo"
     });
   };
 
   const handleSave = async () => {
-    if (!formData.name || !formData.telefone) {
+    if (!formData.name) {
       return;
     }
 
     setIsSubmitting(true);
     try {
-      if (editingEmployee) {
-        await updateEmployee(editingEmployee.id, formData);
+      if (editingClient) {
+        await updateClient(editingClient.id, formData);
       } else {
-        await createEmployee(formData);
+        await createClient(formData);
       }
       handleCloseDialog();
     } catch (error) {
-      console.error('Erro ao salvar funcionário:', error);
+      console.error('Erro ao salvar cliente:', error);
     } finally {
       setIsSubmitting(false);
     }
   };
 
   const handleDelete = async () => {
-    if (deletingEmployee) {
+    if (deletingClient) {
       try {
-        await deleteEmployee(deletingEmployee.id);
+        await deleteClient(deletingClient.id);
         setIsDeleteDialogOpen(false);
-        setDeletingEmployee(null);
+        setDeletingClient(null);
       } catch (error) {
-        console.error('Erro ao deletar funcionário:', error);
+        console.error('Erro ao deletar cliente:', error);
       }
     }
   };
 
-  const openDeleteDialog = (employee: Employee) => {
-    setDeletingEmployee(employee);
+  const openDeleteDialog = (client: Client) => {
+    setDeletingClient(client);
     setIsDeleteDialogOpen(true);
-  };
-
-  const getRoleDisplayName = (role: string) => {
-    const roleMap = {
-      'ADMIN': 'Administrador',
-      'SUBADMIN': 'Sub-administrador',
-      'FUNCIONARIO': 'Funcionário',
-      'RECEPCIONISTA': 'Recepcionista'
-    };
-    return roleMap[role as keyof typeof roleMap] || role;
   };
 
   if (loading) {
@@ -165,9 +155,9 @@ export default function Funcionarios() {
     <div className="space-y-4 md:space-y-6">
       <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
         <div>
-          <h1 className="text-2xl md:text-3xl font-bold text-foreground">Funcionários</h1>
+          <h1 className="text-2xl md:text-3xl font-bold text-foreground">Clientes</h1>
           <p className="text-muted-foreground">
-            Gerencie sua equipe de profissionais
+            Gerencie seus clientes
           </p>
         </div>
         <Button 
@@ -175,61 +165,79 @@ export default function Funcionarios() {
           className="bg-primary hover:bg-primary/90 hover-gold w-full sm:w-auto"
         >
           <Plus className="h-4 w-4 mr-2" />
-          Novo Funcionário
+          Novo Cliente
         </Button>
       </div>
 
       {/* Cards de Resumo */}
-      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-3 gap-4">
+      <div className="grid grid-cols-1 sm:grid-cols-2 lg:grid-cols-4 gap-4">
         <Card className="hover-card">
           <CardHeader className="pb-2">
-            <CardTitle className="text-sm font-medium text-muted-foreground">
-              Total de Funcionários
+            <CardTitle className="text-sm font-medium text-muted-foreground flex items-center gap-2">
+              <Users className="h-4 w-4" />
+              Total de Clientes
             </CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="text-xl md:text-2xl font-bold text-foreground">{employees.length}</div>
+            <div className="text-xl md:text-2xl font-bold text-foreground">{clients.length}</div>
           </CardContent>
         </Card>
 
         <Card className="hover-card">
           <CardHeader className="pb-2">
             <CardTitle className="text-sm font-medium text-muted-foreground">
-              Funcionários Ativos
+              Clientes Ativos
             </CardTitle>
           </CardHeader>
           <CardContent>
             <div className="text-xl md:text-2xl font-bold text-success">
-              {employees.filter(f => f.status === 'ativo').length}
+              {clients.filter(c => c.status === 'ativo').length}
             </div>
           </CardContent>
         </Card>
 
-        <Card className="hover-card sm:col-span-2 lg:col-span-1">
+        <Card className="hover-card">
           <CardHeader className="pb-2">
             <CardTitle className="text-sm font-medium text-muted-foreground">
-              Funcionários Inativos
+              Total de Visitas
             </CardTitle>
           </CardHeader>
           <CardContent>
-            <div className="text-xl md:text-2xl font-bold text-destructive">
-              {employees.filter(f => f.status === 'inativo').length}
+            <div className="text-xl md:text-2xl font-bold text-foreground">
+              {clients.reduce((sum, client) => sum + (client.total_visits || 0), 0)}
+            </div>
+          </CardContent>
+        </Card>
+
+        <Card className="hover-card">
+          <CardHeader className="pb-2">
+            <CardTitle className="text-sm font-medium text-muted-foreground">
+              Novos este Mês
+            </CardTitle>
+          </CardHeader>
+          <CardContent>
+            <div className="text-xl md:text-2xl font-bold text-primary">
+              {clients.filter(c => {
+                const clientDate = new Date(c.created_at);
+                const now = new Date();
+                return clientDate.getMonth() === now.getMonth() && clientDate.getFullYear() === now.getFullYear();
+              }).length}
             </div>
           </CardContent>
         </Card>
       </div>
 
-      {/* Lista de Funcionários */}
+      {/* Lista de Clientes */}
       <Card>
         <CardHeader>
-          <CardTitle>Lista de Funcionários</CardTitle>
+          <CardTitle>Lista de Clientes</CardTitle>
         </CardHeader>
         <CardContent className="p-0 sm:p-6">
           <div className="p-4 sm:p-0 mb-4">
             <div className="relative w-full">
               <Search className="absolute left-3 top-1/2 transform -translate-y-1/2 text-muted-foreground h-4 w-4" />
               <Input
-                placeholder="Buscar por nome, telefone, email ou função..."
+                placeholder="Buscar por nome, telefone ou email..."
                 value={searchTerm}
                 onChange={(e) => setSearchTerm(e.target.value)}
                 className="pl-10 w-full"
@@ -244,45 +252,45 @@ export default function Funcionarios() {
                   <TableHead className="w-[150px] sm:w-auto">Nome</TableHead>
                   <TableHead className="w-[120px] sm:w-auto">Telefone</TableHead>
                   <TableHead className="w-[150px] sm:w-auto hidden md:table-cell">E-mail</TableHead>
-                  <TableHead className="w-[120px] sm:w-auto">Função</TableHead>
                   <TableHead className="w-[80px] sm:w-auto hidden sm:table-cell">Status</TableHead>
+                  <TableHead className="w-[80px] sm:w-auto hidden lg:table-cell">Visitas</TableHead>
                   <TableHead className="w-[100px] sm:w-auto hidden lg:table-cell">Data Cadastro</TableHead>
                   <TableHead className="text-right w-[100px] sm:w-auto">Ações</TableHead>
                 </TableRow>
               </TableHeader>
               <TableBody>
-                {filteredEmployees.map((employee) => (
-                  <TableRow key={employee.id}>
+                {filteredClients.map((client) => (
+                  <TableRow key={client.id}>
                     <TableCell>
                       <div className="flex items-center gap-2">
                         <User className="h-4 w-4 text-muted-foreground" />
-                        <div className="font-medium text-sm">{employee.name}</div>
+                        <div className="font-medium text-sm">{client.name}</div>
                       </div>
                     </TableCell>
                     <TableCell>
                       <div className="flex items-center gap-2 text-sm">
                         <Phone className="h-3 w-3 text-muted-foreground" />
-                        {employee.telefone || '-'}
+                        {client.telefone || '-'}
                       </div>
                     </TableCell>
                     <TableCell className="hidden md:table-cell">
                       <div className="flex items-center gap-2 text-sm">
                         <Mail className="h-3 w-3 text-muted-foreground" />
-                        {employee.pro_email || '-'}
+                        {client.email || '-'}
                       </div>
                     </TableCell>
-                    <TableCell>
-                      <Badge variant="secondary" className="text-xs">{getRoleDisplayName(employee.role)}</Badge>
-                    </TableCell>
                     <TableCell className="hidden sm:table-cell">
-                      <Badge variant={employee.status === 'ativo' ? 'default' : 'secondary'} className="text-xs">
-                        {employee.status === 'ativo' ? 'Ativo' : 'Inativo'}
+                      <Badge variant={client.status === 'ativo' ? 'default' : 'secondary'} className="text-xs">
+                        {client.status === 'ativo' ? 'Ativo' : 'Inativo'}
                       </Badge>
+                    </TableCell>
+                    <TableCell className="hidden lg:table-cell">
+                      <div className="text-sm font-medium">{client.total_visits || 0}</div>
                     </TableCell>
                     <TableCell className="hidden lg:table-cell">
                       <div className="flex items-center gap-2 text-sm">
                         <CalendarIcon className="h-3 w-3 text-muted-foreground" />
-                        {new Date(employee.created_at).toLocaleDateString('pt-BR')}
+                        {new Date(client.created_at).toLocaleDateString('pt-BR')}
                       </div>
                     </TableCell>
                     <TableCell className="text-right">
@@ -291,7 +299,7 @@ export default function Funcionarios() {
                           variant="ghost" 
                           size="icon" 
                           className="hover-glow h-8 w-8 p-0 sm:h-9 sm:w-9"
-                          onClick={() => handleOpenDialog(employee)}
+                          onClick={() => handleOpenDialog(client)}
                         >
                           <Edit className="h-3 w-3 sm:h-4 sm:w-4" />
                         </Button>
@@ -299,7 +307,7 @@ export default function Funcionarios() {
                           variant="ghost" 
                           size="icon" 
                           className="text-destructive hover:text-destructive hover-darken h-8 w-8 p-0 sm:h-9 sm:w-9"
-                          onClick={() => openDeleteDialog(employee)}
+                          onClick={() => openDeleteDialog(client)}
                         >
                           <Trash2 className="h-3 w-3 sm:h-4 sm:w-4" />
                         </Button>
@@ -318,7 +326,7 @@ export default function Funcionarios() {
         <DialogContent className="sm:max-w-[425px]">
           <DialogHeader>
             <DialogTitle>
-              {editingEmployee ? 'Editar Funcionário' : 'Novo Funcionário'}
+              {editingClient ? 'Editar Cliente' : 'Novo Cliente'}
             </DialogTitle>
           </DialogHeader>
           <div className="grid gap-4 py-4">
@@ -341,18 +349,14 @@ export default function Funcionarios() {
               />
             </div>
             <div className="grid gap-2">
-              <Label htmlFor="role">Função</Label>
-              <Select value={formData.role} onValueChange={(value) => setFormData(prev => ({ ...prev, role: value as typeof formData.role }))}>
-                <SelectTrigger>
-                  <SelectValue placeholder="Selecione uma função" />
-                </SelectTrigger>
-                <SelectContent>
-                  <SelectItem value="ADMIN">Administrador</SelectItem>
-                  <SelectItem value="SUBADMIN">Sub-administrador</SelectItem>
-                  <SelectItem value="FUNCIONARIO">Funcionário</SelectItem>
-                  <SelectItem value="RECEPCIONISTA">Recepcionista</SelectItem>
-                </SelectContent>
-              </Select>
+              <Label htmlFor="email">E-mail</Label>
+              <Input
+                id="email"
+                type="email"
+                value={formData.email}
+                onChange={(e) => setFormData(prev => ({ ...prev, email: e.target.value }))}
+                placeholder="email@exemplo.com"
+              />
             </div>
             <div className="grid gap-2">
               <Label htmlFor="status">Status</Label>
@@ -366,11 +370,6 @@ export default function Funcionarios() {
                 </SelectContent>
               </Select>
             </div>
-            {!editingEmployee && (
-              <div className="text-sm text-muted-foreground p-3 bg-muted rounded-md">
-                <strong>Nota:</strong> Email profissional e senha serão gerados automaticamente após o cadastro.
-              </div>
-            )}
           </div>
           <DialogFooter>
             <Button variant="outline" onClick={handleCloseDialog}>
@@ -380,7 +379,7 @@ export default function Funcionarios() {
             <Button onClick={handleSave} className="hover-gold" disabled={isSubmitting}>
               {isSubmitting && <Loader2 className="h-4 w-4 mr-2 animate-spin" />}
               {!isSubmitting && <Check className="h-4 w-4 mr-2" />}
-              {editingEmployee ? 'Atualizar' : 'Cadastrar'}
+              {editingClient ? 'Atualizar' : 'Cadastrar'}
             </Button>
           </DialogFooter>
         </DialogContent>
@@ -392,7 +391,7 @@ export default function Funcionarios() {
           <AlertDialogHeader>
             <AlertDialogTitle>Confirmar exclusão</AlertDialogTitle>
             <AlertDialogDescription>
-              Tem certeza que deseja excluir o funcionário <strong>{deletingEmployee?.name}</strong>? 
+              Tem certeza que deseja excluir o cliente <strong>{deletingClient?.name}</strong>? 
               Esta ação não pode ser desfeita.
             </AlertDialogDescription>
           </AlertDialogHeader>
