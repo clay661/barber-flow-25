@@ -29,7 +29,7 @@ const getMenuItemsByRole = (role: string) => {
     { title: "Dashboard", url: "/", icon: LayoutDashboard },
   ];
 
-  if (role === 'ADMIN' || role === 'SUBADMIN') {
+  if (role === 'ADMIN') {
     return [
       ...baseItems,
       { title: "Clientes", url: "/clientes", icon: Users },
@@ -39,6 +39,17 @@ const getMenuItemsByRole = (role: string) => {
       { title: "Finanças", url: "/financas", icon: DollarSign },
       { title: "Divulgação", url: "/divulgacao", icon: Share2 },
       { title: "Configurações", url: "/configuracoes", icon: Settings },
+    ];
+  }
+
+  if (role === 'SUBADMIN') {
+    return [
+      ...baseItems,
+      { title: "Clientes", url: "/clientes", icon: Users },
+      { title: "Agendamentos", url: "/agendamentos", icon: Calendar },
+      { title: "Serviços", url: "/servicos", icon: Scissors },
+      { title: "Relatório do Dia", url: "/financas-subadmin", icon: DollarSign },
+      { title: "Configurações", url: "/perfil", icon: Settings },
     ];
   }
 

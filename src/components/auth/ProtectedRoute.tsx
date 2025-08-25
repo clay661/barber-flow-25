@@ -5,9 +5,10 @@ import { useAuth } from '@/hooks/useAuth';
 interface ProtectedRouteProps {
   children: React.ReactNode;
   adminOnly?: boolean;
+  subAdminOnly?: boolean;
 }
 
-export function ProtectedRoute({ children, adminOnly = false }: ProtectedRouteProps) {
+export function ProtectedRoute({ children, adminOnly = false, subAdminOnly = false }: ProtectedRouteProps) {
   const { employee, loading } = useAuth();
 
   if (loading) {
@@ -23,6 +24,10 @@ export function ProtectedRoute({ children, adminOnly = false }: ProtectedRoutePr
   }
 
   if (adminOnly && employee.role !== 'ADMIN') {
+    return <Navigate to="/" replace />;
+  }
+
+  if (subAdminOnly && employee.role !== 'SUBADMIN') {
     return <Navigate to="/" replace />;
   }
 

@@ -2,6 +2,7 @@ import { useAuth } from "@/hooks/useAuth";
 import { AdminDashboard } from "@/components/dashboard/AdminDashboard";
 import { EmployeeDashboard } from "@/components/dashboard/EmployeeDashboard";
 import { ReceptionistDashboard } from "@/components/dashboard/ReceptionistDashboard";
+import { SubAdminDashboard } from "@/components/dashboard/SubAdminDashboard";
 
 export default function Dashboard() {
   const { employee } = useAuth();
@@ -15,8 +16,12 @@ export default function Dashboard() {
   }
 
   // Renderizar dashboard baseado no role
-  if (employee.role === 'ADMIN' || employee.role === 'SUBADMIN') {
+  if (employee.role === 'ADMIN') {
     return <AdminDashboard />;
+  }
+
+  if (employee.role === 'SUBADMIN') {
+    return <SubAdminDashboard />;
   }
 
   if (employee.role === 'FUNCIONARIO') {

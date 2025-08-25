@@ -19,6 +19,7 @@ import Login from "./pages/Login";
 import PublicBooking from "./pages/PublicBooking";
 import NotFound from "./pages/NotFound";
 import Divulgacao from "./pages/Divulgacao";
+import FinancasSubAdmin from "./pages/FinancasSubAdmin";
 
 const queryClient = new QueryClient();
 
@@ -52,6 +53,11 @@ const App = () => (
               <Route path="financas" element={
                 <ProtectedRoute adminOnly>
                   <Financas />
+                </ProtectedRoute>
+              } />
+              <Route path="financas-subadmin" element={
+                <ProtectedRoute subAdminOnly>
+                  <FinancasSubAdmin />
                 </ProtectedRoute>
               } />
               <Route path="divulgacao" element={
