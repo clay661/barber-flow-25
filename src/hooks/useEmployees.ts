@@ -51,11 +51,17 @@ export const useEmployees = () => {
       if (error) throw error;
 
       setEmployees(prev => [data as Employee, ...prev]);
-      toast({
-        title: 'Sucesso',
-        description: `Funcionário cadastrado! Email: ${data.pro_email} | Senha: ${data.pro_password}`,
-      });
-      return data;
+      
+      // Retornar dados incluindo credenciais geradas
+      return {
+        ...data,
+        credentials: {
+          name: data.name,
+          email: data.pro_email || '',
+          password: data.pro_password || '',
+          phone: data.telefone || undefined,
+        }
+      };
     } catch (error) {
       console.error('Erro ao criar funcionário:', error);
       toast({

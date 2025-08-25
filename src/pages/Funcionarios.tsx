@@ -50,6 +50,7 @@ import {
 } from "@/components/ui/select";
 import { Label } from "@/components/ui/label";
 import { useEmployees, Employee } from "@/hooks/useEmployees";
+import { EmployeeCredentialsModal } from "@/components/forms/EmployeeCredentialsModal";
 
 export default function Funcionarios() {
   const { employees, loading, createEmployee, updateEmployee, deleteEmployee } = useEmployees();
@@ -59,6 +60,13 @@ export default function Funcionarios() {
   const [editingEmployee, setEditingEmployee] = useState<Employee | null>(null);
   const [deletingEmployee, setDeletingEmployee] = useState<Employee | null>(null);
   const [isSubmitting, setIsSubmitting] = useState(false);
+  const [showCredentialsModal, setShowCredentialsModal] = useState(false);
+  const [employeeCredentials, setEmployeeCredentials] = useState<{
+    name: string;
+    email: string;
+    password: string;
+    phone?: string;
+  } | null>(null);
 
   const [formData, setFormData] = useState({
     name: "",
@@ -115,10 +123,17 @@ export default function Funcionarios() {
     try {
       if (editingEmployee) {
         await updateEmployee(editingEmployee.id, formData);
+        handleCloseDialog();
       } else {
-        await createEmployee(formData);
+        const result = await createEmployee(formData);
+        handleCloseDialog();
+        
+        // Mostrar modal com credenciais geradas
+        if (result?.credentials) {
+          setEmployeeCredentials(result.credentials);
+          setShowCredentialsModal(true);
+        }
       }
-      handleCloseDialog();
     } catch (error) {
       console.error('Erro ao salvar funcionário:', error);
     } finally {
@@ -404,6 +419,13 @@ export default function Funcionarios() {
           </AlertDialogFooter>
         </AlertDialogContent>
       </AlertDialog>
+
+      {/* Modal de Credenciais */}
+      <EmployeeCredentialsModal
+        open={showCredentialsModal}
+        onOpenChange={setShowCredentialsModal}
+        credentials={employeeCredentials}
+      />
     </div>
   );
 }
