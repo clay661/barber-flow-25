@@ -48,27 +48,31 @@ export function useAuthState() {
 
   const login = async (email: string, password: string) => {
     try {
-      // Verify credentials against employees table
-      const { data: employeeData, error } = await supabase
-        .from('employees')
-        .select('*')
-        .eq('pro_email', email)
-        .eq('pro_password', password)
-        .eq('status', 'ativo')
-        .single();
+      console.log('Auth: Attempting secure login for:', email);
+      
+      // Use secure login edge function
+      const { data, error } = await supabase.functions.invoke('secure-login', {
+        body: {
+          email,
+          password,
+          userType: 'employee'
+        }
+      });
 
-      if (error || !employeeData) {
-        return { success: false, error: 'Credenciais inválidas' };
+      if (error || !data.success) {
+        console.log('Auth: Login failed:', error || data.error);
+        return { success: false, error: data?.error || 'Credenciais inválidas' };
       }
 
-      setEmployee(employeeData);
+      console.log('Auth: Login successful');
+      setEmployee(data.user);
       // Store in localStorage for persistence
-      localStorage.setItem('employee_id', employeeData.id);
+      localStorage.setItem('employee_id', data.user.id);
       
       return { success: true };
     } catch (error) {
       console.error('Login error:', error);
-      return { success: false, error };
+      return { success: false, error: 'Erro ao fazer login' };
     }
   };
 

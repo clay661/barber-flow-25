@@ -37,29 +37,31 @@ export function useSuperAuthState() {
 
   const login = async (email: string, password: string) => {
     try {
-      console.log('SuperAuth: Attempting login for:', email);
-      // Verificar credenciais contra tabela super_admins
-      const { data: adminData, error } = await supabase
-        .from('super_admins')
-        .select('*')
-        .eq('email', email)
-        .eq('password_hash', password)
-        .single();
+      console.log('SuperAuth: Attempting secure login for:', email);
+      
+      // Use secure login edge function
+      const { data, error } = await supabase.functions.invoke('secure-login', {
+        body: {
+          email,
+          password,
+          userType: 'super_admin'
+        }
+      });
 
-      if (error || !adminData) {
-        console.log('SuperAuth: Login failed:', error);
-        return { success: false, error: 'Credenciais inválidas' };
+      if (error || !data.success) {
+        console.log('SuperAuth: Login failed:', error || data.error);
+        return { success: false, error: data?.error || 'Credenciais inválidas' };
       }
 
       console.log('SuperAuth: Login successful');
-      setSuperAdmin(adminData);
+      setSuperAdmin(data.user);
       // Armazenar no localStorage para persistência
-      localStorage.setItem('super_admin_id', adminData.id);
+      localStorage.setItem('super_admin_id', data.user.id);
       
       return { success: true };
     } catch (error) {
       console.error('Super Admin login error:', error);
-      return { success: false, error };
+      return { success: false, error: 'Erro ao fazer login' };
     }
   };
 

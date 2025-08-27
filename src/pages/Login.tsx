@@ -50,12 +50,11 @@ export default function Login() {
     setIsLoading(true);
 
     try {
-      // Verificar se é super admin primeiro
-      if (email === 'luizasbs70@gmail.com' && password === '10luiz10') {
-        console.log('Super admin login detected, redirecting...');
-        // Fazer login super admin e redirecionar
-        const result = await superLogin(email, password);
-        if (result.success) {
+      // Tentar login como super admin primeiro se for um email de super admin
+      if (email.includes('@gmail.com') || email.includes('@admin.com')) {
+        console.log('Attempting super admin login...');
+        const superResult = await superLogin(email, password);
+        if (superResult.success) {
           toast({
             title: "Login realizado com sucesso",
             description: "Bem-vindo ao painel Super Admin!",
@@ -63,15 +62,9 @@ export default function Login() {
           // Forçar redirecionamento para super admin
           window.location.href = '/super-admin';
           return;
-        } else {
-          console.error('Super admin login failed:', result.error);
-          toast({
-            variant: "destructive",
-            title: "Erro no login",
-            description: "Erro ao acessar painel Super Admin",
-          });
-          return;
         }
+        // Se falhou como super admin, tentar como usuário normal
+        console.log('Super admin login failed, trying employee login...');
       }
 
       // Login normal para usuários regulares

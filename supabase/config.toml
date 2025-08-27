@@ -59,6 +59,18 @@ verify_jwt = false
 [functions.send-appointment-email]
 verify_jwt = false
 
+[functions.secure-login]
+verify_jwt = false
+
+[functions.setup-2fa]
+verify_jwt = false
+
+[functions.generate-qr-code]
+verify_jwt = false
+
+[functions.export-data]
+verify_jwt = false
+
 [analytics]
 enabled = false
 port = 54327
