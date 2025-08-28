@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -34,6 +35,7 @@ export function AppointmentForm({ open, onOpenChange, onSubmit, appointment, loa
     notes: '',
     total_price: '',
   });
+  const [errors, setErrors] = useState<Record<string, string>>({});
 
   const { clients } = useClients();
   const { services } = useServices();
@@ -68,6 +70,7 @@ export function AppointmentForm({ open, onOpenChange, onSubmit, appointment, loa
         total_price: '',
       });
     }
+    setErrors({});
   }, [appointment, open]);
 
   // Auto-fill price when service is selected
@@ -80,21 +83,66 @@ export function AppointmentForm({ open, onOpenChange, onSubmit, appointment, loa
     }
   }, [formData.service_id, services, appointment]);
 
+  const validateForm = () => {
+    const newErrors: Record<string, string> = {};
+
+    if (!formData.client_id) {
+      newErrors.client_id = 'Cliente é obrigatório';
+    }
+
+    if (!formData.service_id) {
+      newErrors.service_id = 'Serviço é obrigatório';
+    }
+
+    if (!formData.date) {
+      newErrors.date = 'Data e hora são obrigatórias';
+    } else {
+      const appointmentDate = new Date(formData.date);
+      const now = new Date();
+      if (appointmentDate < now) {
+        newErrors.date = 'Data e hora devem ser futuras';
+      }
+    }
+
+    if (formData.total_price && parseFloat(formData.total_price) < 0) {
+      newErrors.total_price = 'Valor deve ser positivo';
+    }
+
+    setErrors(newErrors);
+    return Object.keys(newErrors).length === 0;
+  };
+
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
     
-    const submitData = {
-      client_id: formData.client_id || null,
-      employee_id: formData.employee_id || null,
-      service_id: formData.service_id || null,
-      date: formData.date,
-      status: formData.status,
-      notes: formData.notes || null,
-      total_price: formData.total_price ? parseFloat(formData.total_price) : null,
-    };
+    if (!validateForm()) {
+      return;
+    }
 
-    await onSubmit(submitData);
-    onOpenChange(false);
+    try {
+      const submitData = {
+        client_id: formData.client_id || null,
+        employee_id: formData.employee_id || null,
+        service_id: formData.service_id || null,
+        date: formData.date,
+        status: formData.status,
+        notes: formData.notes || null,
+        total_price: formData.total_price ? parseFloat(formData.total_price) : null,
+      };
+
+      await onSubmit(submitData);
+      setErrors({});
+      onOpenChange(false);
+    } catch (error: any) {
+      // Preservar dados em caso de erro
+      const errorMessage = error.message || 'Erro ao salvar agendamento';
+      
+      if (errorMessage.includes('Conflito de horário')) {
+        setErrors({ date: 'Conflito de horário: já existe um agendamento para este funcionário neste horário' });
+      } else {
+        setErrors({ general: errorMessage });
+      }
+    }
   };
 
   return (
@@ -110,14 +158,19 @@ export function AppointmentForm({ open, onOpenChange, onSubmit, appointment, loa
         </DialogHeader>
         
         <form onSubmit={handleSubmit} className="space-y-4">
+          {errors.general && (
+            <div className="bg-red-50 border border-red-200 rounded-lg p-3">
+              <p className="text-sm text-red-800">{errors.general}</p>
+            </div>
+          )}
+
           <div className="space-y-2">
             <Label htmlFor="client_id">Cliente *</Label>
             <Select
               value={formData.client_id}
               onValueChange={(value) => setFormData({ ...formData, client_id: value })}
-              required
             >
-              <SelectTrigger>
+              <SelectTrigger className={errors.client_id ? 'border-red-500' : ''}>
                 <SelectValue placeholder="Selecione o cliente" />
               </SelectTrigger>
               <SelectContent>
@@ -128,6 +181,7 @@ export function AppointmentForm({ open, onOpenChange, onSubmit, appointment, loa
                 ))}
               </SelectContent>
             </Select>
+            {errors.client_id && <p className="text-sm text-red-600">{errors.client_id}</p>}
           </div>
 
           <div className="space-y-2">
@@ -135,9 +189,8 @@ export function AppointmentForm({ open, onOpenChange, onSubmit, appointment, loa
             <Select
               value={formData.service_id}
               onValueChange={(value) => setFormData({ ...formData, service_id: value })}
-              required
             >
-              <SelectTrigger>
+              <SelectTrigger className={errors.service_id ? 'border-red-500' : ''}>
                 <SelectValue placeholder="Selecione o serviço" />
               </SelectTrigger>
               <SelectContent>
@@ -148,6 +201,7 @@ export function AppointmentForm({ open, onOpenChange, onSubmit, appointment, loa
                 ))}
               </SelectContent>
             </Select>
+            {errors.service_id && <p className="text-sm text-red-600">{errors.service_id}</p>}
           </div>
 
           <div className="space-y-2">
@@ -176,8 +230,9 @@ export function AppointmentForm({ open, onOpenChange, onSubmit, appointment, loa
               type="datetime-local"
               value={formData.date}
               onChange={(e) => setFormData({ ...formData, date: e.target.value })}
-              required
+              className={errors.date ? 'border-red-500' : ''}
             />
+            {errors.date && <p className="text-sm text-red-600">{errors.date}</p>}
           </div>
 
           <div className="grid grid-cols-2 gap-4">
@@ -209,7 +264,9 @@ export function AppointmentForm({ open, onOpenChange, onSubmit, appointment, loa
                 onChange={(e) => setFormData({ ...formData, total_price: e.target.value })}
                 placeholder="0.00"
                 min="0"
+                className={errors.total_price ? 'border-red-500' : ''}
               />
+              {errors.total_price && <p className="text-sm text-red-600">{errors.total_price}</p>}
             </div>
           </div>
 

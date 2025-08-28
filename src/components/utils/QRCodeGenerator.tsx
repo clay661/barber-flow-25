@@ -1,172 +1,170 @@
-import React, { useState } from 'react';
-import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+
+import { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
+import { QrCode, Download, Copy, Check } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
-import { supabase } from '@/integrations/supabase/client';
-import { QrCode, Download, Link, Copy } from 'lucide-react';
+import QRCodeLib from 'qrcode';
 
-interface QRCodeGeneratorProps {
-  publicLink: string;
-  className?: string;
-}
-
-export function QRCodeGenerator({ publicLink, className = '' }: QRCodeGeneratorProps) {
+export function QRCodeGenerator() {
   const [qrCodeUrl, setQrCodeUrl] = useState('');
-  const [bookingUrl, setBookingUrl] = useState('');
-  const [isGenerating, setIsGenerating] = useState(false);
+  const [customPath, setCustomPath] = useState('agendamento');
+  const [loading, setLoading] = useState(false);
+  const [copied, setCopied] = useState(false);
   const { toast } = useToast();
 
+  // URL base do sistema público (usando o dominio atual)
+  const baseUrl = window.location.origin;
+  const publicUrl = `${baseUrl}/public/${customPath}`;
+
   const generateQRCode = async () => {
-    if (!publicLink) {
+    if (!customPath.trim()) {
       toast({
-        variant: "destructive",
-        title: "Erro",
-        description: "Link público não encontrado",
+        title: 'Erro',
+        description: 'Digite um nome para o link personalizado',
+        variant: 'destructive',
       });
       return;
     }
 
-    setIsGenerating(true);
     try {
-      const { data, error } = await supabase.functions.invoke('generate-qr-code', {
-        body: { publicLink }
+      setLoading(true);
+      
+      // Gerar QR Code com a URL pública
+      const qrDataUrl = await QRCodeLib.toDataURL(publicUrl, {
+        width: 256,
+        margin: 2,
+        color: {
+          dark: '#000000',
+          light: '#FFFFFF'
+        }
       });
-
-      if (error || !data.success) {
-        throw new Error(data?.error || 'Erro ao gerar QR Code');
-      }
-
-      setQrCodeUrl(data.qrCodeUrl);
-      setBookingUrl(data.bookingUrl);
+      
+      setQrCodeUrl(qrDataUrl);
       
       toast({
-        title: "QR Code gerado!",
-        description: "O QR Code foi gerado com sucesso",
+        title: 'Sucesso!',
+        description: 'QR Code gerado com sucesso!',
       });
-    } catch (error: any) {
+    } catch (error) {
+      console.error('Erro ao gerar QR Code:', error);
       toast({
-        variant: "destructive",
-        title: "Erro ao gerar QR Code",
-        description: error.message,
+        title: 'Erro',
+        description: 'Não foi possível gerar o QR Code.',
+        variant: 'destructive',
       });
     } finally {
-      setIsGenerating(false);
+      setLoading(false);
     }
   };
 
-  const copyToClipboard = async (text: string) => {
-    try {
-      await navigator.clipboard.writeText(text);
-      toast({
-        title: "Copiado!",
-        description: "Link copiado para a área de transferência",
-      });
-    } catch (error) {
-      toast({
-        variant: "destructive",
-        title: "Erro ao copiar",
-        description: "Não foi possível copiar o link",
-      });
-    }
-  };
-
-  const downloadQRCode = async () => {
+  const downloadQRCode = () => {
     if (!qrCodeUrl) return;
 
+    const link = document.createElement('a');
+    link.download = `qrcode-${customPath}.png`;
+    link.href = qrCodeUrl;
+    link.click();
+  };
+
+  const copyLink = async () => {
     try {
-      const response = await fetch(qrCodeUrl);
-      const blob = await response.blob();
-      const url = window.URL.createObjectURL(blob);
-      
-      const link = document.createElement('a');
-      link.href = url;
-      link.download = `qr-code-${publicLink}.png`;
-      document.body.appendChild(link);
-      link.click();
-      document.body.removeChild(link);
-      
-      window.URL.revokeObjectURL(url);
-      
+      await navigator.clipboard.writeText(publicUrl);
+      setCopied(true);
       toast({
-        title: "Download iniciado",
-        description: "O QR Code está sendo baixado",
+        title: 'Copiado!',
+        description: 'Link copiado para a área de transferência.',
       });
+      setTimeout(() => setCopied(false), 2000);
     } catch (error) {
       toast({
-        variant: "destructive",
-        title: "Erro no download",
-        description: "Não foi possível baixar o QR Code",
+        title: 'Erro',
+        description: 'Não foi possível copiar o link.',
+        variant: 'destructive',
       });
     }
   };
 
   return (
-    <Card className={className}>
-      <CardHeader>
-        <CardTitle className="flex items-center gap-2">
-          <QrCode className="h-5 w-5" />
-          Gerador de QR Code
-        </CardTitle>
-        <CardDescription>
-          Gere um QR Code para facilitar o acesso dos clientes ao agendamento online
-        </CardDescription>
-      </CardHeader>
-      <CardContent className="space-y-6">
-        <div className="space-y-4">
-          <div className="space-y-2">
-            <Label>Link público de agendamento:</Label>
-            <div className="flex gap-2">
-              <Input
-                value={bookingUrl || `${window.location.origin}/booking/${publicLink}`}
-                readOnly
-                className="font-mono text-sm"
-              />
-              <Button
-                variant="outline"
-                size="sm"
-                onClick={() => copyToClipboard(bookingUrl || `${window.location.origin}/booking/${publicLink}`)}
-              >
-                <Copy className="h-4 w-4" />
-              </Button>
-            </div>
-          </div>
+    <div className="space-y-6">
+      <div>
+        <h2 className="text-lg font-semibold mb-2">Gerar QR Code</h2>
+        <p className="text-sm text-muted-foreground">
+          Crie um QR Code personalizado para seus clientes acessarem a página de agendamento
+        </p>
+      </div>
 
-          <Button onClick={generateQRCode} disabled={isGenerating || !publicLink}>
-            <QrCode className="h-4 w-4 mr-2" />
-            {isGenerating ? "Gerando..." : "Gerar QR Code"}
-          </Button>
+      <div className="space-y-4">
+        <div className="space-y-2">
+          <Label htmlFor="custom-path">Nome do Link Personalizado</Label>
+          <Input
+            id="custom-path"
+            value={customPath}
+            onChange={(e) => setCustomPath(e.target.value.replace(/[^a-zA-Z0-9-]/g, ''))}
+            placeholder="agendamento"
+            className="max-w-sm"
+          />
+          <p className="text-xs text-muted-foreground">
+            Seu link será: <span className="font-mono">{publicUrl}</span>
+          </p>
         </div>
 
-        {qrCodeUrl && (
-          <div className="space-y-4">
-            <div className="flex flex-col items-center space-y-4">
-              <div className="p-4 bg-white rounded-lg shadow-sm border">
-                <img
-                  src={qrCodeUrl}
-                  alt="QR Code para agendamento"
-                  className="w-48 h-48"
-                />
-              </div>
-              <p className="text-sm text-muted-foreground text-center">
-                Clientes podem escanear este QR Code para acessar diretamente o agendamento online
-              </p>
-            </div>
+        <div className="flex gap-2">
+          <Button 
+            onClick={generateQRCode} 
+            disabled={loading || !customPath.trim()}
+            className="flex items-center gap-2"
+          >
+            <QrCode className="h-4 w-4" />
+            {loading ? 'Gerando...' : 'Gerar QR Code'}
+          </Button>
+          
+          <Button 
+            variant="outline" 
+            onClick={copyLink}
+            className="flex items-center gap-2"
+          >
+            {copied ? (
+              <Check className="h-4 w-4 text-green-600" />
+            ) : (
+              <Copy className="h-4 w-4" />
+            )}
+            {copied ? 'Copiado!' : 'Copiar Link'}
+          </Button>
+        </div>
+      </div>
 
-            <div className="flex gap-2 justify-center">
-              <Button onClick={downloadQRCode} variant="outline">
-                <Download className="h-4 w-4 mr-2" />
-                Baixar QR Code
-              </Button>
-              <Button onClick={() => copyToClipboard(bookingUrl)} variant="outline">
-                <Link className="h-4 w-4 mr-2" />
-                Copiar Link
-              </Button>
-            </div>
+      {qrCodeUrl && (
+        <div className="space-y-4">
+          <div className="border rounded-lg p-6 text-center bg-white">
+            <img 
+              src={qrCodeUrl} 
+              alt="QR Code" 
+              className="mx-auto mb-4"
+              width={256}
+              height={256}
+            />
+            <p className="text-sm text-muted-foreground mb-4">
+              QR Code para: <span className="font-mono text-primary">{publicUrl}</span>
+            </p>
+            <Button onClick={downloadQRCode} variant="outline" className="flex items-center gap-2 mx-auto">
+              <Download className="h-4 w-4" />
+              Baixar QR Code
+            </Button>
           </div>
-        )}
-      </CardContent>
-    </Card>
+        </div>
+      )}
+
+      <div className="bg-blue-50 border border-blue-200 rounded-lg p-4">
+        <h3 className="font-medium text-blue-900 mb-2">Como usar:</h3>
+        <ul className="text-sm text-blue-800 space-y-1">
+          <li>• Personalize o nome do seu link</li>
+          <li>• Gere o QR Code e baixe a imagem</li>
+          <li>• Compartilhe o QR Code com seus clientes</li>
+          <li>• Clientes podem escanear e agendar diretamente</li>
+        </ul>
+      </div>
+    </div>
   );
 }

@@ -1,244 +1,339 @@
-import React, { useState, useEffect } from 'react';
-import { Navigate, useNavigate } from 'react-router-dom';
-import { Card, CardContent, CardDescription, CardFooter, CardHeader, CardTitle } from '@/components/ui/card';
+
+import { useState, useEffect } from 'react';
+import { useNavigate } from 'react-router-dom';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { useToast } from '@/hooks/use-toast';
+import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
+import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { useAuth } from '@/hooks/useAuth';
 import { useSuperAuth } from '@/hooks/useSuperAuth';
-import { Eye, EyeOff, Scissors } from 'lucide-react';
-import barbershopLogo from "@/assets/barbershop-logo.jpg";
+import { Eye, EyeOff, Lock, Mail, User, Building } from 'lucide-react';
+import { useToast } from '@/hooks/use-toast';
 
 export default function Login() {
-  const [email, setEmail] = useState('');
-  const [password, setPassword] = useState('');
-  const [name, setName] = useState('');
-  const [showPassword, setShowPassword] = useState(false);
-  const [isLoading, setIsLoading] = useState(false);
-  const [isRegisterMode, setIsRegisterMode] = useState(false);
-  const [adminExists, setAdminExists] = useState(true);
-  const { login, register, checkAdminExists, employee, loading } = useAuth();
-  const { login: superLogin, superAdmin, loading: superLoading } = useSuperAuth();
-  const { toast } = useToast();
   const navigate = useNavigate();
+  const { employee, login, register, checkAdminExists } = useAuth();
+  const { superAdmin, login: superLogin } = useSuperAuth();
+  const { toast } = useToast();
 
-  // Check if admin exists on component mount
+  const [isLogin, setIsLogin] = useState(true);
+  const [showPassword, setShowPassword] = useState(false);
+  const [loading, setLoading] = useState(false);
+  const [adminExists, setAdminExists] = useState(false);
+  const [errors, setErrors] = useState<Record<string, string>>({});
+
+  // Formulário regular
+  const [formData, setFormData] = useState({
+    name: '',
+    email: '',
+    password: '',
+  });
+
+  // Formulário super admin
+  const [superFormData, setSuperFormData] = useState({
+    email: '',
+    password: '',
+  });
+
   useEffect(() => {
     const checkAdmin = async () => {
       const exists = await checkAdminExists();
       setAdminExists(exists);
+      setIsLogin(exists);
     };
-    
-    if (!loading && !superLoading) {
-      checkAdmin();
-    }
-  }, [loading, superLoading, checkAdminExists]);
+    checkAdmin();
+  }, [checkAdminExists]);
 
-  // Redirect if already logged in
-  if (!loading && !superLoading) {
+  useEffect(() => {
     if (employee) {
-      return <Navigate to="/" replace />;
+      navigate('/');
+    } else if (superAdmin) {
+      navigate('/super-admin');
     }
-    if (superAdmin) {
-      return <Navigate to="/super-admin" replace />;
+  }, [employee, superAdmin, navigate]);
+
+  const validateForm = (data: any, isRegister = false) => {
+    const newErrors: Record<string, string> = {};
+
+    if (isRegister && !data.name.trim()) {
+      newErrors.name = 'Nome é obrigatório';
     }
-  }
+
+    if (!data.email.trim()) {
+      newErrors.email = 'E-mail é obrigatório';
+    } else if (!/^[^\s@]+@[^\s@]+\.[^\s@]+$/.test(data.email)) {
+      newErrors.email = 'E-mail inválido';
+    }
+
+    if (!data.password.trim()) {
+      newErrors.password = 'Senha é obrigatória';
+    } else if (isRegister && data.password.length < 6) {
+      newErrors.password = 'Senha deve ter pelo menos 6 caracteres';
+    }
+
+    return newErrors;
+  };
 
   const handleSubmit = async (e: React.FormEvent) => {
     e.preventDefault();
-    setIsLoading(true);
+    
+    const validationErrors = validateForm(formData, !isLogin);
+    if (Object.keys(validationErrors).length > 0) {
+      setErrors(validationErrors);
+      return;
+    }
+
+    setLoading(true);
+    setErrors({});
 
     try {
-      // Tentar login como super admin primeiro se for um email de super admin
-      if (email.includes('@gmail.com') || email.includes('@admin.com')) {
-        console.log('Attempting super admin login...');
-        const superResult = await superLogin(email, password);
-        if (superResult.success) {
-          toast({
-            title: "Login realizado com sucesso",
-            description: "Bem-vindo ao painel Super Admin!",
-          });
-          // Forçar redirecionamento para super admin
-          window.location.href = '/super-admin';
-          return;
-        }
-        // Se falhou como super admin, tentar como usuário normal
-        console.log('Super admin login failed, trying employee login...');
-      }
-
-      // Login normal para usuários regulares
-      if (isRegisterMode) {
-        const result = await register(name, email, password);
-        
-        if (result.success) {
-          toast({
-            title: "Administrador cadastrado com sucesso!",
-            description: "Agora você pode fazer login com seus dados.",
-          });
-          // Reset form and switch to login mode
-          setName('');
-          setEmail('');
-          setPassword('');
-          setIsRegisterMode(false);
-          setAdminExists(true);
-        } else {
-          toast({
-            variant: "destructive",
-            title: "Erro no cadastro",
-            description: result.error || "Não foi possível cadastrar o administrador",
-          });
+      if (isLogin) {
+        const result = await login(formData.email, formData.password);
+        if (!result.success) {
+          setErrors({ general: result.error || 'Credenciais inválidas' });
         }
       } else {
-        const result = await login(email, password);
-        
+        const result = await register(formData.name, formData.email, formData.password);
         if (result.success) {
+          setAdminExists(true);
+          setIsLogin(true);
           toast({
-            title: "Login realizado com sucesso",
-            description: "Bem-vindo ao sistema!",
+            title: 'Sucesso!',
+            description: 'Administrador criado com sucesso! Agora você pode fazer login.',
           });
-          // Aguardar um pouco e redirecionar
-          setTimeout(() => {
-            navigate('/');
-          }, 500);
+          setFormData({ name: '', email: formData.email, password: '' });
         } else {
-          toast({
-            variant: "destructive",
-            title: "Erro no login",
-            description: result.error || "Credenciais inválidas",
-          });
+          setErrors({ general: result.error || 'Erro ao criar administrador' });
         }
       }
-    } catch (error) {
-      console.error('Login error:', error);
-      toast({
-        variant: "destructive",
-        title: isRegisterMode ? "Erro no cadastro" : "Erro no login",
-        description: "Ocorreu um erro inesperado",
-      });
+    } catch (error: any) {
+      setErrors({ general: error.message || 'Erro interno do servidor' });
     } finally {
-      setIsLoading(false);
+      setLoading(false);
     }
   };
 
-  if (loading || superLoading) {
-    return (
-      <div className="min-h-screen flex items-center justify-center">
-        <div className="animate-spin rounded-full h-8 w-8 border-b-2 border-primary"></div>
-      </div>
-    );
-  }
+  const handleSuperLogin = async (e: React.FormEvent) => {
+    e.preventDefault();
+    
+    const validationErrors = validateForm(superFormData, false);
+    if (Object.keys(validationErrors).length > 0) {
+      setErrors(validationErrors);
+      return;
+    }
+
+    setLoading(true);
+    setErrors({});
+
+    try {
+      const result = await superLogin(superFormData.email, superFormData.password);
+      if (!result.success) {
+        setErrors({ general: result.error || 'Credenciais inválidas' });
+      }
+    } catch (error: any) {
+      setErrors({ general: error.message || 'Erro interno do servidor' });
+    } finally {
+      setLoading(false);
+    }
+  };
 
   return (
-    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-background to-muted p-4">
-      <Card className="w-full max-w-md shadow-2xl border-0 bg-card/80 backdrop-blur-sm">
-        <CardHeader className="text-center space-y-4">
-          <div className="flex justify-center">
-            <img 
-              src={barbershopLogo} 
-              alt="Nexio" 
-              className="w-16 h-16 rounded-lg shadow-md"
-            />
+    <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-50 to-indigo-100 p-4">
+      <div className="w-full max-w-md">
+        <div className="text-center mb-8">
+          <div className="mx-auto h-12 w-12 bg-primary rounded-lg flex items-center justify-center mb-4">
+            <Building className="h-6 w-6 text-primary-foreground" />
           </div>
-          <div>
-            <CardTitle className="text-2xl font-bold text-foreground flex items-center justify-center gap-2">
-              <Scissors className="h-6 w-6 text-accent" />
-              Nexio
-            </CardTitle>
-            <CardDescription className="text-muted-foreground">
-              {isRegisterMode ? "Cadastro do Administrador" : "Sistema de Gestão Empresarial"}
-            </CardDescription>
-          </div>
-        </CardHeader>
-        
-        <form onSubmit={handleSubmit}>
-          <CardContent className="space-y-4">
-            {isRegisterMode && (
-              <div className="space-y-2">
-                <Label htmlFor="name">Nome Completo</Label>
-                <Input
-                  id="name"
-                  type="text"
-                  placeholder="Digite seu nome completo"
-                  value={name}
-                  onChange={(e) => setName(e.target.value)}
-                  className="bg-background"
-                  required
-                />
-              </div>
-            )}
-            <div className="space-y-2">
-              <Label htmlFor="email">{isRegisterMode ? "E-mail" : "Email Profissional"}</Label>
-              <Input
-                id="email"
-                type="email"
-                placeholder={isRegisterMode ? "seu@email.com" : "seu.email@meusalon.com"}
-                value={email}
-                onChange={(e) => setEmail(e.target.value)}
-                className="bg-background"
-                required
-              />
-            </div>
-            <div className="space-y-2">
-              <Label htmlFor="password">Senha</Label>
-              <div className="relative">
-                <Input
-                  id="password"
-                  type={showPassword ? "text" : "password"}
-                  placeholder={isRegisterMode ? "Mínimo 6 caracteres" : ""}
-                  value={password}
-                  onChange={(e) => setPassword(e.target.value)}
-                  className="bg-background pr-10"
-                  minLength={isRegisterMode ? 6 : undefined}
-                  required
-                />
-                <Button
-                  type="button"
-                  variant="ghost"
-                  size="sm"
-                  className="absolute right-0 top-0 h-full px-3 py-2 hover:bg-transparent"
-                  onClick={() => setShowPassword(!showPassword)}
-                >
-                  {showPassword ? (
-                    <EyeOff className="h-4 w-4" />
-                  ) : (
-                    <Eye className="h-4 w-4" />
+          <h1 className="text-2xl font-bold">Meu Salão</h1>
+          <p className="text-muted-foreground">Sistema de gestão completo</p>
+        </div>
+
+        <Tabs defaultValue="regular" className="space-y-6">
+          <TabsList className="grid w-full grid-cols-2">
+            <TabsTrigger value="regular">Acesso Regular</TabsTrigger>
+            <TabsTrigger value="super">Super Admin</TabsTrigger>
+          </TabsList>
+
+          <TabsContent value="regular">
+            <Card>
+              <CardHeader className="space-y-1">
+                <CardTitle className="text-xl">
+                  {isLogin ? 'Entrar no sistema' : 'Criar administrador'}
+                </CardTitle>
+                <CardDescription>
+                  {isLogin 
+                    ? 'Digite suas credenciais para acessar' 
+                    : 'Configure sua conta de administrador'
+                  }
+                </CardDescription>
+              </CardHeader>
+              <CardContent>
+                <form onSubmit={handleSubmit} className="space-y-4">
+                  {errors.general && (
+                    <div className="bg-red-50 border border-red-200 rounded-lg p-3">
+                      <p className="text-sm text-red-800">{errors.general}</p>
+                    </div>
                   )}
-                </Button>
-              </div>
-            </div>
-          </CardContent>
-          <CardFooter className="flex flex-col space-y-3">
-            <Button 
-              type="submit" 
-              className="w-full bg-primary hover:bg-primary/90 text-primary-foreground font-medium" 
-              disabled={isLoading}
-            >
-              {isLoading 
-                ? (isRegisterMode ? "Cadastrando..." : "Entrando...") 
-                : (isRegisterMode ? "Criar Administrador" : "Entrar no Sistema")
-              }
-            </Button>
-            
-            {!adminExists && (
-              <Button
-                type="button"
-                variant="ghost"
-                className="w-full text-muted-foreground hover:text-foreground"
-                onClick={() => {
-                  setIsRegisterMode(!isRegisterMode);
-                  setName('');
-                  setEmail('');
-                  setPassword('');
-                }}
-                disabled={isLoading}
-              >
-                {isRegisterMode ? "Já tenho uma conta" : "Cadastrar Novo Usuário"}
-              </Button>
-            )}
-          </CardFooter>
-        </form>
-      </Card>
+
+                  {!isLogin && (
+                    <div className="space-y-2">
+                      <Label htmlFor="name">Nome completo</Label>
+                      <div className="relative">
+                        <User className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
+                        <Input
+                          id="name"
+                          type="text"
+                          placeholder="Digite seu nome"
+                          value={formData.name}
+                          onChange={(e) => setFormData({ ...formData, name: e.target.value })}
+                          className={`pl-10 ${errors.name ? 'border-red-500' : ''}`}
+                        />
+                      </div>
+                      {errors.name && <p className="text-sm text-red-600">{errors.name}</p>}
+                    </div>
+                  )}
+
+                  <div className="space-y-2">
+                    <Label htmlFor="email">E-mail</Label>
+                    <div className="relative">
+                      <Mail className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
+                      <Input
+                        id="email"
+                        type="email"
+                        placeholder="Digite seu e-mail"
+                        value={formData.email}
+                        onChange={(e) => setFormData({ ...formData, email: e.target.value })}
+                        className={`pl-10 ${errors.email ? 'border-red-500' : ''}`}
+                      />
+                    </div>
+                    {errors.email && <p className="text-sm text-red-600">{errors.email}</p>}
+                  </div>
+
+                  <div className="space-y-2">
+                    <Label htmlFor="password">Senha</Label>
+                    <div className="relative">
+                      <Lock className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
+                      <Input
+                        id="password"
+                        type={showPassword ? 'text' : 'password'}
+                        placeholder="Digite sua senha"
+                        value={formData.password}
+                        onChange={(e) => setFormData({ ...formData, password: e.target.value })}
+                        className={`pl-10 pr-10 ${errors.password ? 'border-red-500' : ''}`}
+                      />
+                      <Button
+                        type="button"
+                        variant="ghost"
+                        size="sm"
+                        className="absolute right-1 top-1 h-8 w-8 p-0"
+                        onClick={() => setShowPassword(!showPassword)}
+                      >
+                        {showPassword ? (
+                          <EyeOff className="h-4 w-4" />
+                        ) : (
+                          <Eye className="h-4 w-4" />
+                        )}
+                      </Button>
+                    </div>
+                    {errors.password && <p className="text-sm text-red-600">{errors.password}</p>}
+                  </div>
+
+                  <Button type="submit" className="w-full" disabled={loading}>
+                    {loading ? 'Processando...' : (isLogin ? 'Entrar' : 'Criar conta')}
+                  </Button>
+
+                  {adminExists && (
+                    <div className="text-center">
+                      <Button
+                        type="button"
+                        variant="link"
+                        onClick={() => {
+                          setIsLogin(!isLogin);
+                          setErrors({});
+                          setFormData({ name: '', email: '', password: '' });
+                        }}
+                        className="text-sm"
+                      >
+                        {isLogin ? 'Não tem conta? Criar nova' : 'Já tem conta? Fazer login'}
+                      </Button>
+                    </div>
+                  )}
+                </form>
+              </CardContent>
+            </Card>
+          </TabsContent>
+
+          <TabsContent value="super">
+            <Card>
+              <CardHeader className="space-y-1">
+                <CardTitle className="text-xl">Super Administrador</CardTitle>
+                <CardDescription>
+                  Acesso exclusivo para gestão do sistema
+                </CardDescription>
+              </CardHeader>
+              <CardContent>
+                <form onSubmit={handleSuperLogin} className="space-y-4">
+                  {errors.general && (
+                    <div className="bg-red-50 border border-red-200 rounded-lg p-3">
+                      <p className="text-sm text-red-800">{errors.general}</p>
+                    </div>
+                  )}
+
+                  <div className="space-y-2">
+                    <Label htmlFor="super-email">E-mail</Label>
+                    <div className="relative">
+                      <Mail className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
+                      <Input
+                        id="super-email"
+                        type="email"
+                        placeholder="Digite seu e-mail"
+                        value={superFormData.email}
+                        onChange={(e) => setSuperFormData({ ...superFormData, email: e.target.value })}
+                        className={`pl-10 ${errors.email ? 'border-red-500' : ''}`}
+                      />
+                    </div>
+                    {errors.email && <p className="text-sm text-red-600">{errors.email}</p>}
+                  </div>
+
+                  <div className="space-y-2">
+                    <Label htmlFor="super-password">Senha</Label>
+                    <div className="relative">
+                      <Lock className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
+                      <Input
+                        id="super-password"
+                        type={showPassword ? 'text' : 'password'}
+                        placeholder="Digite sua senha"
+                        value={superFormData.password}
+                        onChange={(e) => setSuperFormData({ ...superFormData, password: e.target.value })}
+                        className={`pl-10 pr-10 ${errors.password ? 'border-red-500' : ''}`}
+                      />
+                      <Button
+                        type="button"
+                        variant="ghost"
+                        size="sm"
+                        className="absolute right-1 top-1 h-8 w-8 p-0"
+                        onClick={() => setShowPassword(!showPassword)}
+                      >
+                        {showPassword ? (
+                          <EyeOff className="h-4 w-4" />
+                        ) : (
+                          <Eye className="h-4 w-4" />
+                        )}
+                      </Button>
+                    </div>
+                    {errors.password && <p className="text-sm text-red-600">{errors.password}</p>}
+                  </div>
+
+                  <Button type="submit" className="w-full" disabled={loading}>
+                    {loading ? 'Processando...' : 'Entrar como Super Admin'}
+                  </Button>
+                </form>
+              </CardContent>
+            </Card>
+          </TabsContent>
+        </Tabs>
+      </div>
     </div>
   );
 }
