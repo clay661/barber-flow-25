@@ -4,12 +4,13 @@ import { supabase } from '@/integrations/supabase/client';
 export interface Employee {
   id: string;
   name: string;
-  role: 'ADMIN' | 'FUNCIONARIO' | 'SUBADMIN' | 'RECEPCIONISTA';
+  role: 'ADMIN' | 'FUNCIONARIO' | 'SUBADMIN' | 'RECEPCIONISTA' | 'OUTRO';
   pro_email: string;
   telefone?: string;
   status: string;
   commission_type?: string;
   commission_value?: number;
+  custom_role_name?: string;
 }
 
 export interface AuthContextType {
