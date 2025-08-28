@@ -245,6 +245,7 @@ export type Database = {
           commission_type: string | null
           commission_value: number | null
           created_at: string | null
+          custom_role_name: string | null
           id: string
           name: string
           pro_email: string | null
@@ -257,6 +258,7 @@ export type Database = {
           commission_type?: string | null
           commission_value?: number | null
           created_at?: string | null
+          custom_role_name?: string | null
           id?: string
           name: string
           pro_email?: string | null
@@ -269,6 +271,7 @@ export type Database = {
           commission_type?: string | null
           commission_value?: number | null
           created_at?: string | null
+          custom_role_name?: string | null
           id?: string
           name?: string
           pro_email?: string | null
@@ -772,7 +775,12 @@ export type Database = {
       }
     }
     Enums: {
-      employee_role: "ADMIN" | "SUBADMIN" | "FUNCIONARIO" | "RECEPCIONISTA"
+      employee_role:
+        | "ADMIN"
+        | "SUBADMIN"
+        | "FUNCIONARIO"
+        | "RECEPCIONISTA"
+        | "OUTRO"
     }
     CompositeTypes: {
       [_ in never]: never
@@ -900,7 +908,13 @@ export type CompositeTypes<
 export const Constants = {
   public: {
     Enums: {
-      employee_role: ["ADMIN", "SUBADMIN", "FUNCIONARIO", "RECEPCIONISTA"],
+      employee_role: [
+        "ADMIN",
+        "SUBADMIN",
+        "FUNCIONARIO",
+        "RECEPCIONISTA",
+        "OUTRO",
+      ],
     },
   },
 } as const

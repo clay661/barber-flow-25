@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 import { useToast } from '@/hooks/use-toast';
@@ -47,17 +48,19 @@ export const useEmployees = () => {
     try {
       console.log('Criando funcionário:', employeeData);
       
+      const insertData = {
+        name: employeeData.name,
+        telefone: employeeData.telefone,
+        role: employeeData.role,
+        custom_role_name: employeeData.role === 'OUTRO' ? employeeData.custom_role_name : null,
+        status: employeeData.status,
+        commission_type: employeeData.commission_type,
+        commission_value: employeeData.commission_value,
+      };
+
       const { data, error } = await supabase
         .from('employees')
-        .insert({
-          name: employeeData.name,
-          telefone: employeeData.telefone,
-          role: employeeData.role,
-          custom_role_name: employeeData.role === 'OUTRO' ? employeeData.custom_role_name : null,
-          status: employeeData.status,
-          commission_type: employeeData.commission_type,
-          commission_value: employeeData.commission_value,
-        })
+        .insert(insertData)
         .select()
         .single();
 
