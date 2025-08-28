@@ -14,11 +14,10 @@ export function SalonSettingsForm() {
   const { toast } = useToast();
   
   const [formData, setFormData] = useState({
-    salon_name: '',
+    name: '',
     address: '',
     phone: '',
     banner_url: '',
-    opening_hours: '',
     description: '',
   });
   
@@ -28,11 +27,10 @@ export function SalonSettingsForm() {
   useEffect(() => {
     if (settings) {
       setFormData({
-        salon_name: settings.salon_name || '',
+        name: settings.name || '',
         address: settings.address || '',
         phone: settings.phone || '',
         banner_url: settings.banner_url || '',
-        opening_hours: settings.opening_hours || '',
         description: settings.description || '',
       });
     }
@@ -41,8 +39,8 @@ export function SalonSettingsForm() {
   const validateForm = () => {
     const newErrors: Record<string, string> = {};
 
-    if (!formData.salon_name.trim()) {
-      newErrors.salon_name = 'Nome do salão é obrigatório';
+    if (!formData.name.trim()) {
+      newErrors.name = 'Nome do salão é obrigatório';
     }
 
     if (!formData.address.trim()) {
@@ -53,10 +51,6 @@ export function SalonSettingsForm() {
       newErrors.phone = 'Telefone é obrigatório';
     } else if (!/^\(\d{2}\)\s\d{4,5}-\d{4}$/.test(formData.phone) && !/^\d{10,11}$/.test(formData.phone.replace(/\D/g, ''))) {
       newErrors.phone = 'Formato de telefone inválido';
-    }
-
-    if (!formData.opening_hours.trim()) {
-      newErrors.opening_hours = 'Horário de funcionamento é obrigatório';
     }
 
     setErrors(newErrors);
@@ -170,15 +164,15 @@ export function SalonSettingsForm() {
         <CardContent className="space-y-4">
           <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
             <div className="space-y-2">
-              <Label htmlFor="salon_name">Nome do Salão *</Label>
+              <Label htmlFor="name">Nome do Salão *</Label>
               <Input
-                id="salon_name"
-                value={formData.salon_name}
-                onChange={(e) => setFormData({ ...formData, salon_name: e.target.value })}
+                id="name"
+                value={formData.name}
+                onChange={(e) => setFormData({ ...formData, name: e.target.value })}
                 placeholder="Nome do seu salão"
-                className={errors.salon_name ? 'border-red-500' : ''}
+                className={errors.name ? 'border-red-500' : ''}
               />
-              {errors.salon_name && <p className="text-sm text-red-600">{errors.salon_name}</p>}
+              {errors.name && <p className="text-sm text-red-600">{errors.name}</p>}
             </div>
 
             <div className="space-y-2">
@@ -207,21 +201,6 @@ export function SalonSettingsForm() {
               className={errors.address ? 'border-red-500' : ''}
             />
             {errors.address && <p className="text-sm text-red-600">{errors.address}</p>}
-          </div>
-
-          <div className="space-y-2">
-            <Label htmlFor="opening_hours">Horário de Funcionamento *</Label>
-            <div className="relative">
-              <Clock className="absolute left-3 top-3 h-4 w-4 text-muted-foreground" />
-              <Input
-                id="opening_hours"
-                value={formData.opening_hours}
-                onChange={(e) => setFormData({ ...formData, opening_hours: e.target.value })}
-                placeholder="Seg-Sex: 8h-18h, Sáb: 8h-17h"
-                className={`pl-10 ${errors.opening_hours ? 'border-red-500' : ''}`}
-              />
-            </div>
-            {errors.opening_hours && <p className="text-sm text-red-600">{errors.opening_hours}</p>}
           </div>
 
           <div className="space-y-2">
