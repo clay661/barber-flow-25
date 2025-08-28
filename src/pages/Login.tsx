@@ -8,8 +8,9 @@ import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/com
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { useAuth } from '@/hooks/useAuth';
 import { useSuperAuth } from '@/hooks/useSuperAuth';
-import { Eye, EyeOff, Lock, Mail, User, Building } from 'lucide-react';
+import { Eye, EyeOff, Lock, Mail, User } from 'lucide-react';
 import { useToast } from '@/hooks/use-toast';
+import nexioLogo from '@/assets/nexio-logo.png';
 
 export default function Login() {
   const navigate = useNavigate();
@@ -142,10 +143,14 @@ export default function Login() {
     <div className="min-h-screen flex items-center justify-center bg-gradient-to-br from-blue-50 to-indigo-100 p-4">
       <div className="w-full max-w-md">
         <div className="text-center mb-8">
-          <div className="mx-auto h-12 w-12 bg-primary rounded-lg flex items-center justify-center mb-4">
-            <Building className="h-6 w-6 text-primary-foreground" />
+          <div className="mx-auto mb-4 flex items-center justify-center">
+            <img 
+              src={nexioLogo} 
+              alt="Nexio Logo" 
+              className="h-12 w-auto"
+            />
           </div>
-          <h1 className="text-2xl font-bold">Meu Salão</h1>
+          <h1 className="text-2xl font-bold">Nexio</h1>
           <p className="text-muted-foreground">Sistema de gestão completo</p>
         </div>
 
