@@ -48,15 +48,18 @@ export const useEmployees = () => {
     try {
       console.log('Criando funcionário:', employeeData);
       
+      // Preparar dados para inserção
       const insertData = {
         name: employeeData.name,
-        telefone: employeeData.telefone,
+        telefone: employeeData.telefone || null,
         role: employeeData.role,
         custom_role_name: employeeData.role === 'OUTRO' ? employeeData.custom_role_name : null,
         status: employeeData.status,
         commission_type: employeeData.commission_type,
         commission_value: employeeData.commission_value,
       };
+
+      console.log('Dados para inserção:', insertData);
 
       const { data, error } = await supabase
         .from('employees')
@@ -69,14 +72,14 @@ export const useEmployees = () => {
         
         // Tratar erros específicos
         if (error.code === '23505') {
-          if (error.message.includes('unique_pro_email')) {
+          if (error.message.includes('pro_email')) {
             throw new Error('Já existe um funcionário com credenciais similares. Tente um nome diferente.');
           }
         }
         throw error;
       }
 
-      console.log('Funcionário criado:', data);
+      console.log('Funcionário criado com sucesso:', data);
       setEmployees(prev => [data as Employee, ...prev]);
       
       toast({
@@ -84,12 +87,12 @@ export const useEmployees = () => {
         description: 'Funcionário cadastrado com sucesso!',
       });
       
-      // Retornar dados incluindo credenciais geradas
+      // Retornar dados incluindo credenciais geradas automaticamente
       return {
         ...data,
         credentials: {
           name: data.name,
-          email: data.pro_email || '',
+          email: data.pro_email || 'Email gerado automaticamente',
           password: 'Senha gerada automaticamente',
           phone: data.telefone || undefined,
         }

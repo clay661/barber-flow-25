@@ -40,7 +40,7 @@ export function EmployeeForm({ open, onOpenChange, onSubmit, employee, loading =
         name: employee.name,
         telefone: employee.telefone || '',
         role: employee.role,
-        custom_role_name: (employee as any).custom_role_name || '',
+        custom_role_name: employee.custom_role_name || '',
         status: employee.status,
         commission_type: employee.commission_type,
         commission_value: employee.commission_value.toString(),
@@ -74,8 +74,9 @@ export function EmployeeForm({ open, onOpenChange, onSubmit, employee, loading =
       newErrors.custom_role_name = 'Nome do cargo personalizado é obrigatório';
     }
 
-    if (parseFloat(formData.commission_value) < 0) {
-      newErrors.commission_value = 'Valor da comissão deve ser positivo';
+    const commissionValue = parseFloat(formData.commission_value);
+    if (isNaN(commissionValue) || commissionValue < 0) {
+      newErrors.commission_value = 'Valor da comissão deve ser um número positivo';
     }
 
     setErrors(newErrors);
@@ -100,17 +101,21 @@ export function EmployeeForm({ open, onOpenChange, onSubmit, employee, loading =
         commission_value: parseFloat(formData.commission_value),
       };
 
+      console.log('Enviando dados do formulário:', submitData);
+      
       const result = await onSubmit(submitData);
-      if (result && !employee) {
-        // Limpar erros se criação foi bem-sucedida
+      console.log('Resultado da submissão:', result);
+      
+      if (result) {
         setErrors({});
+        onOpenChange(false);
       }
-      onOpenChange(false);
     } catch (error: any) {
-      // Preservar dados em caso de erro
+      console.error('Erro no formulário:', error);
       const errorMessage = error.message || 'Erro ao salvar funcionário';
-      if (errorMessage.includes('unique_pro_email')) {
-        setErrors({ name: 'Já existe um funcionário com esse nome (email gerado seria duplicado)' });
+      
+      if (errorMessage.includes('pro_email') || errorMessage.includes('credenciais similares')) {
+        setErrors({ name: 'Já existe um funcionário com esse nome. Tente um nome diferente.' });
       } else {
         setErrors({ general: errorMessage });
       }
