@@ -1,4 +1,3 @@
-
 import { 
   LayoutDashboard,
   Users,
@@ -71,6 +70,16 @@ const getMenuItemsByRole = (role: string) => {
       { title: "Clientes", url: "/clientes", icon: Users },
       { title: "Agendamentos", url: "/agendamentos", icon: Calendar },
       { title: "Serviços", url: "/servicos", icon: Scissors },
+      { title: "Configurações", url: "/perfil", icon: Settings },
+    ];
+  }
+
+  // Adicionar suporte para role 'OUTRO' - tratado como funcionário com acesso básico
+  if (role === 'OUTRO') {
+    return [
+      ...baseItems,
+      { title: "Meus Clientes", url: "/clientes", icon: Users },
+      { title: "Meus Agendamentos", url: "/agendamentos", icon: Calendar },
       { title: "Configurações", url: "/perfil", icon: Settings },
     ];
   }
