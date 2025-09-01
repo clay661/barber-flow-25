@@ -1,3 +1,4 @@
+
 import { 
   LayoutDashboard,
   Users,
@@ -25,6 +26,8 @@ import { useAuth } from "@/hooks/useAuth";
 import nexioLogo from "@/assets/nexio-logo.png";
 
 const getMenuItemsByRole = (role: string) => {
+  console.log('getMenuItemsByRole called with role:', role);
+  
   const baseItems = [
     { title: "Dashboard", url: "/", icon: LayoutDashboard },
   ];
@@ -72,6 +75,7 @@ const getMenuItemsByRole = (role: string) => {
     ];
   }
 
+  console.log('Role not recognized, returning base items:', role);
   return baseItems;
 };
 
@@ -81,7 +85,11 @@ export function AppSidebar() {
   const { state, open, setOpen } = useSidebar();
   const { employee } = useAuth();
   
+  console.log('AppSidebar - employee:', employee);
+  console.log('AppSidebar - employee role:', employee?.role);
+  
   const menuItems = getMenuItemsByRole(employee?.role || 'FUNCIONARIO');
+  console.log('AppSidebar - menuItems:', menuItems);
 
   const isActive = (path: string) => {
     if (path === "/") return location.pathname === "/";
