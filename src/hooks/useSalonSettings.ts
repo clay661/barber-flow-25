@@ -1,3 +1,4 @@
+
 import { useState, useEffect } from 'react';
 import { supabase } from '@/integrations/supabase/client';
 
@@ -32,7 +33,6 @@ export function useSalonSettings() {
         .single();
 
       if (error) {
-        // Se não existir settings, criar um registro inicial
         if (error.code === 'PGRST116') {
           const { data: newSettings, error: createError } = await supabase
             .from('salon_settings')
@@ -95,9 +95,27 @@ export function useSalonSettings() {
       const fileExt = file.name.split('.').pop();
       const fileName = `${type}_${Date.now()}.${fileExt}`;
       
+      // Remove arquivo anterior se existir
+      if (settings?.logo_url && type === 'logo') {
+        const oldFileName = settings.logo_url.split('/').pop();
+        if (oldFileName) {
+          await supabase.storage.from('salon-images').remove([oldFileName]);
+        }
+      }
+      
+      if (settings?.banner_url && type === 'banner') {
+        const oldFileName = settings.banner_url.split('/').pop();
+        if (oldFileName) {
+          await supabase.storage.from('salon-images').remove([oldFileName]);
+        }
+      }
+
       const { error: uploadError } = await supabase.storage
         .from('salon-images')
-        .upload(fileName, file);
+        .upload(fileName, file, {
+          cacheControl: '3600',
+          upsert: false
+        });
 
       if (uploadError) throw uploadError;
 
@@ -105,11 +123,14 @@ export function useSalonSettings() {
         .from('salon-images')
         .getPublicUrl(fileName);
 
-      // Update settings with new image URL
       const updateField = type === 'logo' ? 'logo_url' : 'banner_url';
-      await updateSettings({ [updateField]: publicUrl });
+      const result = await updateSettings({ [updateField]: publicUrl });
 
-      return { success: true, url: publicUrl };
+      if (result.success) {
+        return { success: true, url: publicUrl };
+      } else {
+        throw result.error;
+      }
     } catch (error) {
       console.error('Error uploading image:', error);
       return { success: false, error };

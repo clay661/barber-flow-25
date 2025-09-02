@@ -1,5 +1,5 @@
 
-import { Calendar, Users, Scissors, Settings, LayoutDashboard, Share2, UserCheck } from 'lucide-react';
+import { Calendar, Users, Scissors, Settings, LayoutDashboard, Share2, UserCheck, DollarSign } from 'lucide-react';
 import { SidebarContent, SidebarGroup, SidebarGroupContent, SidebarGroupLabel, SidebarMenu, SidebarMenuButton, SidebarMenuItem, Sidebar, SidebarHeader } from '@/components/ui/sidebar';
 import { useAuth } from '@/hooks/useAuth';
 import { Link, useLocation } from 'react-router-dom';
@@ -40,6 +40,11 @@ const getMenuItemsByRole = (role: string) => {
           icon: Scissors,
         },
         {
+          title: "Financeiro",
+          url: "/financas",
+          icon: DollarSign,
+        },
+        {
           title: "Divulgação",
           url: "/divulgacao",
           icon: Share2,
@@ -73,6 +78,11 @@ const getMenuItemsByRole = (role: string) => {
           title: "Serviços",
           url: "/servicos",
           icon: Scissors,
+        },
+        {
+          title: "Financeiro",
+          url: "/financas-subadmin",
+          icon: DollarSign,
         },
         {
           title: "Configurações",
