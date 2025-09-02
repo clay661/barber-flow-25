@@ -1,3 +1,4 @@
+
 import React from 'react';
 import { AuthContext, useAuthState } from '@/hooks/useAuth';
 
@@ -6,10 +7,10 @@ interface AuthProviderProps {
 }
 
 export function AuthProvider({ children }: AuthProviderProps) {
-  const authState = useAuthState();
-
+  const auth = useAuthState();
+  
   return (
-    <AuthContext.Provider value={authState}>
+    <AuthContext.Provider value={auth}>
       {children}
     </AuthContext.Provider>
   );

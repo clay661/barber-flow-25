@@ -138,11 +138,18 @@ const getMenuItemsByRole = (role: string) => {
 };
 
 export function AppSidebar() {
-  const { employee } = useAuth();
+  const { employee, refreshUser } = useAuth();
   const location = useLocation();
 
   console.log('AppSidebar - employee:', employee);
   console.log('AppSidebar - employee role:', employee?.role);
+
+  // Refresh user data when component mounts to ensure latest role
+  React.useEffect(() => {
+    if (employee) {
+      refreshUser();
+    }
+  }, []);
 
   if (!employee) {
     return null;
@@ -161,7 +168,7 @@ export function AppSidebar() {
           <div className="grid flex-1 text-left text-sm leading-tight">
             <span className="truncate font-semibold">Nexio</span>
             <span className="truncate text-xs text-muted-foreground">
-              {employee.name}
+              {employee.name} ({employee.role})
             </span>
           </div>
         </div>
