@@ -1,21 +1,13 @@
 
 import { useState } from 'react';
-import { Plus, Pencil, Trash2, UserCheck, UserX } from 'lucide-react';
+import { Plus } from 'lucide-react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
-import {
-  Table,
-  TableBody,
-  TableCell,
-  TableHead,
-  TableHeader,
-  TableRow,
-} from '@/components/ui/table';
-import { Badge } from '@/components/ui/badge';
 import { useEmployees } from '@/hooks/useEmployees';
 import { EmployeeForm } from '@/components/forms/EmployeeForm';
 import { EmployeeCredentialsModal } from '@/components/forms/EmployeeCredentialsModal';
 import { DeleteConfirmDialog } from '@/components/forms/DeleteConfirmDialog';
+import { ResponsiveEmployeeTable } from '@/components/forms/ResponsiveEmployeeTable';
 
 export default function Funcionarios() {
   const { employees, loading, createEmployee, updateEmployee, deleteEmployee } = useEmployees();
@@ -40,13 +32,11 @@ export default function Funcionarios() {
       setFormLoading(true);
       const result = await createEmployee(data);
       
-      // Mostrar credenciais se criação foi bem-sucedida
       if (result && result.credentials) {
         setEmployeeCredentials(result.credentials);
         setIsCredentialsModalOpen(true);
       }
     } catch (error) {
-      // Erro já é tratado no hook
       throw error;
     } finally {
       setFormLoading(false);
@@ -141,100 +131,36 @@ export default function Funcionarios() {
   }
 
   return (
-    <div className="space-y-6">
-      <div className="flex flex-col sm:flex-row sm:items-center sm:justify-between gap-4">
+    <div className="space-y-6 p-4 md:p-6">
+      <div className="flex flex-col space-y-4 md:flex-row md:items-center md:justify-between md:space-y-0">
         <div>
           <h1 className="text-2xl font-semibold">Funcionários</h1>
           <p className="text-muted-foreground">
             Gerencie os funcionários do seu salão
           </p>
         </div>
-        <Button onClick={openCreateForm} className="flex items-center gap-2">
-          <Plus className="h-4 w-4" />
+        <Button onClick={openCreateForm} className="w-full md:w-auto">
+          <Plus className="h-4 w-4 mr-2" />
           Novo Funcionário
         </Button>
       </div>
 
-      <div className="flex items-center gap-4">
-        <div className="flex-1">
-          <Input
-            placeholder="Buscar funcionários..."
-            value={searchTerm}
-            onChange={(e) => setSearchTerm(e.target.value)}
-            className="max-w-sm"
-          />
-        </div>
+      <div className="w-full">
+        <Input
+          placeholder="Buscar funcionários..."
+          value={searchTerm}
+          onChange={(e) => setSearchTerm(e.target.value)}
+          className="w-full md:max-w-sm"
+        />
       </div>
 
-      <div className="border rounded-lg">
-        <Table>
-          <TableHeader>
-            <TableRow>
-              <TableHead>Nome</TableHead>
-              <TableHead>Cargo</TableHead>
-              <TableHead>Telefone</TableHead>
-              <TableHead>Comissão</TableHead>
-              <TableHead>Status</TableHead>
-              <TableHead className="text-right">Ações</TableHead>
-            </TableRow>
-          </TableHeader>
-          <TableBody>
-            {filteredEmployees.map((employee) => (
-              <TableRow key={employee.id}>
-                <TableCell className="font-medium">
-                  {employee.name}
-                </TableCell>
-                <TableCell>
-                  <Badge variant={getRoleBadgeVariant(employee.role)}>
-                    {getRoleDisplay(employee)}
-                  </Badge>
-                </TableCell>
-                <TableCell>{employee.telefone || 'Não informado'}</TableCell>
-                <TableCell>
-                  {employee.commission_type === 'percentage' 
-                    ? `${employee.commission_value}%` 
-                    : `R$ ${employee.commission_value.toFixed(2)}`
-                  }
-                </TableCell>
-                <TableCell>
-                  <Badge variant={employee.status === 'ativo' ? 'default' : 'secondary'}>
-                    {employee.status === 'ativo' ? (
-                      <><UserCheck className="h-3 w-3 mr-1" /> Ativo</>
-                    ) : (
-                      <><UserX className="h-3 w-3 mr-1" /> Inativo</>
-                    )}
-                  </Badge>
-                </TableCell>
-                <TableCell className="text-right">
-                  <div className="flex items-center justify-end gap-2">
-                    <Button
-                      variant="ghost"
-                      size="icon"
-                      onClick={() => openEditForm(employee)}
-                    >
-                      <Pencil className="h-4 w-4" />
-                    </Button>
-                    <Button
-                      variant="ghost"
-                      size="icon"
-                      onClick={() => openDeleteDialog(employee)}
-                    >
-                      <Trash2 className="h-4 w-4" />
-                    </Button>
-                  </div>
-                </TableCell>
-              </TableRow>
-            ))}
-            {filteredEmployees.length === 0 && (
-              <TableRow>
-                <TableCell colSpan={6} className="text-center py-8 text-muted-foreground">
-                  {searchTerm ? 'Nenhum funcionário encontrado' : 'Nenhum funcionário cadastrado'}
-                </TableCell>
-              </TableRow>
-            )}
-          </TableBody>
-        </Table>
-      </div>
+      <ResponsiveEmployeeTable
+        employees={filteredEmployees}
+        onEdit={openEditForm}
+        onDelete={openDeleteDialog}
+        getRoleDisplay={getRoleDisplay}
+        getRoleBadgeVariant={getRoleBadgeVariant}
+      />
 
       <EmployeeForm
         open={isFormOpen}

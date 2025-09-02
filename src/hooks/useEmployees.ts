@@ -48,6 +48,9 @@ export const useEmployees = () => {
     try {
       console.log('Criando funcionário:', employeeData);
       
+      // Gerar senha temporária
+      const tempPassword = Math.random().toString(36).slice(-12);
+      
       // Preparar dados para inserção
       const insertData = {
         name: employeeData.name,
@@ -57,6 +60,7 @@ export const useEmployees = () => {
         status: employeeData.status,
         commission_type: employeeData.commission_type,
         commission_value: employeeData.commission_value,
+        pro_password: tempPassword, // Senha será hasheada pelo trigger
       };
 
       console.log('Dados para inserção:', insertData);
@@ -87,13 +91,13 @@ export const useEmployees = () => {
         description: 'Funcionário cadastrado com sucesso!',
       });
       
-      // Retornar dados incluindo credenciais geradas automaticamente
+      // Retornar dados incluindo credenciais geradas
       return {
         ...data,
         credentials: {
           name: data.name,
           email: data.pro_email || 'Email gerado automaticamente',
-          password: 'Senha gerada automaticamente',
+          password: tempPassword, // Senha original antes do hash
           phone: data.telefone || undefined,
         }
       };

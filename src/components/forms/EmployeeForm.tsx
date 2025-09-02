@@ -124,7 +124,7 @@ export function EmployeeForm({ open, onOpenChange, onSubmit, employee, loading =
 
   return (
     <Dialog open={open} onOpenChange={onOpenChange}>
-      <DialogContent className="sm:max-w-md">
+      <DialogContent className="sm:max-w-md max-h-[90vh] overflow-y-auto">
         <DialogHeader>
           <DialogTitle>
             {employee ? 'Editar Funcionário' : 'Novo Funcionário'}
@@ -197,7 +197,7 @@ export function EmployeeForm({ open, onOpenChange, onSubmit, employee, loading =
             </div>
           )}
 
-          <div className="grid grid-cols-2 gap-4">
+          <div className="grid grid-cols-1 sm:grid-cols-2 gap-4">
             <div className="space-y-2">
               <Label htmlFor="commission_type">Tipo de Comissão</Label>
               <Select
@@ -248,16 +248,17 @@ export function EmployeeForm({ open, onOpenChange, onSubmit, employee, loading =
             </Select>
           </div>
 
-          <DialogFooter>
+          <DialogFooter className="flex-col sm:flex-row gap-2">
             <Button
               type="button"
               variant="outline"
               onClick={() => onOpenChange(false)}
               disabled={loading}
+              className="w-full sm:w-auto"
             >
               Cancelar
             </Button>
-            <Button type="submit" disabled={loading}>
+            <Button type="submit" disabled={loading} className="w-full sm:w-auto">
               {loading ? 'Salvando...' : (employee ? 'Atualizar' : 'Cadastrar')}
             </Button>
           </DialogFooter>
