@@ -10,7 +10,8 @@ export interface Employee {
   custom_role_name: string | null;
   status: 'ativo' | 'inativo';
   telefone: string | null;
-  commission_percentage: number | null;
+  commission_type: 'percentage' | 'fixed';
+  commission_value: number;
   created_at: string;
 }
 
@@ -20,6 +21,8 @@ export interface AuthContextType {
   login: (email: string, password: string) => Promise<{ success: boolean; error?: any }>;
   logout: () => Promise<void>;
   refreshUser: () => Promise<void>;
+  register: (name: string, email: string, password: string) => Promise<{ success: boolean; error?: any }>;
+  checkAdminExists: () => Promise<boolean>;
 }
 
 const AuthContext = createContext<AuthContextType | undefined>(undefined);
@@ -61,6 +64,56 @@ export function useAuthState() {
     } catch (error) {
       console.error('Login error:', error);
       return { success: false, error: 'Erro ao fazer login' };
+    }
+  };
+
+  const register = async (name: string, email: string, password: string) => {
+    try {
+      console.log('Auth: Attempting to create admin account');
+      
+      const { data, error } = await supabase
+        .from('employees')
+        .insert({
+          name,
+          pro_email: email,
+          pro_password: password,
+          role: 'ADMIN',
+          status: 'ativo',
+          commission_type: 'percentage',
+          commission_value: 0
+        })
+        .select()
+        .single();
+
+      if (error) {
+        console.error('Register error:', error);
+        return { success: false, error: 'Erro ao criar conta' };
+      }
+
+      return { success: true };
+    } catch (error) {
+      console.error('Register error:', error);
+      return { success: false, error: 'Erro ao criar conta' };
+    }
+  };
+
+  const checkAdminExists = async () => {
+    try {
+      const { data, error } = await supabase
+        .from('employees')
+        .select('id')
+        .eq('role', 'ADMIN')
+        .limit(1);
+
+      if (error) {
+        console.error('Check admin exists error:', error);
+        return false;
+      }
+
+      return data && data.length > 0;
+    } catch (error) {
+      console.error('Check admin exists error:', error);
+      return false;
     }
   };
 
@@ -127,7 +180,9 @@ export function useAuthState() {
     loading,
     login,
     logout,
-    refreshUser
+    refreshUser,
+    register,
+    checkAdminExists
   };
 }
 

@@ -1,3 +1,4 @@
+
 import { useState } from 'react';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
@@ -276,6 +277,7 @@ export default function ConfiguracoesPerfil() {
                     {employee?.role === 'FUNCIONARIO' && 'Funcionário'}
                     {employee?.role === 'RECEPCIONISTA' && 'Recepcionista'}
                     {employee?.role === 'SUBADMIN' && 'Sub-administrador'}
+                    {employee?.role === 'OUTRO' && (employee?.custom_role_name || 'Outro')}
                   </span>
                 </div>
               </div>

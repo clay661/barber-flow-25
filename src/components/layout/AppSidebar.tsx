@@ -1,4 +1,5 @@
 
+import React from 'react';
 import { Calendar, Users, Scissors, Settings, LayoutDashboard, Share2, UserCheck, DollarSign } from 'lucide-react';
 import { SidebarContent, SidebarGroup, SidebarGroupContent, SidebarGroupLabel, SidebarMenu, SidebarMenuButton, SidebarMenuItem, Sidebar, SidebarHeader } from '@/components/ui/sidebar';
 import { useAuth } from '@/hooks/useAuth';
