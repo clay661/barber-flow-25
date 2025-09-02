@@ -157,7 +157,22 @@ export function useAuthState() {
 
         if (!error && employeeData) {
           console.log('Auth: Setting employee with role:', employeeData.role);
-          setEmployee(employeeData);
+          
+          // Type-safe casting of the database response to Employee
+          const employee: Employee = {
+            id: employeeData.id,
+            name: employeeData.name,
+            pro_email: employeeData.pro_email,
+            role: employeeData.role as Employee['role'],
+            custom_role_name: employeeData.custom_role_name,
+            status: employeeData.status as Employee['status'],
+            telefone: employeeData.telefone,
+            commission_type: employeeData.commission_type as Employee['commission_type'],
+            commission_value: employeeData.commission_value,
+            created_at: employeeData.created_at,
+          };
+          
+          setEmployee(employee);
         } else {
           console.log('Auth: Clearing localStorage due to error');
           localStorage.removeItem('employee_id');
