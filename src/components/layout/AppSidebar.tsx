@@ -11,9 +11,7 @@ import {
   Share2,
   Bell,
   LogOut,
-  ChevronDown,
-  Menu,
-  X
+  ChevronDown
 } from 'lucide-react';
 import { useAuth } from '@/hooks/useAuth';
 import {
@@ -27,7 +25,6 @@ import {
   SidebarMenuItem,
   SidebarHeader,
   SidebarFooter,
-  SidebarTrigger,
   useSidebar
 } from '@/components/ui/sidebar';
 import {
@@ -43,7 +40,7 @@ import { Button } from '@/components/ui/button';
 const adminItems = [
   {
     title: 'Dashboard',
-    url: '/dashboard',
+    url: '/',
     icon: FileText,
   },
   {
@@ -86,7 +83,7 @@ const adminItems = [
 const subAdminItems = [
   {
     title: 'Dashboard',
-    url: '/dashboard',
+    url: '/',
     icon: FileText,
   },
   {
@@ -119,7 +116,7 @@ const subAdminItems = [
 const employeeItems = [
   {
     title: 'Dashboard',
-    url: '/dashboard',
+    url: '/',
     icon: FileText,
   },
   {
@@ -137,7 +134,7 @@ const employeeItems = [
 const receptionistItems = [
   {
     title: 'Dashboard',
-    url: '/dashboard',
+    url: '/',
     icon: FileText,
   },
   {
@@ -194,25 +191,12 @@ export function AppSidebar() {
   const menuItems = getMenuItems();
 
   return (
-    <>
-      {/* Mobile sidebar toggle */}
-      <div className="md:hidden fixed top-4 left-4 z-50">
-        <Button
-          variant="outline"
-          size="icon"
-          onClick={() => setOpen(!open)}
-          className="bg-background border-border"
-        >
-          {open ? <X className="h-4 w-4" /> : <Menu className="h-4 w-4" />}
-        </Button>
-      </div>
-
-      <Sidebar 
-        variant="sidebar" 
-        side="left"
-        className="border-r border-border bg-background w-64 md:w-64"
-        collapsible="icon"
-      >
+    <Sidebar 
+      variant="sidebar" 
+      side="left"
+      className="border-r border-border bg-background"
+      collapsible="icon"
+    >
         <SidebarHeader className="border-b border-border p-4">
           <div className="flex items-center gap-2">
             <div className="flex h-8 w-8 items-center justify-center rounded-lg bg-primary text-primary-foreground">
@@ -270,11 +254,11 @@ export function AppSidebar() {
               </Button>
             </DropdownMenuTrigger>
             <DropdownMenuContent align="end" className="w-56">
-              <DropdownMenuItem onClick={() => handleNavigation('/configuracoes-perfil')}>
+              <DropdownMenuItem onClick={() => handleNavigation('/perfil')}>
                 <User className="mr-2 h-4 w-4" />
                 Meu Perfil
               </DropdownMenuItem>
-              <DropdownMenuItem onClick={() => handleNavigation('/notification-settings')}>
+              <DropdownMenuItem onClick={() => handleNavigation('/notificacoes')}>
                 <Bell className="mr-2 h-4 w-4" />
                 Notificações
               </DropdownMenuItem>
@@ -286,6 +270,5 @@ export function AppSidebar() {
           </DropdownMenu>
         </SidebarFooter>
       </Sidebar>
-    </>
   );
 }
