@@ -2,7 +2,7 @@ import { Toaster } from "@/components/ui/toaster";
 import { Toaster as Sonner } from "@/components/ui/sonner";
 import { TooltipProvider } from "@/components/ui/tooltip";
 import { QueryClient, QueryClientProvider } from "@tanstack/react-query";
-import { BrowserRouter, Routes, Route } from "react-router-dom";
+import { BrowserRouter, Routes, Route, Outlet } from "react-router-dom";
 import { AuthProvider } from "./components/auth/AuthProvider";
 import { SuperAuthProvider } from "./components/auth/SuperAuthProvider";
 import { ProtectedRoute } from "./components/auth/ProtectedRoute";
@@ -68,7 +68,9 @@ const App = () => (
               {/* Regular user routes */}
               <Route path="/" element={
                 <ProtectedRoute>
-                  <AppLayout />
+                  <AppLayout>
+                    <Outlet />
+                  </AppLayout>
                 </ProtectedRoute>
               }>
                 <Route index element={<Dashboard />} />
