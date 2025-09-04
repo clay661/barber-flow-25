@@ -5,10 +5,14 @@ import { Switch } from "@/components/ui/switch";
 import { Plus, Edit, Trash2, Check, Settings } from "lucide-react";
 import { useSubscriptionPlans } from "@/hooks/useSuperAdminData";
 import { useState } from "react";
+import { StripeConfigModal } from "@/components/super-admin/StripeConfigModal";
+import { TrialConfigModal } from "@/components/super-admin/TrialConfigModal";
 
 export default function SuperAdminPlanos() {
   const { plans, loading, togglePlanStatus, deletePlan, formatCurrency, getStatusBadge } = useSubscriptionPlans();
   const [showCreateForm, setShowCreateForm] = useState(false);
+  const [showStripeConfig, setShowStripeConfig] = useState(false);
+  const [showTrialConfig, setShowTrialConfig] = useState(false);
 
   const handleToggleStatus = async (id: string, currentStatus: string) => {
     try {
@@ -166,7 +170,11 @@ export default function SuperAdminPlanos() {
                   Configurar chaves da API do Stripe
                 </p>
               </div>
-              <Button variant="outline" size="sm">
+              <Button 
+                variant="outline" 
+                size="sm"
+                onClick={() => setShowStripeConfig(true)}
+              >
                 Configurar
               </Button>
             </div>
@@ -178,7 +186,11 @@ export default function SuperAdminPlanos() {
                   Definir período de teste gratuito: 7 dias
                 </p>
               </div>
-              <Button variant="outline" size="sm">
+              <Button 
+                variant="outline" 
+                size="sm"
+                onClick={() => setShowTrialConfig(true)}
+              >
                 Editar
               </Button>
             </div>
@@ -197,6 +209,16 @@ export default function SuperAdminPlanos() {
           </div>
         </CardContent>
       </Card>
+
+      {/* Modals */}
+      <StripeConfigModal 
+        isOpen={showStripeConfig} 
+        onClose={() => setShowStripeConfig(false)} 
+      />
+      <TrialConfigModal 
+        isOpen={showTrialConfig} 
+        onClose={() => setShowTrialConfig(false)} 
+      />
     </div>
   );
 }
