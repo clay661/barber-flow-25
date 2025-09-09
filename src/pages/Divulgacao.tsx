@@ -45,8 +45,8 @@ const Divulgacao = () => {
           .replace(/[^a-z0-9\s]/g, "")
           .replace(/\s+/g, "")
           .trim();
-        const bookingUrl = `www.${establishmentName}.agendamento`;
-        generateQRCode(`https://${bookingUrl}`);
+      const bookingUrl = `https://${establishmentName}.agendamento`;
+      generateQRCode(bookingUrl);
       }
     }
   }, [settings]);
@@ -77,8 +77,8 @@ const Divulgacao = () => {
         .replace(/[^a-z0-9\s]/g, "")
         .replace(/\s+/g, "")
         .trim();
-      const bookingUrl = `www.${establishmentName}.agendamento`;
-      generateQRCode(`https://${bookingUrl}`);
+      const bookingUrl = `https://${establishmentName}.agendamento`;
+      generateQRCode(bookingUrl);
     }
   };
 
@@ -162,7 +162,7 @@ const Divulgacao = () => {
         .replace(/[^a-z0-9\s]/g, "")
         .replace(/\s+/g, "")
         .trim();
-      const bookingUrl = `www.${establishmentName}.agendamento`;
+      const bookingUrl = `https://${establishmentName}.agendamento`;
       navigator.clipboard.writeText(bookingUrl);
       toast({
         title: 'Link copiado!',
@@ -199,7 +199,7 @@ const Divulgacao = () => {
       .replace(/[^a-z0-9\s]/g, "")
       .replace(/\s+/g, "")
       .trim();
-    return `www.${establishmentName}.agendamento`;
+    return `https://${establishmentName}.agendamento`;
   })() : '';
 
   return (
@@ -262,8 +262,8 @@ const Divulgacao = () => {
                         .replace(/[^a-z0-9\s]/g, "")
                         .replace(/\s+/g, "")
                         .trim();
-                      return `www.${establishmentName}.agendamento`;
-                    })() : 'www.seuestablecimento.agendamento'}
+                      return `https://${establishmentName}.agendamento`;
+                    })() : 'https://seuestablecimento.agendamento'}
                   </p>
                 </div>
                 <p className="text-xs text-muted-foreground">
