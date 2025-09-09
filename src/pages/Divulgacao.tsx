@@ -38,9 +38,15 @@ const Divulgacao = () => {
         public_link: settings.public_link || '',
       });
       
-      if (settings.public_link) {
-        const bookingUrl = `${window.location.origin}/agendamento/${settings.public_link}`;
-        generateQRCode(bookingUrl);
+      if (settings.name) {
+        const establishmentName = settings.name.toLowerCase()
+          .normalize("NFD")
+          .replace(/[\u0300-\u036f]/g, "")
+          .replace(/[^a-z0-9\s]/g, "")
+          .replace(/\s+/g, "")
+          .trim();
+        const bookingUrl = `www.${establishmentName}.agendamento`;
+        generateQRCode(`https://${bookingUrl}`);
       }
     }
   }, [settings]);
@@ -64,9 +70,15 @@ const Divulgacao = () => {
   const handleInputChange = (field: string, value: string) => {
     setFormData(prev => ({ ...prev, [field]: value }));
     
-    if (field === 'public_link' && value) {
-      const bookingUrl = `${window.location.origin}/agendamento/${value}`;
-      generateQRCode(bookingUrl);
+    if (field === 'name' && value) {
+      const establishmentName = value.toLowerCase()
+        .normalize("NFD")
+        .replace(/[\u0300-\u036f]/g, "")
+        .replace(/[^a-z0-9\s]/g, "")
+        .replace(/\s+/g, "")
+        .trim();
+      const bookingUrl = `www.${establishmentName}.agendamento`;
+      generateQRCode(`https://${bookingUrl}`);
     }
   };
 
@@ -143,8 +155,14 @@ const Divulgacao = () => {
   };
 
   const copyLink = () => {
-    if (settings?.public_link) {
-      const bookingUrl = `${window.location.origin}/agendamento/${settings.public_link}`;
+    if (settings?.name) {
+      const establishmentName = settings.name.toLowerCase()
+        .normalize("NFD")
+        .replace(/[\u0300-\u036f]/g, "")
+        .replace(/[^a-z0-9\s]/g, "")
+        .replace(/\s+/g, "")
+        .trim();
+      const bookingUrl = `www.${establishmentName}.agendamento`;
       navigator.clipboard.writeText(bookingUrl);
       toast({
         title: 'Link copiado!',
@@ -174,7 +192,15 @@ const Divulgacao = () => {
     );
   }
 
-  const bookingUrl = settings?.public_link ? `${window.location.origin}/agendamento/${settings.public_link}` : '';
+  const bookingUrl = settings?.name ? (() => {
+    const establishmentName = settings.name.toLowerCase()
+      .normalize("NFD")
+      .replace(/[\u0300-\u036f]/g, "")
+      .replace(/[^a-z0-9\s]/g, "")
+      .replace(/\s+/g, "")
+      .trim();
+    return `www.${establishmentName}.agendamento`;
+  })() : '';
 
   return (
     <div className="space-y-6">
@@ -225,21 +251,25 @@ const Divulgacao = () => {
                 />
               </div>
 
-              {isAdmin && (
-                <div className="space-y-2">
-                  <Label htmlFor="public_link">Link Público Personalizado</Label>
-                  <Input
-                    id="public_link"
-                    value={formData.public_link}
-                    onChange={(e) => handleInputChange('public_link', e.target.value)}
-                    placeholder="link-personalizado"
-                    disabled={!isAdmin}
-                  />
-                  <p className="text-xs text-muted-foreground">
-                    Este será o link único para agendamentos: {window.location.origin}/agendamento/{formData.public_link || 'seu-link'}
+              <div className="space-y-2">
+                <Label htmlFor="booking_preview">Prévia do Link de Agendamento</Label>
+                <div className="p-3 bg-muted rounded-lg">
+                  <p className="text-sm font-mono">
+                    {formData.name ? (() => {
+                      const establishmentName = formData.name.toLowerCase()
+                        .normalize("NFD")
+                        .replace(/[\u0300-\u036f]/g, "")
+                        .replace(/[^a-z0-9\s]/g, "")
+                        .replace(/\s+/g, "")
+                        .trim();
+                      return `www.${establishmentName}.agendamento`;
+                    })() : 'www.seuestablecimento.agendamento'}
                   </p>
                 </div>
-              )}
+                <p className="text-xs text-muted-foreground">
+                  O link é gerado automaticamente baseado no nome do estabelecimento
+                </p>
+              </div>
 
               {isAdmin && (
                 <Button onClick={handleSave} disabled={isSaving} className="w-full">

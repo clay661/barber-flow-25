@@ -74,10 +74,18 @@ export function useSalonSettings() {
 
   const updateSettings = async (updates: Partial<Omit<SalonSettings, 'id' | 'created_at' | 'updated_at'>>) => {
     try {
+      if (!settings?.id) {
+        // Se não há settings carregados, tenta buscar ou criar primeiro
+        await fetchSettings();
+        if (!settings?.id) {
+          throw new Error('Não foi possível encontrar as configurações do salão');
+        }
+      }
+
       const { data, error } = await supabase
         .from('salon_settings')
         .update(updates)
-        .eq('id', settings?.id)
+        .eq('id', settings.id)
         .select()
         .single();
 
