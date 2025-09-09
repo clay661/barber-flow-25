@@ -30,38 +30,40 @@ export function useSalonSettings() {
       const { data, error } = await supabase
         .from('salon_settings')
         .select('*')
-        .single();
+        .maybeSingle();
 
       if (error) {
-        if (error.code === 'PGRST116') {
-          const { data: newSettings, error: createError } = await supabase
-            .from('salon_settings')
-            .insert({
-              name: 'Meu Salão',
-              description: '',
-              address: '',
-              phone: '',
-              scheduling_interval: 30,
-              notifications_enabled: true,
-              email_notifications_enabled: true,
-              working_hours: {
-                monday: { start: "08:00", end: "18:00", active: true },
-                tuesday: { start: "08:00", end: "18:00", active: true },
-                wednesday: { start: "08:00", end: "18:00", active: true },
-                thursday: { start: "08:00", end: "18:00", active: true },
-                friday: { start: "08:00", end: "18:00", active: true },
-                saturday: { start: "08:00", end: "16:00", active: true },
-                sunday: { start: "10:00", end: "14:00", active: false },
-              }
-            })
-            .select()
-            .single();
-          
-          if (createError) throw createError;
-          setSettings(newSettings as SalonSettings);
-        } else {
-          throw error;
-        }
+        throw error;
+      }
+
+      if (!data) {
+        // Criar configurações padrão se não existir
+        const { data: newSettings, error: createError } = await supabase
+          .from('salon_settings')
+          .insert({
+            name: 'Meu Salão',
+            description: '',
+            address: '',
+            phone: '',
+            scheduling_interval: 30,
+            notifications_enabled: true,
+            email_notifications_enabled: true,
+            public_link: Math.random().toString(36).substring(2, 8), // Link curto de 6 caracteres
+            working_hours: {
+              monday: { start: "08:00", end: "18:00", active: true },
+              tuesday: { start: "08:00", end: "18:00", active: true },
+              wednesday: { start: "08:00", end: "18:00", active: true },
+              thursday: { start: "08:00", end: "18:00", active: true },
+              friday: { start: "08:00", end: "18:00", active: true },
+              saturday: { start: "08:00", end: "16:00", active: true },
+              sunday: { start: "10:00", end: "14:00", active: false },
+            }
+          })
+          .select()
+          .single();
+        
+        if (createError) throw createError;
+        setSettings(newSettings as SalonSettings);
       } else {
         setSettings(data as SalonSettings);
       }
@@ -74,9 +76,6 @@ export function useSalonSettings() {
 
   const updateSettings = async (updates: Partial<Omit<SalonSettings, 'id' | 'created_at' | 'updated_at'>>) => {
     try {
-      console.log('Updating settings with:', updates);
-      console.log('Current settings:', settings);
-      
       if (!settings?.id) {
         console.log('No settings ID found, fetching settings first');
         await fetchSettings();
@@ -95,7 +94,6 @@ export function useSalonSettings() {
         throw error;
       }
       
-      console.log('Update successful:', data);
       setSettings(data as SalonSettings);
       return { success: true };
     } catch (error) {
