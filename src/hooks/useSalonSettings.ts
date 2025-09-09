@@ -74,12 +74,13 @@ export function useSalonSettings() {
 
   const updateSettings = async (updates: Partial<Omit<SalonSettings, 'id' | 'created_at' | 'updated_at'>>) => {
     try {
+      console.log('Updating settings with:', updates);
+      console.log('Current settings:', settings);
+      
       if (!settings?.id) {
-        // Se não há settings carregados, tenta buscar ou criar primeiro
+        console.log('No settings ID found, fetching settings first');
         await fetchSettings();
-        if (!settings?.id) {
-          throw new Error('Não foi possível encontrar as configurações do salão');
-        }
+        return { success: false, error: 'Configurações não encontradas. Tente novamente.' };
       }
 
       const { data, error } = await supabase
@@ -89,7 +90,12 @@ export function useSalonSettings() {
         .select()
         .single();
 
-      if (error) throw error;
+      if (error) {
+        console.error('Supabase error:', error);
+        throw error;
+      }
+      
+      console.log('Update successful:', data);
       setSettings(data as SalonSettings);
       return { success: true };
     } catch (error) {

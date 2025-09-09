@@ -45,11 +45,19 @@ const Divulgacao = () => {
           .replace(/[^a-z0-9\s]/g, "")
           .replace(/\s+/g, "")
           .trim();
-      const bookingUrl = `https://${establishmentName}.agendamento`;
-      generateQRCode(bookingUrl);
+        const bookingUrl = `${window.location.origin}/agendamento/${settings.public_link}`;
+        generateQRCode(bookingUrl);
       }
     }
   }, [settings]);
+
+  // Atualizar QR code quando o nome do form muda
+  React.useEffect(() => {
+    if (formData.name && settings?.public_link) {
+      const bookingUrl = `${window.location.origin}/agendamento/${settings.public_link}`;
+      generateQRCode(bookingUrl);
+    }
+  }, [formData.name, settings?.public_link]);
 
   const generateQRCode = async (url: string) => {
     try {
@@ -69,17 +77,7 @@ const Divulgacao = () => {
 
   const handleInputChange = (field: string, value: string) => {
     setFormData(prev => ({ ...prev, [field]: value }));
-    
-    if (field === 'name' && value) {
-      const establishmentName = value.toLowerCase()
-        .normalize("NFD")
-        .replace(/[\u0300-\u036f]/g, "")
-        .replace(/[^a-z0-9\s]/g, "")
-        .replace(/\s+/g, "")
-        .trim();
-      const bookingUrl = `https://${establishmentName}.agendamento`;
-      generateQRCode(bookingUrl);
-    }
+    // QR code será atualizado pelo useEffect que monitora formData.name
   };
 
   const handleImageUpload = async (file: File, type: 'logo' | 'banner') => {
@@ -138,15 +136,19 @@ const Divulgacao = () => {
 
     setSaving(true);
     try {
-      await updateSettings(formData);
-      toast({
-        title: 'Sucesso',
-        description: 'Informações de divulgação salvas com sucesso!',
-      });
-    } catch (error) {
+      const result = await updateSettings(formData);
+      if (result.success) {
+        toast({
+          title: 'Sucesso',
+          description: 'Informações de divulgação salvas com sucesso!',
+        });
+      } else {
+        throw new Error(result.error?.message || 'Erro ao salvar');
+      }
+    } catch (error: any) {
       toast({
         title: 'Erro',
-        description: 'Erro ao salvar as informações.',
+        description: error.message || 'Erro ao salvar as informações.',
         variant: 'destructive',
       });
     } finally {
@@ -155,14 +157,8 @@ const Divulgacao = () => {
   };
 
   const copyLink = () => {
-    if (settings?.name) {
-      const establishmentName = settings.name.toLowerCase()
-        .normalize("NFD")
-        .replace(/[\u0300-\u036f]/g, "")
-        .replace(/[^a-z0-9\s]/g, "")
-        .replace(/\s+/g, "")
-        .trim();
-      const bookingUrl = `https://${establishmentName}.agendamento`;
+    if (settings?.public_link) {
+      const bookingUrl = `${window.location.origin}/agendamento/${settings.public_link}`;
       navigator.clipboard.writeText(bookingUrl);
       toast({
         title: 'Link copiado!',
@@ -192,15 +188,7 @@ const Divulgacao = () => {
     );
   }
 
-  const bookingUrl = settings?.name ? (() => {
-    const establishmentName = settings.name.toLowerCase()
-      .normalize("NFD")
-      .replace(/[\u0300-\u036f]/g, "")
-      .replace(/[^a-z0-9\s]/g, "")
-      .replace(/\s+/g, "")
-      .trim();
-    return `https://${establishmentName}.agendamento`;
-  })() : '';
+  const bookingUrl = settings?.public_link ? `${window.location.origin}/agendamento/${settings.public_link}` : '';
 
   return (
     <div className="space-y-6">
@@ -252,22 +240,14 @@ const Divulgacao = () => {
               </div>
 
               <div className="space-y-2">
-                <Label htmlFor="booking_preview">Prévia do Link de Agendamento</Label>
+                <Label htmlFor="booking_preview">Link de Agendamento</Label>
                 <div className="p-3 bg-muted rounded-lg">
                   <p className="text-sm font-mono">
-                    {formData.name ? (() => {
-                      const establishmentName = formData.name.toLowerCase()
-                        .normalize("NFD")
-                        .replace(/[\u0300-\u036f]/g, "")
-                        .replace(/[^a-z0-9\s]/g, "")
-                        .replace(/\s+/g, "")
-                        .trim();
-                      return `https://${establishmentName}.agendamento`;
-                    })() : 'https://seuestablecimento.agendamento'}
+                    {settings?.public_link ? `${window.location.origin}/agendamento/${settings.public_link}` : 'Link será gerado automaticamente'}
                   </p>
                 </div>
                 <p className="text-xs text-muted-foreground">
-                  O link é gerado automaticamente baseado no nome do estabelecimento
+                  Link público para agendamentos online
                 </p>
               </div>
 
