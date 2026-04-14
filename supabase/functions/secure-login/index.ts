@@ -14,71 +14,52 @@ serve(async (req) => {
   try {
     const { email, password, userType } = await req.json();
     
-    // Create Supabase client with service role for secure operations
     const supabase = createClient(
       Deno.env.get('SUPABASE_URL') ?? '',
       Deno.env.get('SUPABASE_SERVICE_ROLE_KEY') ?? '',
       { auth: { persistSession: false } }
     );
 
-    let userData = null;
-    let tableName = '';
-    let passwordField = '';
+    // Use the verify_employee_password function
+    const { data: empId, error: verifyError } = await supabase
+      .rpc('verify_employee_password', {
+        p_email: email,
+        p_password: password
+      });
 
-    // Determine which table to query based on user type
-    if (userType === 'super_admin') {
-      tableName = 'super_admins';
-      passwordField = 'password_hash';
-    } else {
-      tableName = 'employees';
-      passwordField = 'pro_password';
-    }
-
-    // Get user data
-    const emailField = userType === 'super_admin' ? 'email' : 'pro_email';
-    const { data: user, error: userError } = await supabase
-      .from(tableName)
-      .select('*')
-      .eq(emailField, email)
-      .single();
-
-    if (userError || !user) {
+    if (verifyError || !empId) {
       return new Response(
         JSON.stringify({ success: false, error: 'Credenciais inválidas' }), 
         { headers: { ...corsHeaders, 'Content-Type': 'application/json' }, status: 401 }
       );
     }
 
-    // For employees, check if status is active
-    if (userType === 'employee' && user.status !== 'ativo') {
+    // Get full employee data
+    const { data: user, error: userError } = await supabase
+      .from('employees')
+      .select('id, name, pro_email, role, custom_role_name, status, telefone, commission_type, commission_value, created_at')
+      .eq('id', empId)
+      .single();
+
+    if (userError || !user) {
+      return new Response(
+        JSON.stringify({ success: false, error: 'Usuário não encontrado' }), 
+        { headers: { ...corsHeaders, 'Content-Type': 'application/json' }, status: 401 }
+      );
+    }
+
+    if (user.status !== 'ativo') {
       return new Response(
         JSON.stringify({ success: false, error: 'Usuário inativo' }), 
         { headers: { ...corsHeaders, 'Content-Type': 'application/json' }, status: 401 }
       );
     }
 
-    // Verify password using the database function
-    const { data: passwordValid, error: verifyError } = await supabase
-      .rpc('verify_password', {
-        password: password,
-        hash: user[passwordField]
-      });
-
-    if (verifyError || !passwordValid) {
-      return new Response(
-        JSON.stringify({ success: false, error: 'Credenciais inválidas' }), 
-        { headers: { ...corsHeaders, 'Content-Type': 'application/json' }, status: 401 }
-      );
-    }
-
-    // Remove password from response
-    delete user[passwordField];
-
     return new Response(
       JSON.stringify({ 
         success: true, 
         user: user,
-        userType: userType 
+        userType: userType || 'employee'
       }),
       { headers: { ...corsHeaders, 'Content-Type': 'application/json' } }
     );
